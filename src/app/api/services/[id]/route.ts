@@ -12,6 +12,9 @@ export async function GET(
 
     const service = await prisma.service.findUnique({
       where: { id },
+      include: {
+        organization: true,
+      },
     });
 
     if (!service) {

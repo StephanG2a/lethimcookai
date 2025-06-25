@@ -7,12 +7,38 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Organization {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  logo         String?
+  website      String?
+  email        String?
+  phone        String?
+  address      String?
+  sector       String   // ex: "cuisine", "marketing", "tech", etc.
+  siret        String?  // Numéro SIRET
+  tva          String?  // Numéro TVA
+  legalForm    String?  // ex: "SARL", "SAS", "Auto-entrepreneur", etc.
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  services     Service[]
+}
+
 model Service {
-  id              String   @id @default(uuid())
+  id              String       @id @default(uuid())
   title           String
   description     String
   tags            String[]
   priceMin        Float
   priceMax        Float
-  isAIReplaceable Boolean  @default(false)
+  isAIReplaceable Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  // Relations
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 }

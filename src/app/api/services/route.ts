@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     const minPrice = searchParams.get("minPrice");
     const maxPrice = searchParams.get("maxPrice");
     const aiReplaceable = searchParams.get("aiReplaceable");
+    const sector = searchParams.get("sector");
 
     const skip = (page - 1) * limit;
 
@@ -25,6 +26,7 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" } },
         { description: { contains: search, mode: "insensitive" } },
+        { organization: { name: { contains: search, mode: "insensitive" } } },
       ];
     }
 
@@ -42,13 +44,22 @@ export async function GET(request: NextRequest) {
       where.isAIReplaceable = aiReplaceable === "true";
     }
 
-    // Récupérer les prestataires avec pagination
+    if (sector) {
+      where.organization = {
+        sector: { equals: sector, mode: "insensitive" },
+      };
+    }
+
+    // Récupérer les prestataires avec pagination et informations de l'organisation
     const [services, total] = await Promise.all([
       prisma.service.findMany({
         where,
         skip,
         take: limit,
-        orderBy: { id: "asc" },
+        orderBy: { title: "asc" },
+        include: {
+          organization: true,
+        },
       }),
       prisma.service.count({ where }),
     ]);
