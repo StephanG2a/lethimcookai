@@ -14,7 +14,7 @@ export function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
           <ChefHat className="h-8 w-8 text-orange-600" />
-          <span className="text-xl font-bold text-neutral-900">CulinaryConnect</span>
+          <span className="text-xl font-bold text-neutral-900">LetHimCookAI</span>
         </Link>
 
         {/* Navigation Desktop */}

@@ -71,7 +71,7 @@ export default function LoginPage() {
               </div>
             </div>
             <h1 className="text-2xl font-bold text-neutral-900 mb-2">
-              Connexion à CulinaryConnect
+              Connexion à LetHimCookAI
             </h1>
             <p className="text-neutral-600">
               Accédez à votre espace prestataire ou client

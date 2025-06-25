@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CulinaryConnect - Plateforme culinaire IA",
+  title: "LetHimCookAI - Plateforme culinaire IA",
   description: "Mise en relation entre clients et prestataires du domaine culinaire avec assistance IA",
   keywords: ["cuisine", "chef", "traiteur", "restaurateur", "prestataires", "marketplace", "IA", "chat"],
 };

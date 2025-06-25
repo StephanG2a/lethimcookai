@@ -106,7 +106,7 @@ export default async function HomePage() {
               <h1 className="text-4xl md:text-6xl font-bold text-neutral-900 leading-tight">
                 Connectez-vous aux
                 <span className="text-orange-600"> meilleurs prestataires</span>
-                culinaires
+                {" "}culinaires
               </h1>
 
               <p className="text-xl text-neutral-600 leading-relaxed">

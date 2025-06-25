@@ -1,4 +1,4 @@
-# 🔧 Modifications apportées à CulinaryConnect
+# 🔧 Modifications apportées à LetHimCookAI
 
 ## 🌙 ➡️ ☀️ Suppression du thème dark
 

@@ -10,7 +10,7 @@ export function Footer() {
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2">
               <ChefHat className="h-8 w-8 text-orange-500" />
-              <span className="text-xl font-bold text-white">CulinaryConnect</span>
+              <span className="text-xl font-bold text-white">LetHimCookAI</span>
             </Link>
             <p className="text-sm text-neutral-400">
               La plateforme qui connecte les professionnels de la gastronomie avec les meilleurs prestataires du secteur.
@@ -67,7 +67,7 @@ export function Footer() {
             <div className="space-y-2 text-sm">
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-orange-500" />
-                <span>contact@culinaryconnect.fr</span>
+                <span>contact@lethimcookai.fr</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="h-4 w-4 text-orange-500" />
@@ -83,7 +83,7 @@ export function Footer() {
 
         <div className="mt-8 pt-8 border-t border-neutral-800 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-neutral-400">
-            © 2024 CulinaryConnect. Tous droits réservés.
+            © 2024 LetHimCookAI. Tous droits réservés.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <Link href="/mentions-legales" className="text-sm text-neutral-400 hover:text-orange-500 transition-colors">
