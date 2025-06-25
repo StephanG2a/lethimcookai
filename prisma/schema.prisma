@@ -1,0 +1,18 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Service {
+  id              String   @id @default(uuid())
+  title           String
+  description     String
+  tags            String[]
+  priceMin        Float
+  priceMax        Float
+  isAIReplaceable Boolean  @default(false)
+}
