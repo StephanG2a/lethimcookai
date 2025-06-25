@@ -17,43 +17,97 @@ export const menuPlanner = tool(
     goals,
   }) => {
     try {
-      const prompt = `Tu es un chef planificateur de menus expert. Crée un plan de repas avec :
+      const prompt = `Planning ${duration} pour ${people_count} personnes
+🥗 ${dietary_preferences || "Pas de restriction"}
+💰 ${budget || "Budget libre"}
+🍽️ ${meal_types}
 
-📅 **Durée** : ${duration}
-👥 **Nombre de personnes** : ${people_count}
-🥗 **Préférences alimentaires** : ${dietary_preferences || "Aucune restriction"}
-💰 **Budget** : ${budget || "Pas de contrainte"}
-🍽️ **Types de repas** : ${meal_types}
-🎯 **Objectifs** : ${goals || "Équilibre général"}
+Format de présentation OBLIGATOIRE:
 
-Fournis un plan complet avec :
+# 📅 Planning de Menus - ${duration}
 
-**📋 MENU DÉTAILLÉ :**
-- Planning jour par jour avec tous les repas
-- Nom des plats et descriptions courtes
-- Équilibre nutritionnel quotidien
+## 🍽️ Menu Détaillé
 
-**🛒 LISTE DE COURSES ORGANISÉE :**
-- Par catégories (légumes, viandes, épicerie, etc.)
-- Quantités précises pour ${people_count} personnes
-- Estimation des coûts si budget mentionné
+${
+  duration.includes("semaine") || duration.includes("7")
+    ? `
+### 🌅 Lundi
+**Petit-déjeuner :** [Plat] - [X min]  
+**Déjeuner :** [Plat] - [X min]  
+**Dîner :** [Plat] - [X min]
 
-**⚡ CONSEILS DE PRÉPARATION :**
-- Préparations à l'avance possibles
-- Organisation de la cuisine
-- Temps de préparation par jour
+### 🌞 Mardi  
+**Petit-déjeuner :** [Plat] - [X min]  
+**Déjeuner :** [Plat] - [X min]  
+**Dîner :** [Plat] - [X min]
 
-**🔄 ALTERNATIVES ET FLEXIBILITÉ :**
-- Substitutions possibles
-- Adaptations selon saisons
-- Suggestions de restes
+### 🌸 Mercredi
+**Petit-déjeuner :** [Plat] - [X min]  
+**Déjeuner :** [Plat] - [X min]  
+**Dîner :** [Plat] - [X min]
 
-**📊 ÉQUILIBRE NUTRITIONNEL :**
-- Répartition macro-nutriments
-- Validation des objectifs santé
-- Variété alimentaire
+### 🌻 Jeudi
+**Petit-déjeuner :** [Plat] - [X min]  
+**Déjeuner :** [Plat] - [X min]  
+**Dîner :** [Plat] - [X min]
 
-Assure-toi que le menu soit pratique, équilibré et adapté aux contraintes mentionnées.`;
+### 🌺 Vendredi  
+**Petit-déjeuner :** [Plat] - [X min]  
+**Déjeuner :** [Plat] - [X min]  
+**Dîner :** [Plat] - [X min]
+
+### 🎉 Samedi
+**Petit-déjeuner :** [Plat] - [X min]  
+**Déjeuner :** [Plat] - [X min]  
+**Dîner :** [Plat] - [X min]
+
+### 🌈 Dimanche
+**Petit-déjeuner :** [Plat] - [X min]  
+**Déjeuner :** [Plat] - [X min]  
+**Dîner :** [Plat] - [X min]
+`
+    : `
+### 📍 Jour 1
+**Petit-déjeuner :** [Plat] - [X min]  
+**Déjeuner :** [Plat] - [X min]  
+**Dîner :** [Plat] - [X min]
+
+### 📍 Jour 2
+**Petit-déjeuner :** [Plat] - [X min]  
+**Déjeuner :** [Plat] - [X min]  
+**Dîner :** [Plat] - [X min]
+
+[Continue selon durée...]
+`
+}
+
+## 🛒 Liste de Courses
+
+### 🥬 Légumes & Fruits
+• [Légume 1] - [quantité pour ${people_count} pers]
+• [Légume 2] - [quantité pour ${people_count} pers]
+
+### 🥩 Viandes & Poissons  
+• [Viande 1] - [quantité pour ${people_count} pers]
+• [Poisson 1] - [quantité pour ${people_count} pers]
+
+### 🥛 Produits Laitiers
+• [Produit 1] - [quantité pour ${people_count} pers]
+• [Produit 2] - [quantité pour ${people_count} pers]
+
+### 🍞 Féculents & Céréales
+• [Féculent 1] - [quantité pour ${people_count} pers]
+
+### 🧂 Épicerie
+• [Produit 1] - [quantité]
+• [Condiment 1] - [quantité]
+
+## 💡 Conseils d'Organisation
+• [Conseil 1]
+• [Conseil 2]  
+• [Conseil 3]
+
+IMPORTANT: Utilise EXACTEMENT cette structure avec émojis et sauts de ligne.`;
 
       const response = await chatgpt.invoke(prompt);
 

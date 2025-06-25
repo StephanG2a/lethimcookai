@@ -1,8 +1,9 @@
 import type { CompiledStateGraph } from "@langchain/langgraph";
 import "dotenv/config";
 
-import { mygesAgent } from "../Agents/myges/myges.mts";
 import { cuisinierAgent } from "../Agents/cuisinier/cuisinier-agent.mts";
+import { cuisinierPremiumAgent } from "../Agents/cuisinier-premium/cuisinier-premium-agent.mts";
+import { cuisinierBusinessAgent } from "../Agents/cuisinier-business/cuisinier-business-agent.mts";
 
 export interface AgentInfo {
   id: string;
@@ -11,20 +12,28 @@ export interface AgentInfo {
   agent: CompiledStateGraph<any, any>;
 }
 
-// Registre des agents - Ajoutez vos agents ici
-export const AGENTS_REGISTRY: Record<string, AgentInfo> = {
-  myges: {
-    id: "myges",
-    name: "MyGES Agent",
-    description: "Agent spécialisé pour MyGES et les informations météo",
-    agent: mygesAgent,
-  },
+// Registre des agents disponibles
+export const AGENTS_REGISTRY = {
   cuisinier: {
     id: "cuisinier",
-    name: "Chef Cuisinier IA",
+    name: "Chef Cuisinier IA Basic",
     description:
-      "Agent culinaire avec recherche de recettes, analyse nutritionnelle et planification de menus intelligente",
+      "Agent culinaire essentiel : recettes, nutrition, techniques (7 outils)",
     agent: cuisinierAgent,
+  },
+  "cuisinier-premium": {
+    id: "cuisinier-premium",
+    name: "Chef Cuisinier IA Premium",
+    description:
+      "Agent culinaire + création visuelle : logos, images, PDFs, templates (13 outils)",
+    agent: cuisinierPremiumAgent,
+  },
+  "cuisinier-business": {
+    id: "cuisinier-business",
+    name: "Chef Cuisinier IA Business",
+    description:
+      "Agent culinaire complet + services pro : recherche orgas, business plans, analyses (18 outils)",
+    agent: cuisinierBusinessAgent,
   },
 };
 

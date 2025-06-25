@@ -10,37 +10,27 @@ const chatgpt = new ChatOpenAI({
 export const unitConverter = tool(
   async ({ quantity, from_unit, to_unit, ingredient }) => {
     try {
-      const prompt = `Tu es un expert en conversions culinaires. Convertis précisément :
+      const prompt = `Convertis ${quantity} ${from_unit} vers ${to_unit}${
+        ingredient ? ` (${ingredient})` : ""
+      }
 
-📏 **Quantité** : ${quantity}
-🔄 **De** : ${from_unit}
-🔄 **Vers** : ${to_unit}
-🥄 **Ingrédient** : ${ingredient || "générique"}
+Format de présentation OBLIGATOIRE:
 
-Fournis une conversion précise avec :
+# 📐 Conversion Culinaire
 
-**🎯 RÉSULTAT PRINCIPAL :**
-- Conversion exacte avec chiffres précis
-- Équivalence directe
+## 🎯 Résultat Principal
+**${quantity} ${from_unit} = [X] ${to_unit}**
+${ingredient ? `*Pour ${ingredient}*` : ""}
 
-**📐 CONVERSIONS MULTIPLES :**
-- Autres unités courantes équivalentes
-- Tableau de correspondances utiles
+## 📊 Équivalences Courantes
+• **[Unité 1] :** [valeur]
+• **[Unité 2] :** [valeur]  
+• **[Unité 3] :** [valeur]
 
-**⚖️ DENSITÉ/SPÉCIFICITÉS :**
-- Prise en compte de la densité de l'ingrédient si applicable
-- Différences entre poids et volume
+## 💡 Conseil Pratique
+[Astuce de mesure utile]
 
-**💡 CONSEILS PRATIQUES :**
-- Astuces de mesure en cuisine
-- Ustensiles recommandés
-- Approximations utiles pour cuisiner
-
-**📊 TABLEAU DE RÉFÉRENCE :**
-- Conversions courantes pour cet ingrédient
-- Mesures alternatives
-
-Sois très précis dans tes calculs et donne des équivalences pratiques pour la cuisine.`;
+IMPORTANT: Utilise EXACTEMENT cette structure avec émojis et sauts de ligne.`;
 
       const response = await chatgpt.invoke(prompt);
 

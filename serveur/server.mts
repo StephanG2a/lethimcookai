@@ -126,6 +126,16 @@ function addMessageToConversation(threadId: string, message: ChatMessage) {
   const conversation = getOrCreateConversation(threadId);
   conversation.messages.push(message);
   conversation.updated_at = new Date().toISOString();
+
+  // Limiter l'historique pour éviter le dépassement de tokens
+  // Garder seulement les 4 derniers messages (2 échanges)
+  const MAX_MESSAGES = 4;
+  if (conversation.messages.length > MAX_MESSAGES) {
+    conversation.messages = conversation.messages.slice(-MAX_MESSAGES);
+    console.log(
+      `🧹 Historique tronqué pour ${threadId}: gardé ${MAX_MESSAGES} derniers messages`
+    );
+  }
 }
 
 // Create Express app

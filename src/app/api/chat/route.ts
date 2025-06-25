@@ -105,10 +105,14 @@ export async function POST(request: NextRequest) {
                             new TextEncoder().encode(jsonLine)
                           );
                         } else if (data.name && data.output) {
-                          // Événement tool_execution_complete - parser les métadonnées d'images
+                          // Événement tool_execution_complete - parser les métadonnées d'images, vidéos, PDFs, services et organisations
                           const output = data.output;
                           let content = output;
                           let images: any[] = [];
+                          let videos: any[] = [];
+                          let pdfs: any[] = [];
+                          let services: any[] = [];
+                          let organizations: any[] = [];
 
                           // Extraire les métadonnées d'images si présentes
                           const imageMetaMatch = output.match(
@@ -131,10 +135,104 @@ export async function POST(request: NextRequest) {
                             }
                           }
 
+                          // Extraire les métadonnées de vidéos si présentes
+                          const videoMetaMatch = output.match(
+                            /\*\*MÉTADONNÉES_VIDÉO:\*\* (.+?)(?=\n|$)/
+                          );
+                          if (videoMetaMatch) {
+                            try {
+                              const videoData = JSON.parse(videoMetaMatch[1]);
+                              videos = [videoData];
+                              // Retirer les métadonnées du contenu visible
+                              content = output.replace(
+                                /---\n\*\*MÉTADONNÉES_VIDÉO:\*\* .+/s,
+                                "---"
+                              );
+                            } catch (e) {
+                              console.warn(
+                                "Erreur parsing métadonnées vidéo:",
+                                e
+                              );
+                            }
+                          }
+
+                          // Extraire les métadonnées de PDFs si présentes
+                          const pdfMetaMatch = output.match(
+                            /\*\*MÉTADONNÉES_PDF:\*\* (.+?)(?=\n|$)/
+                          );
+                          if (pdfMetaMatch) {
+                            try {
+                              const pdfData = JSON.parse(pdfMetaMatch[1]);
+                              pdfs = [pdfData];
+                              // Retirer les métadonnées du contenu visible
+                              content = output.replace(
+                                /---\n\*\*MÉTADONNÉES_PDF:\*\* .+/s,
+                                "---"
+                              );
+                            } catch (e) {
+                              console.warn(
+                                "Erreur parsing métadonnées PDF:",
+                                e
+                              );
+                            }
+                          }
+
+                          // Extraire les métadonnées de services si présentes
+                          const serviceMetaMatch = output.match(
+                            /\*\*MÉTADONNÉES_SERVICES:\*\* (.+?)(?=\n|$)/
+                          );
+                          if (serviceMetaMatch) {
+                            try {
+                              const servicesData = JSON.parse(
+                                serviceMetaMatch[1]
+                              );
+                              services = servicesData.services || [];
+                              // Retirer les métadonnées du contenu visible
+                              content = output.replace(
+                                /---\n\*\*MÉTADONNÉES_SERVICES:\*\* .+/s,
+                                "---"
+                              );
+                            } catch (e) {
+                              console.warn(
+                                "Erreur parsing métadonnées services:",
+                                e
+                              );
+                            }
+                          }
+
+                          // Extraire les métadonnées d'organisations si présentes
+                          const orgMetaMatch = output.match(
+                            /\*\*MÉTADONNÉES_ORGANISATIONS:\*\* (.+?)(?=\n|$)/
+                          );
+                          if (orgMetaMatch) {
+                            try {
+                              const orgsData = JSON.parse(orgMetaMatch[1]);
+                              organizations = orgsData.organizations || [];
+                              // Retirer les métadonnées du contenu visible
+                              content = output.replace(
+                                /---\n\*\*MÉTADONNÉES_ORGANISATIONS:\*\* .+/s,
+                                "---"
+                              );
+                            } catch (e) {
+                              console.warn(
+                                "Erreur parsing métadonnées organisations:",
+                                e
+                              );
+                            }
+                          }
+
                           const jsonLine =
                             JSON.stringify({
                               content: `${content}\n`,
                               images: images.length > 0 ? images : undefined,
+                              videos: videos.length > 0 ? videos : undefined,
+                              pdfs: pdfs.length > 0 ? pdfs : undefined,
+                              services:
+                                services.length > 0 ? services : undefined,
+                              organizations:
+                                organizations.length > 0
+                                  ? organizations
+                                  : undefined,
                             }) + "\n";
                           controller.enqueue(
                             new TextEncoder().encode(jsonLine)
