@@ -16,7 +16,7 @@ const agentModel = new ChatOpenAI({
   model: "llama-3.2-3b-instruct", // ou le nom de votre modèle
   maxTokens: 1000, // Limiter les tokens pour éviter les réponses trop longues
   configuration: {
-    baseURL: "http://localhost:1234/v1",
+    baseURL: "http://127.0.0.1:1234/v1",
     apiKey: "not-needed", // LMStudio ne nécessite pas de clé API réelle
   },
 });
