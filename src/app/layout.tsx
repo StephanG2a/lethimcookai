@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CulinaryConnect - Plateforme culinaire professionnelle",
-  description: "Mise en relation entre clients et prestataires du domaine culinaire",
-  keywords: ["cuisine", "chef", "traiteur", "restaurateur", "prestataires", "marketplace"],
+  title: "CulinaryConnect - Plateforme culinaire IA",
+  description: "Mise en relation entre clients et prestataires du domaine culinaire avec assistance IA",
+  keywords: ["cuisine", "chef", "traiteur", "restaurateur", "prestataires", "marketplace", "IA", "chat"],
 };
 
 export default function RootLayout({

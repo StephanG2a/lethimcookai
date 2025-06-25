@@ -12,7 +12,7 @@ import { weather } from "./tools/weather.mts";
 const mygesPrompt = loadAgentPrompt('myges');
 
 const agentModel = new ChatOpenAI({ 
-  temperature: 0.3, // Réduire la température pour plus de cohérence
+  temperature: 0.7, // Augmenter pour plus de créativité et meilleure utilisation des outils
   model: "llama-3.2-3b-instruct", // ou le nom de votre modèle
   maxTokens: 1000, // Limiter les tokens pour éviter les réponses trop longues
   configuration: {

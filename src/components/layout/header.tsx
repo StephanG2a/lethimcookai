@@ -25,6 +25,9 @@ export function Header() {
           <Link href="/prestataires" className="text-sm font-medium text-neutral-600 hover:text-orange-600 transition-colors">
             Prestataires
           </Link>
+          <Link href="/chat" className="text-sm font-medium text-neutral-600 hover:text-orange-600 transition-colors">
+            Assistant IA
+          </Link>
           <Link href="/comment-ca-marche" className="text-sm font-medium text-neutral-600 hover:text-orange-600 transition-colors">
             Comment ça marche
           </Link>
@@ -82,6 +85,13 @@ export function Header() {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Prestataires
+            </Link>
+            <Link
+              href="/chat"
+              className="block text-sm font-medium text-neutral-600 hover:text-orange-600"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Assistant IA
             </Link>
             <Link
               href="/comment-ca-marche"
