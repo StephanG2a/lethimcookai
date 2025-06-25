@@ -1,19 +1,36 @@
-import { notFound } from 'next/navigation'
-import Image from 'next/image'
-import Link from 'next/link'
-import { MainLayout } from '@/components/layout/main-layout'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { MapPin, Clock, Zap, Star, User, ArrowLeft, MessageCircle, Shield, CheckCircle } from 'lucide-react'
-import { formatPrice } from '@/lib/utils'
+import { notFound } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { MainLayout } from "@/components/layout/main-layout";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  MapPin,
+  Clock,
+  Zap,
+  Star,
+  User,
+  ArrowLeft,
+  MessageCircle,
+  Shield,
+  CheckCircle,
+} from "lucide-react";
+import { formatPrice } from "@/lib/utils";
 
 // Données de démonstration - En réalité, cela viendrait d'une API/base de données
 const services = [
   {
-    id: '1',
-    title: 'Shooting photo culinaire professionnel',
-    description: 'Sublimez vos plats avec des photos dignes des plus grands restaurants. Shootings en studio ou sur site.',
+    id: "1",
+    title: "Shooting photo culinaire professionnel",
+    description:
+      "Sublimez vos plats avec des photos dignes des plus grands restaurants. Shootings en studio ou sur site.",
     fullDescription: `
       <h3>🎯 Ce que vous obtenez :</h3>
       <ul>
@@ -31,78 +48,86 @@ const services = [
       <p>Photographe culinaire depuis 8 ans, j'ai travaillé avec des restaurants étoilés et des marques alimentaires reconnues. Mon style met en valeur les textures et les couleurs pour créer des images appétissantes.</p>
     `,
     price: 350,
-    type: 'IRL' as const,
-    tags: ['Photographie', 'Culinaire', 'Professionnel'],
+    type: "IRL" as const,
+    tags: ["Photographie", "Culinaire", "Professionnel"],
     images: [
       // Images seront ajoutées plus tard
     ],
-    location: 'Paris et proche banlieue',
-    duration: '2 heures',
+    location: "Paris et proche banlieue",
+    duration: "2 heures",
     replacedByAI: false,
     deliverables: [
-      '10-15 photos haute résolution',
-      'Retouches professionnelles',
-      'Formats optimisés réseaux sociaux',
-      'Conseils styling inclus'
+      "10-15 photos haute résolution",
+      "Retouches professionnelles",
+      "Formats optimisés réseaux sociaux",
+      "Conseils styling inclus",
     ],
     provider: {
-      id: 'marie-dubois',
-      name: 'Marie Dubois',
+      id: "marie-dubois",
+      name: "Marie Dubois",
       rating: 4.9,
       reviewCount: 47,
-      responseTime: '2h',
+      responseTime: "2h",
       completedProjects: 156,
-      memberSince: '2019',
-      description: 'Photographe culinaire passionnée, spécialisée dans la mise en valeur des créations gastronomiques.',
-      location: 'Paris, France',
-      languages: ['Français', 'Anglais'],
-      verified: true
+      memberSince: "2019",
+      description:
+        "Photographe culinaire passionnée, spécialisée dans la mise en valeur des créations gastronomiques.",
+      location: "Paris, France",
+      languages: ["Français", "Anglais"],
+      verified: true,
     },
     reviews: [
       {
-        id: '1',
-        author: 'Restaurant Le Petit Gourmet',
+        id: "1",
+        author: "Restaurant Le Petit Gourmet",
         rating: 5,
-        date: '2024-01-15',
-        comment: 'Travail exceptionnel ! Marie a su capturer l\'essence de nos plats. Les photos sont magnifiques et ont considérablement amélioré notre présence sur les réseaux sociaux.'
+        date: "2024-01-15",
+        comment:
+          "Travail exceptionnel ! Marie a su capturer l'essence de nos plats. Les photos sont magnifiques et ont considérablement amélioré notre présence sur les réseaux sociaux.",
       },
       {
-        id: '2',
-        author: 'Chef Antoine',
+        id: "2",
+        author: "Chef Antoine",
         rating: 5,
-        date: '2024-01-10',
-        comment: 'Très professionnelle et créative. Les photos correspondent exactement à ce que j\'imaginais. Je recommande vivement !'
-      }
+        date: "2024-01-10",
+        comment:
+          "Très professionnelle et créative. Les photos correspondent exactement à ce que j'imaginais. Je recommande vivement !",
+      },
     ],
     faq: [
       {
-        question: 'Que dois-je préparer pour le shooting ?',
-        answer: 'Je vous fournirai une liste détaillée avant le shooting, mais généralement : vos plats fraîchement préparés, quelques accessoires de mise en scène, et un espace bien éclairé.'
+        question: "Que dois-je préparer pour le shooting ?",
+        answer:
+          "Je vous fournirai une liste détaillée avant le shooting, mais généralement : vos plats fraîchement préparés, quelques accessoires de mise en scène, et un espace bien éclairé.",
       },
       {
-        question: 'Combien de photos vais-je recevoir ?',
-        answer: 'Vous recevrez 10 à 15 photos haute résolution, retouchées et optimisées. Si vous souhaitez plus de photos, nous pouvons en discuter.'
+        question: "Combien de photos vais-je recevoir ?",
+        answer:
+          "Vous recevrez 10 à 15 photos haute résolution, retouchées et optimisées. Si vous souhaitez plus de photos, nous pouvons en discuter.",
       },
       {
-        question: 'Travaillez-vous dans toute la France ?',
-        answer: 'Je suis basée à Paris mais je peux me déplacer en région parisienne sans frais supplémentaires. Pour les autres régions, des frais de déplacement peuvent s\'appliquer.'
-      }
-    ]
-  }
-]
+        question: "Travaillez-vous dans toute la France ?",
+        answer:
+          "Je suis basée à Paris mais je peux me déplacer en région parisienne sans frais supplémentaires. Pour les autres régions, des frais de déplacement peuvent s'appliquer.",
+      },
+    ],
+  },
+];
 
 interface ServiceDetailPageProps {
   params: Promise<{
-    id: string
-  }>
+    id: string;
+  }>;
 }
 
-export default async function ServiceDetailPage({ params }: ServiceDetailPageProps) {
-  const { id } = await params
-  const service = services.find(s => s.id === id)
+export default async function ServiceDetailPage({
+  params,
+}: ServiceDetailPageProps) {
+  const { id } = await params;
+  const service = services.find((s) => s.id === id);
 
   if (!service) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -111,7 +136,10 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
         {/* Breadcrumb */}
         <div className="mb-6">
           <Button variant="ghost" asChild className="p-0 h-auto">
-            <Link href="/services" className="flex items-center text-neutral-600 hover:text-orange-600">
+            <Link
+              href="/services"
+              className="flex items-center text-neutral-600 hover:text-orange-600"
+            >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour aux services
             </Link>
@@ -124,24 +152,31 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
             {/* Header */}
             <div>
               <div className="flex flex-wrap gap-2 mb-4">
-                <Badge variant={service.type === 'IRL' ? 'default' : 'secondary'}>
-                  {service.type === 'IRL' ? 'Présentiel' : 'En ligne'}
+                <Badge
+                  variant={service.type === "IRL" ? "default" : "secondary"}
+                >
+                  {service.type === "IRL" ? "Présentiel" : "En ligne"}
                 </Badge>
                 {service.replacedByAI && (
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
+                  <Badge
+                    variant="secondary"
+                    className="bg-purple-100 text-purple-800 border-purple-200"
+                  >
                     <Zap className="h-3 w-3 mr-1" />
                     IA Compatible
                   </Badge>
                 )}
-                {service.tags.map(tag => (
-                  <Badge key={tag} variant="outline">{tag}</Badge>
+                {service.tags.map((tag) => (
+                  <Badge key={tag} variant="outline">
+                    {tag}
+                  </Badge>
                 ))}
               </div>
-              
+
               <h1 className="text-3xl font-bold text-neutral-900 mb-4">
                 {service.title}
               </h1>
-              
+
               <div className="flex items-center space-x-6 text-neutral-600 mb-6">
                 {service.location && (
                   <div className="flex items-center space-x-1">
@@ -160,7 +195,10 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
             {service.images.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {service.images.map((image, index) => (
-                  <div key={index} className="relative h-48 rounded-lg overflow-hidden">
+                  <div
+                    key={index}
+                    className="relative h-48 rounded-lg overflow-hidden"
+                  >
                     <Image
                       src={image}
                       alt={`${service.title} - image ${index + 1}`}
@@ -178,7 +216,7 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
                 <CardTitle>Description du service</CardTitle>
               </CardHeader>
               <CardContent>
-                <div 
+                <div
                   className="prose prose-neutral max-w-none"
                   dangerouslySetInnerHTML={{ __html: service.fullDescription }}
                 />
@@ -209,8 +247,13 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
               </CardHeader>
               <CardContent className="space-y-4">
                 {service.faq.map((item, index) => (
-                  <div key={index} className="border-b border-neutral-200 last:border-b-0 pb-4 last:pb-0">
-                    <h4 className="font-medium text-neutral-900 mb-2">{item.question}</h4>
+                  <div
+                    key={index}
+                    className="border-b border-neutral-200 last:border-b-0 pb-4 last:pb-0"
+                  >
+                    <h4 className="font-medium text-neutral-900 mb-2">
+                      {item.question}
+                    </h4>
                     <p className="text-neutral-600">{item.answer}</p>
                   </div>
                 ))}
@@ -222,23 +265,30 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
               <CardHeader>
                 <CardTitle>Avis clients</CardTitle>
                 <CardDescription>
-                  {service.reviews.length} avis • Note moyenne {service.provider.rating}/5
+                  {service.reviews.length} avis • Note moyenne{" "}
+                  {service.provider.rating}/5
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {service.reviews.map((review) => (
-                  <div key={review.id} className="border-b border-neutral-200 last:border-b-0 pb-4 last:pb-0">
+                  <div
+                    key={review.id}
+                    className="border-b border-neutral-200 last:border-b-0 pb-4 last:pb-0"
+                  >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
                         <span className="font-medium">{review.author}</span>
                         <div className="flex items-center">
                           {[...Array(review.rating)].map((_, i) => (
-                            <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <Star
+                              key={i}
+                              className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                            />
                           ))}
                         </div>
                       </div>
                       <span className="text-sm text-neutral-500">
-                        {new Date(review.date).toLocaleDateString('fr-FR')}
+                        {new Date(review.date).toLocaleDateString("fr-FR")}
                       </span>
                     </div>
                     <p className="text-neutral-600">{review.comment}</p>
@@ -260,7 +310,7 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
                     </div>
                     <p className="text-neutral-600">Prix fixe</p>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <Button size="lg" className="w-full">
                       <MessageCircle className="h-5 w-5 mr-2" />
@@ -291,7 +341,9 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
                       )}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">{service.provider.name}</h3>
+                      <h3 className="font-semibold text-lg">
+                        {service.provider.name}
+                      </h3>
                       <div className="flex items-center space-x-1 text-sm text-neutral-600">
                         <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                         <span>{service.provider.rating}</span>
@@ -299,28 +351,38 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
                       </div>
                     </div>
                   </div>
-                  
-                  <p className="text-neutral-600 mb-4">{service.provider.description}</p>
-                  
+
+                  <p className="text-neutral-600 mb-4">
+                    {service.provider.description}
+                  </p>
+
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-neutral-500">Temps de réponse</span>
-                      <span className="font-medium">{service.provider.responseTime}</span>
+                      <span className="font-medium">
+                        {service.provider.responseTime}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-neutral-500">Projets réalisés</span>
-                      <span className="font-medium">{service.provider.completedProjects}</span>
+                      <span className="font-medium">
+                        {service.provider.completedProjects}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-neutral-500">Membre depuis</span>
-                      <span className="font-medium">{service.provider.memberSince}</span>
+                      <span className="font-medium">
+                        {service.provider.memberSince}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-neutral-500">Localisation</span>
-                      <span className="font-medium">{service.provider.location}</span>
+                      <span className="font-medium">
+                        {service.provider.location}
+                      </span>
                     </div>
                   </div>
-                  
+
                   <div className="mt-4 pt-4 border-t border-neutral-200">
                     <Button variant="outline" className="w-full" asChild>
                       <Link href={`/prestataires/${service.provider.id}`}>
@@ -356,5 +418,5 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
         </div>
       </div>
     </MainLayout>
-  )
-} 
+  );
+}
