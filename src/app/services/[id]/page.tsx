@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
@@ -21,98 +20,91 @@ import {
   MessageCircle,
   Shield,
   CheckCircle,
+  Euro,
+  Calendar,
+  Award,
+  Phone,
+  Mail,
 } from "lucide-react";
-import { formatPrice } from "@/lib/utils";
 
-// Données de démonstration - En réalité, cela viendrait d'une API/base de données
-const services = [
-  {
-    id: "1",
-    title: "Shooting photo culinaire professionnel",
-    description:
-      "Sublimez vos plats avec des photos dignes des plus grands restaurants. Shootings en studio ou sur site.",
-    fullDescription: `
-      <h3>🎯 Ce que vous obtenez :</h3>
-      <ul>
-        <li>Shooting photo professionnel de 2h</li>
-        <li>10-15 photos haute résolution retouchées</li>
-        <li>Photos optimisées pour réseaux sociaux</li>
-        <li>Conseils styling culinaire</li>
-        <li>Livraison sous 48h</li>
-      </ul>
-      
-      <h3>📸 Déroulement :</h3>
-      <p>Nous commençons par définir ensemble le style et l'ambiance souhaitée. Je vous accompagne dans la mise en scène de vos plats pour créer des images qui donnent envie.</p>
-      
-      <h3>🏆 Expérience :</h3>
-      <p>Photographe culinaire depuis 8 ans, j'ai travaillé avec des restaurants étoilés et des marques alimentaires reconnues. Mon style met en valeur les textures et les couleurs pour créer des images appétissantes.</p>
-    `,
-    price: 350,
-    type: "IRL" as const,
-    tags: ["Photographie", "Culinaire", "Professionnel"],
-    images: [
-      // Images seront ajoutées plus tard
-    ],
-    location: "Paris et proche banlieue",
-    duration: "2 heures",
-    replacedByAI: false,
-    deliverables: [
-      "10-15 photos haute résolution",
-      "Retouches professionnelles",
-      "Formats optimisés réseaux sociaux",
-      "Conseils styling inclus",
-    ],
-    provider: {
-      id: "marie-dubois",
-      name: "Marie Dubois",
-      rating: 4.9,
-      reviewCount: 47,
-      responseTime: "2h",
-      completedProjects: 156,
-      memberSince: "2019",
-      description:
-        "Photographe culinaire passionnée, spécialisée dans la mise en valeur des créations gastronomiques.",
-      location: "Paris, France",
-      languages: ["Français", "Anglais"],
-      verified: true,
-    },
-    reviews: [
+// Fonction pour récupérer un service par son ID
+async function getService(id: string) {
+  try {
+    const response = await fetch(
+      `${
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+      }/api/services/${id}`,
       {
-        id: "1",
-        author: "Restaurant Le Petit Gourmet",
-        rating: 5,
-        date: "2024-01-15",
-        comment:
-          "Travail exceptionnel ! Marie a su capturer l'essence de nos plats. Les photos sont magnifiques et ont considérablement amélioré notre présence sur les réseaux sociaux.",
-      },
-      {
-        id: "2",
-        author: "Chef Antoine",
-        rating: 5,
-        date: "2024-01-10",
-        comment:
-          "Très professionnelle et créative. Les photos correspondent exactement à ce que j'imaginais. Je recommande vivement !",
-      },
-    ],
-    faq: [
-      {
-        question: "Que dois-je préparer pour le shooting ?",
-        answer:
-          "Je vous fournirai une liste détaillée avant le shooting, mais généralement : vos plats fraîchement préparés, quelques accessoires de mise en scène, et un espace bien éclairé.",
-      },
-      {
-        question: "Combien de photos vais-je recevoir ?",
-        answer:
-          "Vous recevrez 10 à 15 photos haute résolution, retouchées et optimisées. Si vous souhaitez plus de photos, nous pouvons en discuter.",
-      },
-      {
-        question: "Travaillez-vous dans toute la France ?",
-        answer:
-          "Je suis basée à Paris mais je peux me déplacer en région parisienne sans frais supplémentaires. Pour les autres régions, des frais de déplacement peuvent s'appliquer.",
-      },
-    ],
-  },
-];
+        cache: "no-store",
+      }
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur lors de la récupération du service:", error);
+    return null;
+  }
+}
+
+// Fonction pour formater le prix
+function formatPrice(price: number): string {
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+  }).format(price);
+}
+
+// Fonction pour formater le type de service
+function getServiceTypeLabel(type: string): string {
+  switch (type) {
+    case "IRL":
+      return "Présentiel";
+    case "ONLINE":
+      return "En ligne";
+    case "MIXED":
+      return "Hybride";
+    default:
+      return type;
+  }
+}
+
+// Fonction pour formater le type de consommation
+function getConsumptionTypeLabel(type: string): string {
+  switch (type) {
+    case "INSTANT":
+      return "Instantané";
+    case "PERIODIC":
+      return "Périodique";
+    case "PRESTATION":
+      return "Prestation";
+    default:
+      return type;
+  }
+}
+
+// Fonction pour formater le plan de facturation
+function getBillingPlanLabel(plan: string): string {
+  switch (plan) {
+    case "UNIT":
+      return "À l'unité";
+    case "USAGE":
+      return "À l'usage";
+    case "MINUTE":
+      return "Par minute";
+    case "MENSUAL":
+      return "Mensuel";
+    case "ANNUAL":
+      return "Annuel";
+    case "PROJECT":
+      return "Par projet";
+    default:
+      return plan;
+  }
+}
 
 interface ServiceDetailPageProps {
   params: Promise<{
@@ -124,7 +116,7 @@ export default async function ServiceDetailPage({
   params,
 }: ServiceDetailPageProps) {
   const { id } = await params;
-  const service = services.find((s) => s.id === id);
+  const service = await getService(id);
 
   if (!service) {
     notFound();
@@ -153,11 +145,19 @@ export default async function ServiceDetailPage({
             <div>
               <div className="flex flex-wrap gap-2 mb-4">
                 <Badge
-                  variant={service.type === "IRL" ? "default" : "secondary"}
+                  variant={
+                    service.serviceType === "IRL" ? "default" : "secondary"
+                  }
                 >
-                  {service.type === "IRL" ? "Présentiel" : "En ligne"}
+                  {getServiceTypeLabel(service.serviceType)}
                 </Badge>
-                {service.replacedByAI && (
+                <Badge variant="outline">
+                  {getConsumptionTypeLabel(service.consumptionType)}
+                </Badge>
+                <Badge variant="outline">
+                  {getBillingPlanLabel(service.billingPlan)}
+                </Badge>
+                {service.isAIReplaceable && (
                   <Badge
                     variant="secondary"
                     className="bg-purple-100 text-purple-800 border-purple-200"
@@ -166,254 +166,236 @@ export default async function ServiceDetailPage({
                     IA Compatible
                   </Badge>
                 )}
-                {service.tags.map((tag) => (
-                  <Badge key={tag} variant="outline">
-                    {tag}
-                  </Badge>
-                ))}
               </div>
 
               <h1 className="text-3xl font-bold text-neutral-900 mb-4">
                 {service.title}
               </h1>
 
+              <p className="text-lg text-neutral-600 mb-6">{service.summary}</p>
+
               <div className="flex items-center space-x-6 text-neutral-600 mb-6">
-                {service.location && (
-                  <div className="flex items-center space-x-1">
-                    <MapPin className="h-4 w-4" />
-                    <span>{service.location}</span>
-                  </div>
-                )}
                 <div className="flex items-center space-x-1">
-                  <Clock className="h-4 w-4" />
-                  <span>{service.duration}</span>
+                  <User className="h-4 w-4" />
+                  <span>{service.organization?.name || "Organisation"}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Calendar className="h-4 w-4" />
+                  <span>
+                    Créé le{" "}
+                    {new Date(service.createdAt).toLocaleDateString("fr-FR")}
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Images */}
-            {service.images.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {service.images.map((image, index) => (
-                  <div
-                    key={index}
-                    className="relative h-48 rounded-lg overflow-hidden"
-                  >
-                    <Image
-                      src={image}
-                      alt={`${service.title} - image ${index + 1}`}
-                      fill
-                      className="object-cover hover:scale-105 transition-transform duration-200"
-                    />
+            {/* Image principale */}
+            {service.mainMedia && (
+              <div className="relative h-64 md:h-80 rounded-lg overflow-hidden bg-neutral-100">
+                <div className="absolute inset-0 flex items-center justify-center text-neutral-500">
+                  <div className="text-center">
+                    <Award className="h-12 w-12 mx-auto mb-2" />
+                    <p>Image du service</p>
                   </div>
-                ))}
+                </div>
               </div>
             )}
 
-            {/* Description */}
+            {/* Description complète */}
             <Card>
               <CardHeader>
                 <CardTitle>Description du service</CardTitle>
               </CardHeader>
               <CardContent>
-                <div
-                  className="prose prose-neutral max-w-none"
-                  dangerouslySetInnerHTML={{ __html: service.fullDescription }}
-                />
+                <div className="prose prose-neutral max-w-none">
+                  <p className="text-neutral-700 leading-relaxed whitespace-pre-line">
+                    {service.description}
+                  </p>
+                </div>
               </CardContent>
             </Card>
 
-            {/* Ce qui est inclus */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Ce qui est inclus</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {service.deliverables.map((item, index) => (
-                    <li key={index} className="flex items-center space-x-2">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* FAQ */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Questions fréquentes</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {service.faq.map((item, index) => (
-                  <div
-                    key={index}
-                    className="border-b border-neutral-200 last:border-b-0 pb-4 last:pb-0"
-                  >
-                    <h4 className="font-medium text-neutral-900 mb-2">
-                      {item.question}
-                    </h4>
-                    <p className="text-neutral-600">{item.answer}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Avis */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Avis clients</CardTitle>
-                <CardDescription>
-                  {service.reviews.length} avis • Note moyenne{" "}
-                  {service.provider.rating}/5
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {service.reviews.map((review) => (
-                  <div
-                    key={review.id}
-                    className="border-b border-neutral-200 last:border-b-0 pb-4 last:pb-0"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        <span className="font-medium">{review.author}</span>
-                        <div className="flex items-center">
-                          {[...Array(review.rating)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className="h-4 w-4 fill-yellow-400 text-yellow-400"
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <span className="text-sm text-neutral-500">
-                        {new Date(review.date).toLocaleDateString("fr-FR")}
-                      </span>
-                    </div>
-                    <p className="text-neutral-600">{review.comment}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-6">
-              {/* Prix et CTA */}
+            {/* Tags */}
+            {service.tags && service.tags.length > 0 && (
               <Card>
-                <CardContent className="p-6">
-                  <div className="text-center mb-6">
-                    <div className="text-3xl font-bold text-orange-600 mb-2">
-                      {formatPrice(service.price)}
-                    </div>
-                    <p className="text-neutral-600">Prix fixe</p>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Button size="lg" className="w-full">
-                      <MessageCircle className="h-5 w-5 mr-2" />
-                      Contacter le prestataire
-                    </Button>
-                    <Button variant="outline" size="lg" className="w-full">
-                      Demander un devis
-                    </Button>
+                <CardHeader>
+                  <CardTitle>Mots-clés</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {service.tags.map((tag: string, index: number) => (
+                      <Badge key={index} variant="outline">
+                        {tag}
+                      </Badge>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
+            )}
 
-              {/* Prestataire */}
+            {/* Informations sur l'organisation */}
+            {service.organization && (
               <Card>
                 <CardHeader>
-                  <CardTitle>À propos du prestataire</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-green-600" />
+                    Prestataire vérifié
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="relative">
-                      <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center">
-                        <User className="h-8 w-8 text-neutral-400" />
-                      </div>
-                      {service.provider.verified && (
-                        <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1">
-                          <Shield className="h-3 w-3 text-white" />
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-semibold text-lg">
+                        {service.organization.name}
+                      </h3>
+                      {service.organization.description && (
+                        <p className="text-neutral-600 mt-2">
+                          {service.organization.description}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {service.organization.email && (
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-neutral-500" />
+                          <span className="text-sm">
+                            {service.organization.email}
+                          </span>
+                        </div>
+                      )}
+                      {service.organization.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-neutral-500" />
+                          <span className="text-sm">
+                            {service.organization.phone}
+                          </span>
                         </div>
                       )}
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">
-                        {service.provider.name}
-                      </h3>
-                      <div className="flex items-center space-x-1 text-sm text-neutral-600">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span>{service.provider.rating}</span>
-                        <span>({service.provider.reviewCount} avis)</span>
+
+                    <div className="flex items-center gap-4 text-sm text-neutral-600">
+                      <div className="flex items-center gap-1">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span>
+                          Membre depuis{" "}
+                          {new Date(
+                            service.organization.createdAt
+                          ).getFullYear()}
+                        </span>
                       </div>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
 
-                  <p className="text-neutral-600 mb-4">
-                    {service.provider.description}
-                  </p>
-
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-neutral-500">Temps de réponse</span>
-                      <span className="font-medium">
-                        {service.provider.responseTime}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-neutral-500">Projets réalisés</span>
-                      <span className="font-medium">
-                        {service.provider.completedProjects}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-neutral-500">Membre depuis</span>
-                      <span className="font-medium">
-                        {service.provider.memberSince}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-neutral-500">Localisation</span>
-                      <span className="font-medium">
-                        {service.provider.location}
-                      </span>
-                    </div>
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Prix et action */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="text-center space-y-4">
+                  <div>
+                    {service.lowerPrice !== null &&
+                    service.upperPrice !== null ? (
+                      <div className="text-3xl font-bold text-neutral-900">
+                        {formatPrice(service.lowerPrice)} -{" "}
+                        {formatPrice(service.upperPrice)}
+                      </div>
+                    ) : service.lowerPrice !== null ? (
+                      <div className="text-3xl font-bold text-neutral-900">
+                        À partir de {formatPrice(service.lowerPrice)}
+                      </div>
+                    ) : service.upperPrice !== null ? (
+                      <div className="text-3xl font-bold text-neutral-900">
+                        Jusqu'à {formatPrice(service.upperPrice)}
+                      </div>
+                    ) : (
+                      <div className="text-xl font-semibold text-neutral-600">
+                        Prix sur devis
+                      </div>
+                    )}
+                    <p className="text-sm text-neutral-600 mt-1">
+                      {getBillingPlanLabel(service.billingPlan)}
+                    </p>
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-neutral-200">
-                    <Button variant="outline" className="w-full" asChild>
-                      <Link href={`/prestataires/${service.provider.id}`}>
-                        Voir le profil complet
-                      </Link>
+                  <div className="space-y-3">
+                    <Button className="w-full bg-orange-600 hover:bg-orange-700">
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      Contacter le prestataire
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      <Star className="h-4 w-4 mr-2" />
+                      Ajouter aux favoris
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </CardContent>
+            </Card>
 
-              {/* Garanties */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Garanties CulinaryConnect</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Shield className="h-5 w-5 text-green-600" />
-                    <span className="text-sm">Paiement sécurisé</span>
+            {/* Informations détaillées */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Détails du service</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between">
+                  <span className="text-neutral-600">Type</span>
+                  <span className="font-medium">
+                    {getServiceTypeLabel(service.serviceType)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-neutral-600">Consommation</span>
+                  <span className="font-medium">
+                    {getConsumptionTypeLabel(service.consumptionType)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-neutral-600">Facturation</span>
+                  <span className="font-medium">
+                    {getBillingPlanLabel(service.billingPlan)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-neutral-600">Mode de paiement</span>
+                  <span className="font-medium">{service.paymentMode}</span>
+                </div>
+                {service.isAIReplaceable && (
+                  <div className="flex justify-between">
+                    <span className="text-neutral-600">IA Compatible</span>
+                    <span className="flex items-center text-purple-600">
+                      <Zap className="h-4 w-4 mr-1" />
+                      Oui
+                    </span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-sm">Satisfaction garantie</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <MessageCircle className="h-5 w-5 text-green-600" />
-                    <span className="text-sm">Support client 24/7</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Actions rapides */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button variant="outline" className="w-full justify-start">
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Poser une question
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <Star className="h-4 w-4 mr-2" />
+                  Voir les avis
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Signaler ce service
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
