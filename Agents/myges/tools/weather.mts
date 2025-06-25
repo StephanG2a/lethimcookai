@@ -17,7 +17,21 @@ export const weather = tool(
         }
         throw new Error(`Erreur API: ${response.status}`);
       }
-      return await response.json();
+      
+      const data = await response.json();
+      
+      // Formatage des données météo en texte lisible
+      const current = data.current_condition[0];
+      const weather_desc = current.lang_fr[0].value;
+      
+      const result = `🌍 Météo à ${ville} :
+🌡️ Température : ${current.temp_C}°C (ressenti ${current.FeelsLikeC}°C)
+☁️ Conditions : ${weather_desc}
+💧 Humidité : ${current.humidity}%
+💨 Vent : ${current.windspeedKmph} km/h
+👁️ Visibilité : ${current.visibility} km`;
+
+      return result;
       
     } catch (error) {
       console.error('Erreur météo:', error);
