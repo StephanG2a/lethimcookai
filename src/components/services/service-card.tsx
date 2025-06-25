@@ -1,48 +1,55 @@
-import Link from 'next/link'
-import Image from 'next/image'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { MapPin, Clock, Zap, User } from 'lucide-react'
-import { formatPrice } from '@/lib/utils'
+import Link from "next/link";
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { MapPin, Clock, Zap, User } from "lucide-react";
+import { formatPrice } from "@/lib/utils";
 
 interface ServiceCardProps {
   service: {
-    id: string
-    title: string
-    description: string
-    price: number
-    type: 'IRL' | 'ONLINE'
-    tags: string[]
-    image?: string
-    location?: string
-    duration?: string
-    replacedByAI: boolean
+    id: string;
+    title: string;
+    description: string;
+    price: number;
+    type: "IRL" | "ONLINE" | "MIXED";
+    tags: string[];
+    image?: string;
+    location?: string;
+    duration?: string;
+    replacedByAI: boolean;
     provider: {
-      name: string
-      avatar?: string
-      rating: number
-    }
-  }
+      name: string;
+      avatar?: string;
+      rating: number;
+    };
+  };
 }
 
 // Emojis pour les différents types de services
 const getServiceEmoji = (tags: string[]) => {
-  if (tags.includes('Photographie')) return '📸'
-  if (tags.includes('Marketing')) return '📢'
-  if (tags.includes('Développement')) return '💻'
-  if (tags.includes('Design')) return '🎨'
-  if (tags.includes('Formation')) return '📚'
-  if (tags.includes('SEO')) return '🔍'
-  if (tags.includes('Gastronomie')) return '👨‍🍳'
-  return '🍽️'
-}
+  if (tags.includes("Photographie")) return "📸";
+  if (tags.includes("Marketing")) return "📢";
+  if (tags.includes("Développement")) return "💻";
+  if (tags.includes("Design")) return "🎨";
+  if (tags.includes("Formation")) return "📚";
+  if (tags.includes("SEO")) return "🔍";
+  if (tags.includes("Gastronomie")) return "👨‍🍳";
+  return "🍽️";
+};
 
 export function ServiceCard({ service }: ServiceCardProps) {
   return (
     <Card className="group hover:shadow-lg transition-all duration-200 border-neutral-200">
       <div className="relative">
-        {service.image && service.image.startsWith('http') ? (
+        {service.image && service.image.startsWith("http") ? (
           <div className="relative h-48 w-full overflow-hidden rounded-t-xl">
             <Image
               src={service.image}
@@ -56,11 +63,14 @@ export function ServiceCard({ service }: ServiceCardProps) {
             <div className="text-6xl">{getServiceEmoji(service.tags)}</div>
           </div>
         )}
-        
+
         {/* Badge IA remplaçable */}
         {service.replacedByAI && (
           <div className="absolute top-3 right-3">
-            <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
+            <Badge
+              variant="secondary"
+              className="bg-purple-100 text-purple-800 border-purple-200"
+            >
               <Zap className="h-3 w-3 mr-1" />
               IA Compatible
             </Badge>
@@ -69,8 +79,12 @@ export function ServiceCard({ service }: ServiceCardProps) {
 
         {/* Badge type */}
         <div className="absolute top-3 left-3">
-          <Badge variant={service.type === 'IRL' ? 'default' : 'secondary'}>
-            {service.type === 'IRL' ? 'Présentiel' : 'En ligne'}
+          <Badge variant={service.type === "IRL" ? "default" : "secondary"}>
+            {service.type === "IRL"
+              ? "Présentiel"
+              : service.type === "ONLINE"
+              ? "En ligne"
+              : "Hybride"}
           </Badge>
         </div>
       </div>
@@ -120,7 +134,8 @@ export function ServiceCard({ service }: ServiceCardProps) {
         {/* Prestataire */}
         <div className="flex items-center space-x-2">
           <div className="flex items-center space-x-1">
-            {service.provider.avatar && service.provider.avatar.startsWith('http') ? (
+            {service.provider.avatar &&
+            service.provider.avatar.startsWith("http") ? (
               <Image
                 src={service.provider.avatar}
                 alt={service.provider.name}
@@ -131,7 +146,9 @@ export function ServiceCard({ service }: ServiceCardProps) {
             ) : (
               <User className="h-4 w-4 text-neutral-400" />
             )}
-            <span className="text-sm text-neutral-600">{service.provider.name}</span>
+            <span className="text-sm text-neutral-600">
+              {service.provider.name}
+            </span>
           </div>
           <div className="text-xs text-neutral-500">
             ⭐ {service.provider.rating}/5
@@ -144,11 +161,9 @@ export function ServiceCard({ service }: ServiceCardProps) {
           {formatPrice(service.price)}
         </div>
         <Button asChild size="sm">
-          <Link href={`/services/${service.id}`}>
-            Voir détails
-          </Link>
+          <Link href={`/services/${service.id}`}>Voir détails</Link>
         </Button>
       </CardFooter>
     </Card>
-  )
-} 
+  );
+}
