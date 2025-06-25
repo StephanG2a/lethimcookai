@@ -21,6 +21,78 @@ interface Message {
     alt: string;
     title?: string;
   }>;
+  videos?: Array<{
+    url: string;
+    embedUrl: string;
+    thumbnail: string;
+    title: string;
+    channel: string;
+    views: string;
+    duration: string;
+    alt: string;
+  }>;
+  pdfs?: Array<{
+    url?: string;
+    data?: string; // Base64 data pour téléchargement direct
+    previewUrl?: string;
+    filename: string;
+    title: string;
+    documentType: string;
+    style: string;
+    fileSize: string;
+    pages?: number;
+    alt: string;
+    type?: string; // "downloadable_pdf" ou "direct_download_pdf"
+    mimeType?: string;
+  }>;
+  services?: Array<{
+    id: number;
+    title: string;
+    summary: string;
+    price: string;
+    priceMode: string;
+    serviceType: string;
+    billingPlan: string;
+    tags: string[];
+    organizationName: string;
+    organizationSector: string;
+    organizationAddress?: string;
+    organizationPhone?: string;
+    organizationEmail?: string;
+    organizationWebsite?: string;
+    isAIReplaceable: boolean;
+    consumptionType: string;
+    pageUrl: string;
+    searchQuery: string;
+    searchDate: string;
+  }>;
+  organizations?: Array<{
+    id: number;
+    name: string;
+    sector: string;
+    description?: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+    website?: string;
+    legalForm?: string;
+    siret?: string;
+    tvaNume?: string;
+    services: Array<{
+      id: number;
+      title: string;
+      summary?: string;
+      serviceType: string;
+      price: string;
+      paymentMode: string;
+      tags: string[];
+    }>;
+    servicesCount: number;
+    searchQuery: string;
+    searchLocation?: string;
+    searchSector?: string;
+    searchDate: string;
+  }>;
 }
 
 export default function ChatPage() {
@@ -60,7 +132,11 @@ export default function ChatPage() {
 
         // Fallback avec des agents de test
         setAgents([
-          { id: "myges", name: "MyGES", description: "Agent de test MyGES" },
+          {
+            id: "cuisinier",
+            name: "Cuisinier",
+            description: "Chef IA spécialisé en cuisine",
+          },
           {
             id: "culinary",
             name: "Chef Assistant",
@@ -157,6 +233,21 @@ export default function ChatPage() {
                               images: data.images
                                 ? [...(msg.images || []), ...data.images]
                                 : msg.images,
+                              videos: data.videos
+                                ? [...(msg.videos || []), ...data.videos]
+                                : msg.videos,
+                              pdfs: data.pdfs
+                                ? [...(msg.pdfs || []), ...data.pdfs]
+                                : msg.pdfs,
+                              services: data.services
+                                ? [...(msg.services || []), ...data.services]
+                                : msg.services,
+                              organizations: data.organizations
+                                ? [
+                                    ...(msg.organizations || []),
+                                    ...data.organizations,
+                                  ]
+                                : msg.organizations,
                             }
                           : msg
                       )
@@ -326,6 +417,604 @@ export default function ChatPage() {
                       ))}
                     </div>
                   )}
+
+                  {/* Affichage des vidéos YouTube */}
+                  {message.videos && message.videos.length > 0 && (
+                    <div className="mt-3 space-y-3">
+                      {message.videos.map((video, index) => (
+                        <div
+                          key={index}
+                          className="rounded-lg overflow-hidden border border-gray-200 bg-gradient-to-br from-red-50 to-orange-50"
+                        >
+                          {/* Player YouTube intégré */}
+                          <div
+                            className="relative w-full"
+                            style={{ paddingBottom: "56.25%" }}
+                          >
+                            <iframe
+                              src={`${video.embedUrl}?rel=0&modestbranding=1`}
+                              className="absolute top-0 left-0 w-full h-full"
+                              frameBorder="0"
+                              allowFullScreen
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              title={video.alt}
+                            />
+                          </div>
+
+                          {/* Informations vidéo */}
+                          <div className="px-4 py-3 bg-white">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-semibold text-gray-900 text-sm line-clamp-2">
+                                {video.title}
+                              </h4>
+                            </div>
+                            <div className="flex items-center justify-between text-xs text-gray-600 mb-3">
+                              <span>📺 {video.channel}</span>
+                              <div className="flex space-x-3">
+                                <span>👁️ {video.views}</span>
+                                <span>⏱️ {video.duration}</span>
+                              </div>
+                            </div>
+
+                            {/* Boutons d'action */}
+                            <div className="flex space-x-2">
+                              <a
+                                href={video.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 text-center text-xs bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700 transition-colors"
+                              >
+                                ▶️ Voir sur YouTube
+                              </a>
+                              <a
+                                href={video.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 transition-colors"
+                              >
+                                📋 Copier lien
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Affichage des PDFs téléchargeables */}
+                  {message.pdfs && message.pdfs.length > 0 && (
+                    <div className="mt-3 space-y-3">
+                      {message.pdfs.map((pdf, index) => (
+                        <div
+                          key={index}
+                          className="rounded-lg overflow-hidden border border-gray-200 bg-gradient-to-br from-blue-50 to-indigo-50"
+                        >
+                          {/* En-tête PDF */}
+                          <div className="px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                                  <span className="text-lg font-bold">📄</span>
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-sm line-clamp-1">
+                                    {pdf.title}
+                                  </h4>
+                                  <p className="text-xs text-blue-100">
+                                    {pdf.documentType} • {pdf.style}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="text-right text-xs text-blue-100">
+                                <div>{pdf.fileSize}</div>
+                                {pdf.pages && <div>{pdf.pages} pages</div>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Prévisualisation (si disponible) */}
+                          {pdf.previewUrl && (
+                            <div className="p-4 bg-white">
+                              <img
+                                src={pdf.previewUrl}
+                                alt={`Aperçu de ${pdf.title}`}
+                                className="w-full max-w-sm mx-auto h-auto rounded border shadow-sm"
+                                style={{
+                                  maxHeight: "200px",
+                                  objectFit: "contain",
+                                }}
+                              />
+                            </div>
+                          )}
+
+                          {/* Zone de téléchargement */}
+                          <div className="px-4 py-4 bg-white border-t border-gray-100">
+                            <div className="flex flex-col sm:flex-row gap-3">
+                              {/* Bouton de téléchargement principal */}
+                              {pdf.data ? (
+                                // Téléchargement direct depuis base64
+                                <button
+                                  onClick={() => {
+                                    try {
+                                      console.log(
+                                        "PDF data length:",
+                                        pdf.data!.length
+                                      );
+                                      console.log(
+                                        "PDF data sample:",
+                                        pdf.data!.substring(0, 50)
+                                      );
+
+                                      // Nettoyer les données base64 (supprimer espaces, retours chariot, etc.)
+                                      const cleanBase64 = pdf.data!.replace(
+                                        /[^A-Za-z0-9+/=]/g,
+                                        ""
+                                      );
+
+                                      // Vérifier que la longueur est correcte (multiple de 4)
+                                      const paddedBase64 =
+                                        cleanBase64 +
+                                        "=".repeat(
+                                          (4 - (cleanBase64.length % 4)) % 4
+                                        );
+
+                                      const byteCharacters = atob(paddedBase64);
+                                      const byteNumbers = new Array(
+                                        byteCharacters.length
+                                      );
+                                      for (
+                                        let i = 0;
+                                        i < byteCharacters.length;
+                                        i++
+                                      ) {
+                                        byteNumbers[i] =
+                                          byteCharacters.charCodeAt(i);
+                                      }
+                                      const byteArray = new Uint8Array(
+                                        byteNumbers
+                                      );
+                                      const blob = new Blob([byteArray], {
+                                        type: pdf.mimeType || "application/pdf",
+                                      });
+                                      const url = URL.createObjectURL(blob);
+                                      const link = document.createElement("a");
+                                      link.href = url;
+                                      link.download = pdf.filename;
+                                      document.body.appendChild(link);
+                                      link.click();
+                                      document.body.removeChild(link);
+                                      URL.revokeObjectURL(url);
+                                    } catch (error) {
+                                      console.error(
+                                        "Erreur téléchargement PDF:",
+                                        error
+                                      );
+                                      alert(
+                                        "Erreur lors du téléchargement du PDF. Vérifiez la console pour plus de détails."
+                                      );
+                                    }
+                                  }}
+                                  className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                >
+                                  <span className="text-lg">📥</span>
+                                  <span>Télécharger PDF</span>
+                                </button>
+                              ) : (
+                                // Téléchargement classique par URL
+                                <a
+                                  href={pdf.url}
+                                  download={pdf.filename}
+                                  className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                >
+                                  <span className="text-lg">📥</span>
+                                  <span>Télécharger PDF</span>
+                                </a>
+                              )}
+
+                              {/* Boutons secondaires */}
+                              <div className="flex gap-2">
+                                {pdf.data ? (
+                                  // Aperçu depuis base64
+                                  <button
+                                    onClick={() => {
+                                      try {
+                                        // Nettoyer les données base64
+                                        const cleanBase64 = pdf.data!.replace(
+                                          /[^A-Za-z0-9+/=]/g,
+                                          ""
+                                        );
+                                        const paddedBase64 =
+                                          cleanBase64 +
+                                          "=".repeat(
+                                            (4 - (cleanBase64.length % 4)) % 4
+                                          );
+
+                                        const byteCharacters =
+                                          atob(paddedBase64);
+                                        const byteNumbers = new Array(
+                                          byteCharacters.length
+                                        );
+                                        for (
+                                          let i = 0;
+                                          i < byteCharacters.length;
+                                          i++
+                                        ) {
+                                          byteNumbers[i] =
+                                            byteCharacters.charCodeAt(i);
+                                        }
+                                        const byteArray = new Uint8Array(
+                                          byteNumbers
+                                        );
+                                        const blob = new Blob([byteArray], {
+                                          type:
+                                            pdf.mimeType || "application/pdf",
+                                        });
+                                        const url = URL.createObjectURL(blob);
+                                        window.open(url, "_blank");
+                                        // Nettoyer l'URL après un délai
+                                        setTimeout(
+                                          () => URL.revokeObjectURL(url),
+                                          1000
+                                        );
+                                      } catch (error) {
+                                        console.error(
+                                          "Erreur aperçu PDF:",
+                                          error
+                                        );
+                                        alert(
+                                          "Erreur lors de l'aperçu du PDF."
+                                        );
+                                      }
+                                    }}
+                                    className="flex items-center justify-center space-x-1 bg-gray-500 text-white px-3 py-3 rounded-lg hover:bg-gray-600 transition-colors text-sm"
+                                  >
+                                    <span>👁️</span>
+                                    <span className="hidden sm:inline">
+                                      Aperçu
+                                    </span>
+                                  </button>
+                                ) : pdf.url ? (
+                                  // Aperçu classique par URL
+                                  <a
+                                    href={pdf.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-center space-x-1 bg-gray-500 text-white px-3 py-3 rounded-lg hover:bg-gray-600 transition-colors text-sm"
+                                  >
+                                    <span>👁️</span>
+                                    <span className="hidden sm:inline">
+                                      Aperçu
+                                    </span>
+                                  </a>
+                                ) : null}
+
+                                {pdf.data ? (
+                                  // Copier comme lien base64
+                                  <button
+                                    onClick={() => {
+                                      try {
+                                        // Nettoyer les données base64 avant copie
+                                        const cleanBase64 = pdf.data!.replace(
+                                          /[^A-Za-z0-9+/=]/g,
+                                          ""
+                                        );
+                                        const dataUrl = `data:${
+                                          pdf.mimeType || "application/pdf"
+                                        };base64,${cleanBase64}`;
+                                        navigator.clipboard.writeText(dataUrl);
+                                        alert("Lien de données copié !");
+                                      } catch (error) {
+                                        console.error("Erreur copie:", error);
+                                        alert("Erreur lors de la copie.");
+                                      }
+                                    }}
+                                    className="flex items-center justify-center space-x-1 bg-green-500 text-white px-3 py-3 rounded-lg hover:bg-green-600 transition-colors text-sm"
+                                    title="Copier comme lien de données"
+                                  >
+                                    <span>📋</span>
+                                    <span className="hidden sm:inline">
+                                      Data
+                                    </span>
+                                  </button>
+                                ) : pdf.url ? (
+                                  // Copier lien classique
+                                  <button
+                                    onClick={() =>
+                                      navigator.clipboard.writeText(pdf.url!)
+                                    }
+                                    className="flex items-center justify-center space-x-1 bg-green-500 text-white px-3 py-3 rounded-lg hover:bg-green-600 transition-colors text-sm"
+                                    title="Copier le lien"
+                                  >
+                                    <span>📋</span>
+                                    <span className="hidden sm:inline">
+                                      Copier
+                                    </span>
+                                  </button>
+                                ) : null}
+                              </div>
+                            </div>
+
+                            {/* Informations du fichier */}
+                            <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
+                              <span>Fichier: {pdf.filename}</span>
+                              <span>Format: PDF • {pdf.fileSize}</span>
+                              {pdf.data && (
+                                <span className="text-green-600 font-medium">
+                                  ⚡ Téléchargement direct
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Affichage des services */}
+                  {message.services && message.services.length > 0 && (
+                    <div className="mt-3 space-y-3">
+                      {message.services.map((service, index) => (
+                        <div
+                          key={index}
+                          className="rounded-lg overflow-hidden border border-gray-200 bg-gradient-to-br from-purple-50 to-pink-50"
+                        >
+                          {/* En-tête service */}
+                          <div className="px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                                  <span className="text-lg font-bold">🛎️</span>
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-sm line-clamp-1">
+                                    {service.title}
+                                  </h4>
+                                  <p className="text-xs text-purple-100">
+                                    {service.serviceType} •{" "}
+                                    {service.billingPlan}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="text-right text-xs text-purple-100">
+                                <div className="font-semibold">
+                                  {service.price}
+                                </div>
+                                <div>{service.priceMode}</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Contenu service */}
+                          <div className="px-4 py-4 bg-white">
+                            <p className="text-sm text-gray-700 mb-3">
+                              {service.summary}
+                            </p>
+
+                            {service.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mb-3">
+                                {service.tags.map((tag, tagIndex) => (
+                                  <span
+                                    key={tagIndex}
+                                    className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Informations organisation */}
+                            <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                              <div className="text-sm font-medium text-gray-900 mb-1">
+                                🏢 {service.organizationName}
+                              </div>
+                              <div className="text-xs text-gray-600 space-y-1">
+                                <div>📊 {service.organizationSector}</div>
+                                {service.organizationAddress && (
+                                  <div>📍 {service.organizationAddress}</div>
+                                )}
+                                <div className="flex items-center space-x-4">
+                                  {service.organizationPhone && (
+                                    <span>📞 {service.organizationPhone}</span>
+                                  )}
+                                  {service.organizationEmail && (
+                                    <span>📧 {service.organizationEmail}</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Boutons d'action */}
+                            <div className="flex space-x-2">
+                              <a
+                                href={service.pageUrl}
+                                className="flex-1 text-center text-sm bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                              >
+                                🔍 Voir le service
+                              </a>
+                              {service.organizationWebsite && (
+                                <a
+                                  href={service.organizationWebsite}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                                >
+                                  🌐 Site web
+                                </a>
+                              )}
+                            </div>
+
+                            {/* Métadonnées */}
+                            <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
+                              <span>Type: {service.consumptionType}</span>
+                              <span>
+                                IA:{" "}
+                                {service.isAIReplaceable
+                                  ? "✅ Remplaçable"
+                                  : "❌ Non remplaçable"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Affichage des organisations */}
+                  {message.organizations &&
+                    message.organizations.length > 0 && (
+                      <div className="mt-3 space-y-3">
+                        {message.organizations.map((org, index) => (
+                          <div
+                            key={index}
+                            className="rounded-lg overflow-hidden border border-gray-200 bg-gradient-to-br from-blue-50 to-cyan-50"
+                          >
+                            {/* En-tête organisation */}
+                            <div className="px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                  <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                                    <span className="text-lg font-bold">
+                                      🏢
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold text-sm line-clamp-1">
+                                      {org.name}
+                                    </h4>
+                                    <p className="text-xs text-blue-100">
+                                      {org.sector} • {org.servicesCount}{" "}
+                                      services
+                                    </p>
+                                  </div>
+                                </div>
+                                {org.legalForm && (
+                                  <div className="text-right text-xs text-blue-100">
+                                    <div>{org.legalForm}</div>
+                                    {org.siret && <div>SIRET: {org.siret}</div>}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Contenu organisation */}
+                            <div className="px-4 py-4 bg-white">
+                              {org.description && (
+                                <p className="text-sm text-gray-700 mb-3">
+                                  {org.description}
+                                </p>
+                              )}
+
+                              {/* Coordonnées */}
+                              <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                                <div className="text-xs text-gray-600 space-y-1">
+                                  {org.address && (
+                                    <div className="flex items-center space-x-2">
+                                      <span>📍</span>
+                                      <span>{org.address}</span>
+                                    </div>
+                                  )}
+                                  <div className="flex items-center space-x-4">
+                                    {org.phone && (
+                                      <div className="flex items-center space-x-2">
+                                        <span>📞</span>
+                                        <span>{org.phone}</span>
+                                      </div>
+                                    )}
+                                    {org.email && (
+                                      <div className="flex items-center space-x-2">
+                                        <span>📧</span>
+                                        <span>{org.email}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Services disponibles */}
+                              {org.services && org.services.length > 0 && (
+                                <div className="mb-3">
+                                  <div className="text-sm font-medium text-gray-900 mb-2">
+                                    🛎️ Services disponibles:
+                                  </div>
+                                  <div className="space-y-2">
+                                    {org.services.map(
+                                      (service, serviceIndex) => (
+                                        <div
+                                          key={serviceIndex}
+                                          className="bg-blue-50 rounded-lg p-2 text-xs"
+                                        >
+                                          <div className="flex items-center justify-between">
+                                            <div className="font-medium text-blue-900">
+                                              {service.title}
+                                            </div>
+                                            <div className="text-blue-700">
+                                              {service.price}
+                                            </div>
+                                          </div>
+                                          {service.summary && (
+                                            <div className="text-blue-600 mt-1">
+                                              {service.summary}
+                                            </div>
+                                          )}
+                                          {service.tags.length > 0 && (
+                                            <div className="flex flex-wrap gap-1 mt-1">
+                                              {service.tags.map(
+                                                (tag, tagIndex) => (
+                                                  <span
+                                                    key={tagIndex}
+                                                    className="px-1 py-0.5 bg-blue-200 text-blue-800 rounded text-xs"
+                                                  >
+                                                    {tag}
+                                                  </span>
+                                                )
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Boutons d'action */}
+                              <div className="flex space-x-2">
+                                <button
+                                  onClick={() => {
+                                    // TODO: Naviguer vers la page de l'organisation
+                                    window.location.href = `/organizations/${org.id}`;
+                                  }}
+                                  className="flex-1 text-center text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                >
+                                  🔍 Voir l'organisation
+                                </button>
+                                {org.website && (
+                                  <a
+                                    href={org.website}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                                  >
+                                    🌐 Site web
+                                  </a>
+                                )}
+                              </div>
+
+                              {/* Métadonnées */}
+                              <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
+                                <span>Recherche: {org.searchQuery}</span>
+                                <span>
+                                  {org.servicesCount} service
+                                  {org.servicesCount > 1 ? "s" : ""}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                   <div className="text-xs opacity-75 mt-1">
                     {message.timestamp.toLocaleTimeString()}
                   </div>

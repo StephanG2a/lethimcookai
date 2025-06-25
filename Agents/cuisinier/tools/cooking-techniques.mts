@@ -10,54 +10,49 @@ const chatgpt = new ChatOpenAI({
 export const cookingTechniques = tool(
   async ({ technique, difficulty_level, equipment, problem }) => {
     try {
-      const prompt = `Tu es un chef instructeur expert. ${
+      const prompt = `${
         problem
-          ? `L'utilisateur a un problème : ${problem}`
-          : `L'utilisateur veut apprendre :`
+          ? `Problème avec ${technique}: ${problem}`
+          : `Technique: ${technique}`
       }
+Niveau: ${difficulty_level || "Standard"}
+Équipement: ${equipment || "Équipement de base"}
 
-🍳 **Technique** : ${technique}
-📊 **Niveau** : ${difficulty_level || "Non spécifié"}
-🔧 **Équipement disponible** : ${equipment || "Équipement de base"}
+Format de présentation OBLIGATOIRE:
 
-Fournis une explication complète avec :
+# 👨‍🍳 Technique : ${technique}
 
-**📚 EXPLICATION DE LA TECHNIQUE :**
-- Principe et objectif de la technique
-- Contexte d'utilisation
-- Niveau de difficulté réel
+## 📚 Principe de Base
+[Explication simple du principe]
 
-**👨‍🍳 INSTRUCTIONS ÉTAPE PAR ÉTAPE :**
-- Préparation préalable nécessaire
-- Étapes détaillées et chronométrées
-- Points de contrôle critiques
+## 📋 Étapes Clés
+1. **[Étape 1]** : [Description]
+2. **[Étape 2]** : [Description]  
+3. **[Étape 3]** : [Description]
+4. **[Étape 4]** : [Description]
 
-**🎯 SIGNES DE RÉUSSITE :**
-- Comment reconnaître que c'est réussi
-- Indices visuels, olfactifs, tactiles
-- Temps approximatifs
+## ✅ Signes de Réussite
+• **Visuel :** [Ce qu'on doit voir]
+• **Olfactif :** [Ce qu'on doit sentir]  
+• **Tactile :** [Ce qu'on doit ressentir]
 
-**⚠️ ERREURS COURANTES :**
-- Pièges à éviter absolument
-- Erreurs de débutant typiques
-- Comment rattraper si ça rate
+## ⚠️ Erreurs à Éviter
+• [Piège 1]
+• [Piège 2]  
+• [Piège 3]
 
-**🔧 MATÉRIEL ET ALTERNATIVES :**
-- Équipement idéal vs équipement minimum
-- Astuces avec matériel basique
-- Adaptations selon les moyens
+## 🎯 Variantes de Niveau
 
-**🧪 VARIANTES ET ADAPTATIONS :**
-- Versions simplifiées
-- Techniques avancées pour progresser
-- Applications dans différentes recettes
+### 🌱 **Débutant**
+[Version simplifiée]
 
-**🆘 DÉPANNAGE :**
-- Solutions aux problèmes fréquents
-- Comment rectifier le tir
-- Quand recommencer
+### ⚖️ **Standard**  
+[Version classique]
 
-Sois très pédagogue et encourage l'expérimentation progressive.`;
+### 🏆 **Avancé**
+[Version perfectionnée]
+
+IMPORTANT: Utilise EXACTEMENT cette structure avec émojis et sauts de ligne.`;
 
       const response = await chatgpt.invoke(prompt);
 

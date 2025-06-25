@@ -10,48 +10,43 @@ const chatgpt = new ChatOpenAI({
 export const winePairing = tool(
   async ({ dish, cooking_method, main_ingredients, occasion, preferences }) => {
     try {
-      const prompt = `Tu es un sommelier expert en accords mets-vins. Trouve les meilleurs accords pour :
+      const prompt = `Accords pour ${dish}
+${cooking_method ? `Cuisson: ${cooking_method}\n` : ""}${
+        main_ingredients ? `Ingrédients: ${main_ingredients}\n` : ""
+      }${occasion ? `Occasion: ${occasion}\n` : ""}
 
-🍽️ **Plat** : ${dish}
-👨‍🍳 **Méthode de cuisson** : ${cooking_method || "Non spécifiée"}
-🥘 **Ingrédients principaux** : ${
-        main_ingredients || "À déterminer selon le plat"
-      }
-🎉 **Occasion** : ${occasion || "Repas classique"}
-❤️ **Préférences** : ${preferences || "Aucune"}
+Format de présentation OBLIGATOIRE:
 
-Propose des accords détaillés avec :
+# 🍷 Accords Mets-Vins : ${dish}
 
-**🍷 VINS RECOMMANDÉS :**
-- 3-4 suggestions par ordre de préférence
-- Appellations précises et millésimes si pertinent
-- Alternatives par gamme de prix
+## 🏆 Sélection du Sommelier
 
-**🔍 JUSTIFICATION DES ACCORDS :**
-- Pourquoi ce vin s'accorde avec ce plat
-- Équilibre des saveurs et textures
-- Complémentarité ou contraste
+### 🥇 Premier Choix
+**[Nom du Vin]**  
+🏷️ **Région :** [Appellation]  
+💰 **Prix :** [X-Y€]  
+🤝 **Pourquoi :** [Explication en 1 phrase]
 
-**🥂 ALTERNATIVES SANS ALCOOL :**
-- Boissons non alcoolisées appropriées
-- Jus, thés, eaux aromatisées
-- Créations originales
+### 🥈 Deuxième Choix  
+**[Nom du Vin]**  
+🏷️ **Région :** [Appellation]  
+💰 **Prix :** [X-Y€]  
+🤝 **Pourquoi :** [Explication en 1 phrase]
 
-**🌍 SUGGESTIONS RÉGIONALES :**
-- Accords traditionnels par région
-- Vins locaux si le plat a une origine géographique
+### 🥉 Troisième Choix
+**[Nom du Vin]**  
+🏷️ **Région :** [Appellation]  
+💰 **Prix :** [X-Y€]  
+🤝 **Pourquoi :** [Explication en 1 phrase]
 
-**💰 GAMMES DE PRIX :**
-- Option économique (moins de 15€)
-- Option milieu de gamme (15-30€)
-- Option premium (plus de 30€)
+## 🚫 Alternative Sans Alcool
+**[Suggestion]** - [Pourquoi cette boisson]
 
-**🍾 CONSEILS DE SERVICE :**
-- Température de service
-- Moment d'ouverture/carafage
-- Verres recommandés
+## 🍾 Conseils de Service
+**🌡️ Température :** [X-Y°C]  
+**🥃 Verre :** [Type recommandé]
 
-Sois précis et pédagogue dans tes recommandations.`;
+IMPORTANT: Utilise EXACTEMENT cette structure avec émojis et sauts de ligne.`;
 
       const response = await chatgpt.invoke(prompt);
 

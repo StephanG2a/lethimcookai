@@ -2,9 +2,19 @@
   "api_url": "http://localhost:8080",
   "agents": [
     {
-      "id": "myges",
-      "name": "MyGES",
-      "description": "Agent spécialisé pour MyGES et les informations météo"
+      "id": "cuisinier",
+      "name": "Cuisinier Basic",
+      "description": "Agent culinaire essentiel : recettes, nutrition, techniques (7 outils)"
+    },
+    {
+      "id": "cuisinier-premium",
+      "name": "Cuisinier Premium",
+      "description": "Agent culinaire + création visuelle : logos, images, PDFs, templates (13 outils)"
+    },
+    {
+      "id": "cuisinier-business",
+      "name": "Cuisinier Business",
+      "description": "Agent culinaire complet + services pro : recherche orgas, business plans, analyses (18 outils)"
     }
   ]
-} 
+}

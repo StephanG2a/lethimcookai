@@ -112,7 +112,7 @@ npm run cli check
 npm run cli chat
 
 # Utiliser un agent spécifique
-npm run cli chat --agent myges
+npm run cli chat --agent cuisinier
 ```
 
 ## 🌐 API Endpoints
@@ -125,7 +125,7 @@ Chaque service contient maintenant tous les champs suivants :
 
 - **Informations de base** : `title`, `summary`, `description`
 - **Média** : `mainMedia` (bannière/image principale)
-- **Types** : 
+- **Types** :
   - `serviceType` : `IRL`, `ONLINE`, `MIXED`
   - `consumptionType` : `INSTANT`, `PERIODIC`, `PRESTATION`
   - `billingPlan` : `UNIT`, `USAGE`, `MINUTE`, `MENSUAL`, `ANNUAL`, `PROJECT`
@@ -237,17 +237,20 @@ BEARER=dummy-token-for-development
 ## 📡 Endpoints API
 
 ### Vérification de santé
+
 ```http
 GET /health
 ```
 
 ### Liste des agents
+
 ```http
 GET /agents
 Authorization: Bearer your-token
 ```
 
 ### Invocation directe
+
 ```http
 POST /:agentId/invoke
 Authorization: Bearer your-token
@@ -260,6 +263,7 @@ Content-Type: application/json
 ```
 
 ### Streaming SSE
+
 ```http
 POST /:agentId/stream
 Authorization: Bearer your-token
@@ -272,6 +276,7 @@ Content-Type: application/json
 ```
 
 ### Arrêter la génération
+
 ```http
 POST /:agentId/stop
 Authorization: Bearer your-token
@@ -283,6 +288,7 @@ Content-Type: application/json
 ```
 
 ### Gestion des conversations
+
 ```http
 GET /conversations
 GET /conversations/:threadId
@@ -349,7 +355,9 @@ lethimcookai/
 │   ├── server.mts               # Serveur Express.js pour agents
 │   └── agents-registry.mts      # Registre des agents
 ├── Agents/
-│   └── myges/                   # Agent MyGES
+│   └── cuisinier/               # Agent Cuisinier IA
+│       ├── cuisinier-agent.mts
+│       └── tools/
 ├── docker-compose.yml           # Configuration PostgreSQL
 ├── package.json                 # Dépendances et scripts
 └── README.md                   # Documentation
@@ -358,6 +366,7 @@ lethimcookai/
 ### Structure de la base de données
 
 #### Table `Organization`
+
 ```sql
 id              UUID PRIMARY KEY
 name            VARCHAR         -- Nom de l'organisation
@@ -376,6 +385,7 @@ updatedAt       TIMESTAMP
 ```
 
 #### Table `Service`
+
 ```sql
 id              UUID PRIMARY KEY
 title           VARCHAR         -- Titre du service
@@ -412,21 +422,25 @@ npm run start              # Démarrer Next.js en production
 ### Exemples d'utilisation pratiques
 
 #### Rechercher des prestataires photo dans le secteur cuisine
+
 ```bash
 curl "http://localhost:3000/api/services?search=photo&sector=cuisine" | jq
 ```
 
 #### Lister les organisations avec leurs services
+
 ```bash
 curl "http://localhost:3000/api/organizations" | jq '.organizations[] | {name: .name, services_count: ._count.services}'
 ```
 
 #### Trouver des services non remplaçables par l'IA
+
 ```bash
 curl "http://localhost:3000/api/services?aiReplaceable=false" | jq '.services[] | {title: .title, organization: .organization.name}'
 ```
 
 #### Filtrer par gamme de prix
+
 ```bash
 curl "http://localhost:3000/api/services?minPrice=400&maxPrice=800" | jq
 ```
@@ -537,4 +551,4 @@ MIT
 
 ---
 
-🚀 **Prêt à discuter avec vos agents IA !** 
+🚀 **Prêt à discuter avec vos agents IA !**

@@ -10,41 +10,35 @@ const chatgpt = new ChatOpenAI({
 export const ingredientSubstitution = tool(
   async ({ ingredient, reason, recipe_context, quantity }) => {
     try {
-      const prompt = `Tu es un expert en substitutions culinaires. L'utilisateur a besoin de remplacer un ingrédient :
+      const prompt = `Substitutions pour ${ingredient} dans ${recipe_context}
+Raison: ${reason}
 
-🔄 **Ingrédient à remplacer** : ${ingredient}
-❓ **Raison du remplacement** : ${reason}
-🍽️ **Contexte de la recette** : ${recipe_context}
-📏 **Quantité originale** : ${quantity || "Non spécifiée"}
+Format de présentation OBLIGATOIRE:
 
-Fournis des substitutions détaillées avec :
+# 🔄 Substitutions : ${ingredient}
 
-**✅ MEILLEURES ALTERNATIVES :**
-- 3-4 substituts recommandés par ordre de préférence
-- Ratios de conversion précis
-- Impact sur le goût et la texture
+## 🎯 3 Meilleures Alternatives
 
-**⚠️ ADAPTATIONS NÉCESSAIRES :**
-- Modifications de technique de cuisson
-- Ajustements de temps/température
-- Autres ingrédients à adapter
+### 🥇 Option 1 : [NOM]
+**Ratio :** ${quantity || "[quantité]"} ${ingredient} = [X] [substitut]  
+**Goût :** [Impact sur le goût]  
+**Texture :** [Impact sur la texture]
 
-**📊 COMPARAISON :**
-- Profil nutritionnel vs original
-- Coût approximatif
-- Facilité de mise en œuvre
+### 🥈 Option 2 : [NOM]  
+**Ratio :** ${quantity || "[quantité]"} ${ingredient} = [X] [substitut]  
+**Goût :** [Impact sur le goût]  
+**Texture :** [Impact sur la texture]
 
-**💡 CONSEILS DE CHEF :**
-- Astuces pour optimiser le résultat
-- Erreurs à éviter
-- Variations créatives possibles
+### 🥉 Option 3 : [NOM]
+**Ratio :** ${quantity || "[quantité]"} ${ingredient} = [X] [substitut]  
+**Goût :** [Impact sur le goût]  
+**Texture :** [Impact sur la texture]
 
-**🎯 RÉSULTAT ATTENDU :**
-- À quoi s'attendre niveau goût
-- Différences de texture
-- Réussite probable de la substitution
+## 💡 Conseils de Réussite
+• [Conseil 1]
+• [Conseil 2]
 
-Sois précis sur les quantités et les techniques pour garantir le succès de la recette.`;
+IMPORTANT: Utilise EXACTEMENT cette structure avec émojis et sauts de ligne.`;
 
       const response = await chatgpt.invoke(prompt);
 

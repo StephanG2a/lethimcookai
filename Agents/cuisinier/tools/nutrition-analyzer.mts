@@ -10,39 +10,35 @@ const chatgpt = new ChatOpenAI({
 export const nutritionAnalyzer = tool(
   async ({ recipe_or_ingredients, servings, analysis_type }) => {
     try {
-      const prompt = `Tu es un nutritionniste expert. Analyse les informations nutritionnelles pour :
+      const prompt = `Analyse nutritionnelle pour: ${recipe_or_ingredients} (${servings} portions)
 
-📝 **Recette/Ingrédients** : ${recipe_or_ingredients}
-👥 **Nombre de portions** : ${servings}
-📊 **Type d'analyse** : ${analysis_type}
+Format de présentation OBLIGATOIRE:
 
-Fournis une analyse nutritionnelle détaillée avec :
+# 📊 Analyse Nutritionnelle
 
-**🔢 VALEURS NUTRITIONNELLES (par portion) :**
-- Calories (kcal)
-- Protéines (g)
-- Glucides (g)
-- Lipides (g)
-- Fibres (g)
-- Sucres (g)
-- Sodium (mg)
+## 🔢 Valeurs par Portion
 
-**📈 RÉPARTITION :**
-- % de protéines, glucides, lipides
-- Indice glycémique estimé
-- Densité calorique
+**⚡ Énergie :** [X] kcal  
+**🥩 Protéines :** [X] g  
+**🍞 Glucides :** [X] g  
+**🫒 Lipides :** [X] g  
 
-**💡 CONSEILS NUTRITIONNELS :**
-- Points forts nutritionnels
-- Points d'amélioration
-- Suggestions d'accompagnements
-- Adaptations pour régimes spéciaux
+## 📈 Analyse
 
-**⚖️ ÉVALUATION SANTÉ :**
-- Note globale sur 10
-- Convient pour quels objectifs (perte/prise de poids, sport, etc.)
+### ✅ Points Forts
+• [Point fort 1]
+• [Point fort 2]
+• [Point fort 3]
 
-Sois précis dans tes calculs et donne des conseils pratiques.`;
+### ⚠️ À Améliorer
+• [Point d'amélioration 1]
+• [Point d'amélioration 2]
+
+### 🎯 Évaluation Globale
+**Note :** ⭐⭐⭐⭐⭐ ([X]/10)  
+**Raison :** [Explication courte]
+
+IMPORTANT: Utilise EXACTEMENT cette structure avec émojis et sauts de ligne.`;
 
       const response = await chatgpt.invoke(prompt);
 
