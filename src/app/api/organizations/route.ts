@@ -41,10 +41,15 @@ export async function GET(request: NextRequest) {
             select: {
               id: true,
               title: true,
-              priceMin: true,
-              priceMax: true,
+              summary: true,
+              lowerPrice: true,
+              upperPrice: true,
               tags: true,
               isAIReplaceable: true,
+              serviceType: true,
+              consumptionType: true,
+              billingPlan: true,
+              paymentMode: true,
             },
           },
           _count: {
