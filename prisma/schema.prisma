@@ -27,16 +27,51 @@ model Organization {
   services     Service[]
 }
 
+enum ServiceType {
+  IRL
+  ONLINE
+  MIXED
+}
+
+enum ConsumptionType {
+  INSTANT
+  PERIODIC
+  PRESTATION
+}
+
+enum BillingPlan {
+  UNIT
+  USAGE
+  MINUTE
+  MENSUAL
+  ANNUAL
+  PROJECT
+}
+
+enum PaymentMode {
+  CREDIT
+  EUR
+  USD
+  GBP
+  CRYPTO
+}
+
 model Service {
-  id              String       @id @default(uuid())
+  id              String          @id @default(uuid())
   title           String
+  summary         String?         // Résumé court
   description     String
+  mainMedia       String?         // URL de la bannière/média principal
+  serviceType     ServiceType     @default(MIXED)
+  consumptionType ConsumptionType @default(PRESTATION)
+  billingPlan     BillingPlan     @default(PROJECT)
+  lowerPrice      Float
+  upperPrice      Float
+  paymentMode     PaymentMode     @default(EUR)
   tags            String[]
-  priceMin        Float
-  priceMax        Float
-  isAIReplaceable Boolean      @default(false)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  isAIReplaceable Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
   
   // Relations
   organizationId  String

@@ -16,6 +16,10 @@ export async function GET(request: NextRequest) {
     const maxPrice = searchParams.get("maxPrice");
     const aiReplaceable = searchParams.get("aiReplaceable");
     const sector = searchParams.get("sector");
+    const serviceType = searchParams.get("serviceType");
+    const consumptionType = searchParams.get("consumptionType");
+    const billingPlan = searchParams.get("billingPlan");
+    const paymentMode = searchParams.get("paymentMode");
 
     const skip = (page - 1) * limit;
 
@@ -26,6 +30,7 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" } },
         { description: { contains: search, mode: "insensitive" } },
+        { summary: { contains: search, mode: "insensitive" } },
         { organization: { name: { contains: search, mode: "insensitive" } } },
       ];
     }
@@ -36,8 +41,10 @@ export async function GET(request: NextRequest) {
 
     if (minPrice || maxPrice) {
       where.AND = [];
-      if (minPrice) where.AND.push({ priceMin: { gte: parseFloat(minPrice) } });
-      if (maxPrice) where.AND.push({ priceMax: { lte: parseFloat(maxPrice) } });
+      if (minPrice)
+        where.AND.push({ lowerPrice: { gte: parseFloat(minPrice) } });
+      if (maxPrice)
+        where.AND.push({ upperPrice: { lte: parseFloat(maxPrice) } });
     }
 
     if (aiReplaceable !== null) {
@@ -48,6 +55,22 @@ export async function GET(request: NextRequest) {
       where.organization = {
         sector: { equals: sector, mode: "insensitive" },
       };
+    }
+
+    if (serviceType) {
+      where.serviceType = serviceType;
+    }
+
+    if (consumptionType) {
+      where.consumptionType = consumptionType;
+    }
+
+    if (billingPlan) {
+      where.billingPlan = billingPlan;
+    }
+
+    if (paymentMode) {
+      where.paymentMode = paymentMode;
     }
 
     // Récupérer les prestataires avec pagination et informations de l'organisation

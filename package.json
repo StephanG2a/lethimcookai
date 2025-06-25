@@ -15,7 +15,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "tsx prisma/seed.mts"
+    "seed": "tsx prisma/seed-complete.mts"
   },
   "bin": {
     "agent-cli": "./cli.mts"
