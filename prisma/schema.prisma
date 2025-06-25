@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  logo         String?
+  website      String?
+  email        String?
+  phone        String?
+  address      String?
+  sector       String   // ex: "cuisine", "marketing", "tech", etc.
+  siret        String?  // Numéro SIRET
+  tva          String?  // Numéro TVA
+  legalForm    String?  // ex: "SARL", "SAS", "Auto-entrepreneur", etc.
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  services     Service[]
+}
+
+enum ServiceType {
+  IRL
+  ONLINE
+  MIXED
+}
+
+enum ConsumptionType {
+  INSTANT
+  PERIODIC
+  PRESTATION
+}
+
+enum BillingPlan {
+  UNIT
+  USAGE
+  MINUTE
+  MENSUAL
+  ANNUAL
+  PROJECT
+}
+
+enum PaymentMode {
+  CREDIT
+  EUR
+  USD
+  GBP
+  CRYPTO
+}
+
+model Service {
+  id              String          @id @default(uuid())
+  title           String
+  summary         String?         // Résumé court
+  description     String
+  mainMedia       String?         // URL de la bannière/média principal
+  serviceType     ServiceType     @default(MIXED)
+  consumptionType ConsumptionType @default(PRESTATION)
+  billingPlan     BillingPlan     @default(PROJECT)
+  lowerPrice      Float
+  upperPrice      Float
+  paymentMode     PaymentMode     @default(EUR)
+  tags            String[]
+  isAIReplaceable Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  // Relations
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
