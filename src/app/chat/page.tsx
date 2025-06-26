@@ -288,7 +288,7 @@ export default function ChatPage() {
           message: text,
           agentId: selectedAgent.id,
           threadId,
-          streaming: useStreaming,
+          useStream: useStreaming,
         }),
       });
 
@@ -318,9 +318,9 @@ export default function ChatPage() {
             const lines = chunk.split('\n');
 
             for (const line of lines) {
-              if (line.startsWith('data: ')) {
+              if (line.trim()) {
                 try {
-                  const data = JSON.parse(line.slice(6));
+                  const data = JSON.parse(line);
                   
                   if (data.content) {
                     agentMessage.content += data.content;
