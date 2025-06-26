@@ -5,11 +5,18 @@ import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { MainLayout } from "@/components/layout/main-layout";
 import { useAuth } from "@/lib/useAuth";
+import {
+  hasAccessToAgent,
+  getUpgradeMessage,
+  AGENTS_CONFIG,
+  type AgentType,
+} from "@/lib/subscription";
 
 interface Agent {
   id: string;
   name: string;
   description: string;
+  type?: AgentType;
 }
 
 interface Message {
@@ -46,6 +53,23 @@ interface Message {
     alt: string;
     type?: string; // "downloadable_pdf" ou "direct_download_pdf"
     mimeType?: string;
+  }>;
+  websites?: Array<{
+    title: string;
+    restaurantName: string;
+    restaurantType: string;
+    websiteType: string;
+    features: string[];
+    colorScheme: string;
+    htmlContent: string;
+    cssContent: string;
+    jsContent: string;
+    previewUrl: string;
+    technologies: string[];
+    seoOptimized: boolean;
+    responsive: boolean;
+    deploymentReady: boolean;
+    generatedAt: string;
   }>;
   services?: Array<{
     id: number;
@@ -135,7 +159,7 @@ interface Message {
 
 export default function ChatPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -144,6 +168,186 @@ export default function ChatPage() {
   const [threadId] = useState(() => uuidv4());
   const [error, setError] = useState<string | null>(null);
   const [useStreaming, setUseStreaming] = useState(true);
+
+  // Prompts par défaut pour chaque agent
+  const getDefaultPrompts = (agentId: string): string[] => {
+    switch (agentId) {
+      case "cuisinier":
+        return [
+          "Propose-moi une recette simple avec les ingrédients de mon frigo",
+          "Comment faire une pâte à crêpes parfaite ?",
+          "Donne-moi 3 idées de repas rapides pour ce soir"
+        ];
+      case "cuisinier-premium":
+        return [
+          "Crée-moi un logo pour mon restaurant",
+          "Génère une affiche publicitaire pour mon menu",
+          "Fait-moi un site web vitrine pour ma pizzeria"
+        ];
+      case "cuisinier-business":
+        return [
+          "Trouve-moi des services de livraison de repas",
+          "Recherche des prestataires pour mon événement culinaire",
+          "Calcule les coûts d'ouverture d'un restaurant"
+        ];
+      default:
+        return [
+          "Comment puis-je t'aider aujourd'hui ?",
+          "Quelle est ta spécialité culinaire ?",
+          "Peux-tu me donner des conseils cuisine ?"
+        ];
+    }
+  };
+
+  // Gérer le clic sur un prompt par défaut
+  const handlePromptClick = (prompt: string) => {
+    if (!selectedAgent || isLoading) return;
+    setInputValue(prompt);
+    // Auto-envoyer le message après un petit délai pour permettre l'animation
+    setTimeout(() => {
+      sendMessageWithText(prompt);
+    }, 100);
+  };
+
+  // Fonction pour envoyer un message avec un texte spécifique
+  const sendMessageWithText = async (text: string) => {
+    if (!text.trim() || !selectedAgent || isLoading) return;
+
+    const userMessage: Message = {
+      id: uuidv4(),
+      content: text,
+      sender: "user",
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInputValue("");
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: text,
+          agentId: selectedAgent.id,
+          threadId: threadId,
+          useStream: useStreaming,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          `Erreur ${response.status}: ${errorData.error || response.statusText}`
+        );
+      }
+
+      if (useStreaming) {
+        // Mode streaming
+        const agentMessage: Message = {
+          id: uuidv4(),
+          content: "",
+          sender: "agent",
+          timestamp: new Date(),
+          agentName: selectedAgent.name,
+        };
+
+        setMessages((prev) => [...prev, agentMessage]);
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+
+        if (reader) {
+          let buffer = "";
+
+          while (true) {
+            const { done, value } = await reader.read();
+
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+
+            buffer = lines.pop() || "";
+
+            for (const line of lines) {
+              if (line.trim()) {
+                try {
+                  const data = JSON.parse(line);
+                  if (data.content) {
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === agentMessage.id
+                          ? {
+                              ...msg,
+                              content: msg.content + data.content,
+                              images: data.images
+                                ? [...(msg.images || []), ...data.images]
+                                : msg.images,
+                              videos: data.videos
+                                ? [...(msg.videos || []), ...data.videos]
+                                : msg.videos,
+                              pdfs: data.pdfs
+                                ? [...(msg.pdfs || []), ...data.pdfs]
+                                : msg.pdfs,
+                              websites: data.websites
+                                ? [...(msg.websites || []), ...data.websites]
+                                : msg.websites,
+                              services: data.services
+                                ? [...(msg.services || []), ...data.services]
+                                : msg.services,
+                              organizations: data.organizations
+                                ? [
+                                    ...(msg.organizations || []),
+                                    ...data.organizations,
+                                  ]
+                                : msg.organizations,
+                              prestataires: data.prestataires
+                                ? [
+                                    ...(msg.prestataires || []),
+                                    ...data.prestataires,
+                                  ]
+                                : msg.prestataires,
+                            }
+                          : msg
+                      )
+                    );
+                  }
+                } catch (parseError) {
+                  console.warn("Ligne non-JSON ignorée:", line);
+                }
+              }
+            }
+          }
+        }
+      } else {
+        // Mode non-streaming
+        const data = await response.json();
+
+        const agentMessage: Message = {
+          id: uuidv4(),
+          content: data.content || "Aucune réponse",
+          sender: "agent",
+          timestamp: new Date(),
+          agentName: selectedAgent.name,
+        };
+
+        setMessages((prev) => [...prev, agentMessage]);
+      }
+    } catch (err) {
+      const errorMsg = `Erreur lors de l'envoi du message: ${
+        (err as Error).message
+      }`;
+      setError(errorMsg);
+      console.error("Erreur:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Vérifier l'authentification et gérer les déconnexions
   useEffect(() => {
@@ -169,23 +373,11 @@ export default function ChatPage() {
 
         if (response.ok) {
           const agentsData = await response.json();
-          setAgents(agentsData);
           
           // Récupérer les paramètres d'URL
           const urlParams = new URLSearchParams(window.location.search);
           const agentParam = urlParams.get("agent");
           const messageParam = urlParams.get("message");
-          
-          // Sélectionner l'agent demandé ou le premier par défaut
-          let selectedAgentFromParams = null;
-          if (agentParam) {
-            selectedAgentFromParams = agentsData.find((agent: Agent) => agent.id === agentParam);
-          }
-          
-          if (selectedAgentFromParams) {
-            setSelectedAgent(selectedAgentFromParams);
-          } else if (agentsData.length > 0) {
-            setSelectedAgent(agentsData[0]);
 
           // Mapper les agents avec leur type pour le contrôle d'accès
           const mappedAgents = agentsData.map((agent: Agent) => {
@@ -203,16 +395,33 @@ export default function ChatPage() {
           });
 
           setAgents(mappedAgents);
+          
+          // Sélectionner l'agent demandé par paramètre d'URL s'il existe et est accessible
+          let selectedAgentFromParams = null;
+          if (agentParam) {
+            selectedAgentFromParams = mappedAgents.find((agent: Agent) => 
+              agent.id === agentParam && hasAccessToAgent(user, agent.type || "basic")
+            );
+          }
 
-          // Sélectionner le premier agent accessible
-          const accessibleAgent = mappedAgents.find((agent: Agent) =>
-            hasAccessToAgent(user, agent.type || "basic")
-          );
+          if (selectedAgentFromParams) {
+            setSelectedAgent(selectedAgentFromParams);
+          } else {
+            // Sélectionner le premier agent accessible
+            const accessibleAgent = mappedAgents.find((agent: Agent) =>
+              hasAccessToAgent(user, agent.type || "basic")
+            );
 
-          if (accessibleAgent) {
-            setSelectedAgent(accessibleAgent);
-          } else if (mappedAgents.length > 0) {
-            setSelectedAgent(mappedAgents[0]); // Fallback sur le premier agent
+            if (accessibleAgent) {
+              setSelectedAgent(accessibleAgent);
+            } else if (mappedAgents.length > 0) {
+              setSelectedAgent(mappedAgents[0]); // Fallback sur le premier agent
+            }
+          }
+          
+          // Pré-remplir le message si fourni
+          if (messageParam) {
+            setInputValue(decodeURIComponent(messageParam));
           }
         } else {
           const errorText = await response.text();
@@ -233,23 +442,32 @@ export default function ChatPage() {
             id: "cuisinier",
             name: "Cuisinier",
             description: "Chef IA spécialisé en cuisine",
+            type: "basic",
           },
           {
-            id: "culinary",
-            name: "Chef Assistant",
-            description: "Assistant culinaire IA",
+            id: "cuisinier-premium",
+            name: "Cuisinier Premium",
+            description: "Assistant IA premium pour créations visuelles",
+            type: "premium",
+          },
+          {
+            id: "cuisinier-business",
+            name: "Cuisinier Business",
+            description: "Assistant IA pour recherche de services",
+            type: "business",
           },
         ]);
         setSelectedAgent({
-          id: "culinary",
-          name: "Chef Assistant",
-          description: "Assistant culinaire IA",
+          id: "cuisinier",
+          name: "Cuisinier",
+          description: "Chef IA spécialisé en cuisine",
+          type: "basic",
         });
       }
     };
 
     loadAgents();
-  }, [isAuthenticated, authLoading]);
+  }, [isAuthenticated, authLoading, user]);
 
   const sendMessage = async () => {
     if (!inputValue.trim() || !selectedAgent || isLoading) return;
@@ -336,6 +554,9 @@ export default function ChatPage() {
                               pdfs: data.pdfs
                                 ? [...(msg.pdfs || []), ...data.pdfs]
                                 : msg.pdfs,
+                              websites: data.websites
+                                ? [...(msg.websites || []), ...data.websites]
+                                : msg.websites,
                               services: data.services
                                 ? [...(msg.services || []), ...data.services]
                                 : msg.services,
@@ -443,22 +664,80 @@ export default function ChatPage() {
             {agents.length > 1 ? "s" : ""})
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {agents.map((agent) => (
-              <button
-                key={agent.id}
-                onClick={() => setSelectedAgent(agent)}
-                className={`p-4 rounded-lg border-2 transition-all duration-200 text-left ${
-                  selectedAgent?.id === agent.id
-                    ? "border-orange-500 bg-orange-50"
-                    : "border-neutral-200 hover:border-orange-300"
-                }`}
-              >
-                <h3 className="font-semibold text-neutral-900">{agent.name}</h3>
-                <p className="text-sm text-neutral-600 mt-1">
-                  {agent.description}
-                </p>
-              </button>
-            ))}
+            {agents.map((agent) => {
+              const hasAccess = hasAccessToAgent(user, agent.type || "basic");
+              const agentConfig = agent.type ? AGENTS_CONFIG[agent.type] : null;
+
+              return (
+                <div key={agent.id} className="relative">
+                  <button
+                    onClick={() => hasAccess && setSelectedAgent(agent)}
+                    disabled={!hasAccess}
+                    className={`w-full p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                      selectedAgent?.id === agent.id
+                        ? "border-orange-500 bg-orange-50"
+                        : hasAccess
+                        ? "border-neutral-200 hover:border-orange-300"
+                        : "border-gray-300 bg-gray-100 cursor-not-allowed opacity-60"
+                    }`}
+                  >
+                    {/* Badge premium/business */}
+                    {agentConfig &&
+                      "badge" in agentConfig &&
+                      agentConfig.badge && (
+                        <div
+                          className={`absolute top-2 right-2 px-2 py-1 text-xs font-medium text-white rounded-full ${
+                            hasAccess ? agentConfig.color : "bg-gray-400"
+                          }`}
+                        >
+                          {agentConfig.badge}
+                        </div>
+                      )}
+
+                    <div className="flex items-start space-x-3">
+                      <div className="text-2xl">
+                        {agentConfig?.icon || "🤖"}
+                      </div>
+                      <div className="flex-1">
+                        <h3
+                          className={`font-semibold ${
+                            hasAccess ? "text-neutral-900" : "text-gray-500"
+                          }`}
+                        >
+                          {agent.name}
+                        </h3>
+                        <p
+                          className={`text-sm mt-1 ${
+                            hasAccess ? "text-neutral-600" : "text-gray-500"
+                          }`}
+                        >
+                          {agent.description}
+                        </p>
+
+                        {/* Message d'upgrade si pas d'accès */}
+                        {!hasAccess && (
+                          <div className="mt-2 p-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg border border-purple-200">
+                            <p className="text-xs font-medium text-purple-700">
+                              {getUpgradeMessage(agent.type || "basic")}
+                            </p>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // TODO: Implémenter la redirection vers la page d'upgrade
+                                alert("Fonctionnalité d'upgrade à implémenter");
+                              }}
+                              className="mt-1 text-xs bg-purple-600 text-white px-2 py-1 rounded hover:bg-purple-700 transition-colors"
+                            >
+                              Upgrader maintenant
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -472,11 +751,59 @@ export default function ChatPage() {
               </div>
             )}
 
-            {messages.length === 0 && !error && (
+            {messages.length === 0 && !error && selectedAgent && (
+              <div className="text-center py-8">
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold text-neutral-900 mb-2">
+                    👋 Bonjour ! Je suis {selectedAgent.name}
+                  </h3>
+                  <p className="text-neutral-600 mb-4">
+                    {selectedAgent.description}
+                  </p>
+                  <p className="text-sm text-neutral-500">
+                    Pour commencer, vous pouvez cliquer sur l'une de ces suggestions :
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-3 max-w-2xl mx-auto">
+                  {getDefaultPrompts(selectedAgent.id).map((prompt, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handlePromptClick(prompt)}
+                      disabled={isLoading}
+                      className="p-4 text-left bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-lg hover:from-orange-100 hover:to-orange-150 hover:border-orange-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
+                    >
+                      <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-semibold group-hover:bg-orange-600 transition-colors">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-neutral-900 font-medium group-hover:text-orange-700 transition-colors">
+                            {prompt}
+                          </p>
+                          <p className="text-xs text-neutral-500 mt-1 group-hover:text-orange-600 transition-colors">
+                            Cliquez pour envoyer ce message
+                          </p>
+                        </div>
+                        <div className="flex-shrink-0 text-orange-500 group-hover:text-orange-600 transition-colors">
+                          →
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                
+                <div className="mt-6 text-xs text-neutral-400">
+                  💡 Ou tapez votre propre message dans la zone de saisie ci-dessous
+                </div>
+              </div>
+            )}
+
+            {messages.length === 0 && !error && !selectedAgent && (
               <div className="text-center text-neutral-500 py-8">
-                <p>Aucun message pour le moment.</p>
+                <p>Sélectionnez un assistant pour commencer.</p>
                 <p className="text-sm mt-2">
-                  Commencez une conversation culinaire !
+                  Choisissez votre chef IA spécialisé !
                 </p>
               </div>
             )}
@@ -1348,7 +1675,7 @@ export default function ChatPage() {
                               {prestataire.organization && (
                                 <button
                                   onClick={() => {
-                                    window.location.href = `/organizations/${prestataire.organization.id}`;
+                                    window.location.href = `/organizations/${prestataire.organization?.id}`;
                                   }}
                                   className="text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
                                 >
