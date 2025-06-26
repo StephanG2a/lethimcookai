@@ -118,9 +118,7 @@ interface ServiceDetailPageProps {
   }>;
 }
 
-export default function ServiceDetailPage({
-  params,
-}: ServiceDetailPageProps) {
+export default function ServiceDetailPage({ params }: ServiceDetailPageProps) {
   const [service, setService] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -131,15 +129,15 @@ export default function ServiceDetailPage({
       const resolvedParams = await params;
       const { id } = resolvedParams;
       const serviceData = await getService(id);
-      
+
       if (!serviceData) {
         notFound();
       }
-      
+
       setService(serviceData);
       setLoading(false);
     };
-    
+
     loadService();
   }, [params]);
 
@@ -156,7 +154,9 @@ export default function ServiceDetailPage({
 **Votre demande :** `;
 
     // Rediriger vers le chat avec l'agent business et le contexte pré-rempli
-    const chatUrl = `/chat?agent=cuisinier-business&message=${encodeURIComponent(serviceContext)}`;
+    const chatUrl = `/chat?agent=cuisinier-business&message=${encodeURIComponent(
+      serviceContext
+    )}`;
     window.location.href = chatUrl;
   };
 
@@ -399,7 +399,8 @@ export default function ServiceDetailPage({
                     Exécution automatique IA
                   </CardTitle>
                   <CardDescription>
-                    Ce service peut être réalisé automatiquement par notre Chef Cuisinier IA Business
+                    Ce service peut être réalisé automatiquement par notre Chef
+                    Cuisinier IA Business
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -414,7 +415,8 @@ export default function ServiceDetailPage({
                         Discuter avec le Chef IA Business
                       </Button>
                       <p className="text-sm text-neutral-600 text-center">
-                        Vous serez redirigé vers le chat avec le contexte du service pré-rempli
+                        Vous serez redirigé vers le chat avec le contexte du
+                        service pré-rempli
                       </p>
                     </>
                   ) : (
@@ -428,21 +430,21 @@ export default function ServiceDetailPage({
                           </span>
                         </div>
                         <p className="text-sm text-purple-700 mb-3">
-                          {getUpgradeMessage("business")} pour accéder à l'exécution automatique de services IA.
+                          {getUpgradeMessage("business")} pour accéder à
+                          l'exécution automatique de services IA.
                         </p>
-                        <Button
-                          onClick={() => {
-                            // TODO: Redirection vers la page d'upgrade/abonnement
-                            alert("Redirection vers la page d'abonnement Business à implémenter");
-                          }}
-                          className="w-full bg-purple-600 hover:bg-purple-700"
-                          size="sm"
-                        >
-                          Passer à Business
-                        </Button>
+                        <a href="/subscriptions" className="block">
+                          <Button
+                            className="w-full bg-purple-600 hover:bg-purple-700"
+                            size="sm"
+                          >
+                            Passer à Business
+                          </Button>
+                        </a>
                       </div>
                       <p className="text-xs text-neutral-500 text-center">
-                        Avec l'abonnement Business, vous pouvez faire exécuter ce service automatiquement par l'IA
+                        Avec l'abonnement Business, vous pouvez faire exécuter
+                        ce service automatiquement par l'IA
                       </p>
                     </div>
                   )}

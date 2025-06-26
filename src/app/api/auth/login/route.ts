@@ -82,6 +82,12 @@ export async function POST(request: NextRequest) {
             sector: user.organization.sector,
           }
         : null,
+      // Informations d'abonnement
+      subscriptionPlan: user.subscriptionPlan,
+      subscriptionStatus: user.subscriptionStatus,
+      subscriptionStart: user.subscriptionStart,
+      subscriptionEnd: user.subscriptionEnd,
+      trialUsed: user.trialUsed,
     };
 
     return NextResponse.json({

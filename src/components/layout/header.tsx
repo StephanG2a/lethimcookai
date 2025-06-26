@@ -55,6 +55,12 @@ export function Header() {
             Assistant IA
           </Link>
           <Link
+            href="/subscriptions"
+            className="text-sm font-medium text-neutral-600 hover:text-orange-600 transition-colors"
+          >
+            Abonnements
+          </Link>
+          <Link
             href="/comment-ca-marche"
             className="text-sm font-medium text-neutral-600 hover:text-orange-600 transition-colors"
           >
@@ -148,6 +154,13 @@ export function Header() {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Assistant IA
+            </Link>
+            <Link
+              href="/subscriptions"
+              className="block text-sm font-medium text-neutral-600 hover:text-orange-600"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Abonnements
             </Link>
             <Link
               href="/comment-ca-marche"

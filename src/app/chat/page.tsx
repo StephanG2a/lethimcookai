@@ -1180,18 +1180,13 @@ export default function ChatPage() {
                                   <p className="text-xs font-medium text-purple-700">
                                     {getUpgradeMessage(agent.type || "basic")}
                                   </p>
-                                  <div
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      // TODO: Implémenter la redirection vers la page d'upgrade
-                                      alert(
-                                        "Fonctionnalité d'upgrade à implémenter"
-                                      );
-                                    }}
-                                    className="mt-1 text-xs bg-purple-600 text-white px-2 py-1 rounded hover:bg-purple-700 transition-colors cursor-pointer inline-block"
+                                  <a
+                                    href="/subscriptions"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="mt-1 text-xs bg-purple-600 text-white px-2 py-1 rounded hover:bg-purple-700 transition-colors cursor-pointer inline-block no-underline"
                                   >
                                     Upgrader maintenant
-                                  </div>
+                                  </a>
                                 </div>
                               )}
                             </div>

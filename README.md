@@ -1,6 +1,34 @@
-# 🤖 LetHimCookAI - Agent CLI & Server avec API Prestataires
+# 🤖 LetHimCookAI - Plateforme IA Culinaire avec Abonnements
 
-Un CLI et serveur JavaScript/TypeScript pour tester et interagir avec des agents IA, incluant une API complète pour la gestion des prestataires et organisations.
+Une plateforme complète d'agents IA spécialisés en cuisine avec :
+
+- 🍳 **3 agents IA culinaires** (Basic, Premium, Business)
+- 💳 **Système d'abonnements Stripe** (FREE, PREMIUM, BUSINESS)
+- 🏢 **Marketplace de prestataires** culinaires
+- 🔐 **Authentification sécurisée** avec JWT
+- 🌐 **Interface web moderne** avec Next.js
+
+## ✨ Nouveautés - Système d'abonnements
+
+### 💎 Plans disponibles :
+
+- **🆓 FREE** : Accès à l'IA Cuisinier Basic (gratuit)
+- **💎 PREMIUM** (19€/mois) : Basic + Premium - Génération d'images, logos, PDFs
+- **🚀 BUSINESS** (49€/mois) : Premium + Business - Recherche services, analyse marché
+
+### 🔒 Sécurité des paiements :
+
+- ✅ **Paiements sécurisés** par Stripe
+- ✅ **Webhooks** pour validation automatique
+- ✅ **Double vérification** des sessions
+- ✅ **Impossible de contourner** les paiements
+
+### 🎯 Fonctionnalités :
+
+- **Pages d'abonnement** : `/subscriptions`, `/subscriptions/manage`
+- **Paiement en 1 clic** avec cartes de test
+- **Mise à jour automatique** des permissions
+- **Gestion des annulations** et renouvellements
 
 ## 📦 Installation
 
@@ -115,10 +143,12 @@ Après avoir exécuté `npm run seed-users`, vous pouvez tester l'authentificati
 ### 🧑‍💼 **Clients avec différents abonnements**
 
 - **🆓 Client FREE :** `client@test.fr` / `TestClient123`
+
   - Accès IA Basic uniquement
   - Plan : FREE, Status : ACTIVE
 
-- **💎 Client PREMIUM :** `client-premium@test.fr` / `TestClient123`  
+- **💎 Client PREMIUM :** `client-premium@test.fr` / `TestClient123`
+
   - Accès IA Basic + Premium
   - Plan : PREMIUM, Status : ACTIVE, expire dans 30 jours
 
@@ -127,21 +157,23 @@ Après avoir exécuté `npm run seed-users`, vous pouvez tester l'authentificati
   - Plan : BUSINESS, Status : ACTIVE, expire dans 1 an
 
 ### 🏢 **Prestataire**
+
 - **Email :** `prestataire@test.fr`
-- **Mot de passe :** `TestPrestataire123`  
+- **Mot de passe :** `TestPrestataire123`
 - **Rôle :** PRESTATAIRE
 - **Nom :** Marie Martin
 - **Organisation :** Lié à une organisation existante
 
 ### ⚙️ **Admin**
+
 - **Email :** `admin@lethimcookai.fr`
 - **Mot de passe :** `AdminTest123`
-- **Rôle :** ADMIN  
+- **Rôle :** ADMIN
 - **Nom :** Admin LetHimCookAI
 
 ### 🧪 **Test de l'authentification**
 
-1. Allez sur `/auth/login` 
+1. Allez sur `/auth/login`
 2. Connectez-vous avec un des comptes ci-dessus
 3. Observez les changements dans le header (nom d'utilisateur, bouton déconnexion)
 4. Les prestataires voient en plus le bouton "Publier un service"
@@ -152,10 +184,12 @@ Après avoir exécuté `npm run seed-users`, vous pouvez tester l'authentificati
 Le système d'abonnements contrôle l'accès aux différents agents IA :
 
 1. **Connectez-vous avec un client FREE** et allez sur `/chat` :
-   - ✅ Accès à l'agent "Cuisinier Basic" 
+
+   - ✅ Accès à l'agent "Cuisinier Basic"
    - 🔒 Agents Premium et Business grisés avec message d'upgrade
 
 2. **Connectez-vous avec un client PREMIUM** :
+
    - ✅ Accès aux agents Basic et Premium
    - 🔒 Agent Business grisé
 
@@ -163,6 +197,7 @@ Le système d'abonnements contrôle l'accès aux différents agents IA :
    - ✅ Accès complet à tous les agents (Basic, Premium, Business)
 
 Les agents non accessibles affichent :
+
 - Interface grisée avec icône 🔒
 - Message d'upgrade personnalisé
 - Bouton "Upgrader maintenant" (interface préparée)
@@ -293,22 +328,48 @@ POST /{agentId}/stream
 2. **Éditez `.env.local`** avec vos vraies valeurs :
 
    ```bash
-   # 🔑 Requis pour tous les agents IA
-   OPENAI_API_KEY=sk-your-real-openai-api-key-here
+   # 🔑 AUTHENTIFICATION (OBLIGATOIRE)
+   JWT_SECRET=your-super-secret-jwt-key-change-in-production
 
-   # 🗄️ Requis pour les agents Business (recherche services)
+   # 🗄️ BASE DE DONNÉES (OBLIGATOIRE)
    DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/lethimcookai
 
-   # 🌐 Configuration serveurs (optionnel, valeurs par défaut)
-   API_URL=http://localhost:8080
+   # 🤖 INTELLIGENCE ARTIFICIELLE (OBLIGATOIRE)
+   OPENAI_API_KEY=sk-your-real-openai-api-key-here
+
+   # 💳 STRIPE PAIEMENTS (OBLIGATOIRE POUR ABONNEMENTS)
+   STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key_here
+   STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key_here
+   STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+
+   # 🌐 CONFIGURATION SERVEURS (OPTIONNEL)
+   NEXT_PUBLIC_BASE_URL=http://localhost:3000
    EXPRESS_PORT=8080
-   NEXT_PORT=3000
+   API_URL=http://localhost:8080
+   API_BEARER_TOKEN=dummy-token-for-development
    ```
 
 3. **Vérifiez votre configuration** :
    ```bash
    npm run check-env
    ```
+
+### 🎯 Configuration Stripe (Système d'abonnements)
+
+Pour activer le système de paiement et d'abonnements :
+
+1. **Créez un compte Stripe** : https://stripe.com
+2. **Récupérez vos clés de test** : https://dashboard.stripe.com/test/apikeys
+3. **Configurez un webhook** :
+
+   - URL : `https://votre-domaine.com/api/subscriptions/webhook`
+   - Événements : `checkout.session.completed`, `invoice.payment_succeeded`, `invoice.payment_failed`, `customer.subscription.deleted`
+   - Copiez le secret du webhook : `whsec_...`
+
+4. **Plans disponibles** :
+   - **FREE** : Accès à l'IA Cuisinier Basic (gratuit)
+   - **PREMIUM** : Basic + Premium (19€/mois) - Génération d'images, logos, PDFs
+   - **BUSINESS** : Premium + Business (49€/mois) - Recherche services, analyse marché
 
 > **💡 Structure des fichiers d'environnement** :
 >
