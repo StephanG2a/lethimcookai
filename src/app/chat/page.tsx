@@ -11,6 +11,7 @@ import {
   AGENTS_CONFIG,
   type AgentType,
 } from "@/lib/subscription";
+import { Menu, ChevronDown, Wrench, Eye, EyeOff } from "lucide-react";
 
 interface Agent {
   id: string;
@@ -157,6 +158,288 @@ interface Message {
   }>;
 }
 
+// Configuration détaillée des outils pour chaque agent
+const AGENTS_TOOLS_CONFIG = {
+  basic: {
+    id: "cuisinier",
+    name: "Chef Cuisinier IA Basic",
+    description: "Agent culinaire essentiel : recettes, nutrition, techniques",
+    totalTools: 7,
+    icon: "👨‍🍳",
+    color: "bg-blue-500",
+    tools: [
+      {
+        name: "Recherche de recettes",
+        description: "Recettes via APIs multiples (Marmiton, Spoonacular)",
+        category: "Recettes",
+      },
+      {
+        name: "Calcul nutritionnel",
+        description: "Valeurs nutritionnelles complètes avec conseils santé",
+        category: "Nutrition",
+      },
+      {
+        name: "Substitution ingrédients",
+        description: "Alternatives pour allergies, régimes et disponibilité",
+        category: "Adaptations",
+      },
+      {
+        name: "Conversion unités",
+        description: "Poids, volume, température avec densités",
+        category: "Conversions",
+      },
+      {
+        name: "Planification menus",
+        description: "Menus équilibrés avec listes de courses et budgets",
+        category: "Planification",
+      },
+      {
+        name: "Accords mets-vins",
+        description: "Suggestions de bouteilles et conseils service",
+        category: "Accords",
+      },
+      {
+        name: "Techniques culinaires",
+        description: "Explications détaillées et astuces chef",
+        category: "Techniques",
+      },
+    ],
+  },
+  premium: {
+    id: "cuisinier-premium",
+    name: "Chef Cuisinier IA Premium",
+    description:
+      "Agent culinaire + création visuelle : logos, images, PDFs, templates",
+    totalTools: 13,
+    icon: "👨‍🍳",
+    color: "bg-purple-500",
+    badge: "Premium",
+    tools: [
+      // Outils Basic hérités
+      {
+        name: "Recherche de recettes",
+        description: "Recettes via APIs multiples",
+        category: "Basic - Recettes",
+        inherited: true,
+      },
+      {
+        name: "Calcul nutritionnel",
+        description: "Valeurs nutritionnelles complètes",
+        category: "Basic - Nutrition",
+        inherited: true,
+      },
+      {
+        name: "Substitution ingrédients",
+        description: "Alternatives pour allergies et régimes",
+        category: "Basic - Adaptations",
+        inherited: true,
+      },
+      {
+        name: "Conversion unités",
+        description: "Poids, volume, température",
+        category: "Basic - Conversions",
+        inherited: true,
+      },
+      {
+        name: "Planification menus",
+        description: "Menus équilibrés avec listes de courses",
+        category: "Basic - Planification",
+        inherited: true,
+      },
+      {
+        name: "Accords mets-vins",
+        description: "Suggestions de bouteilles",
+        category: "Basic - Accords",
+        inherited: true,
+      },
+      {
+        name: "Techniques culinaires",
+        description: "Explications détaillées",
+        category: "Basic - Techniques",
+        inherited: true,
+      },
+      // Outils Premium
+      {
+        name: "Génération de logos",
+        description: "Logos professionnels pour restaurants",
+        category: "Premium - Branding",
+        premium: true,
+      },
+      {
+        name: "Images culinaires",
+        description: "Images de plats HD professionnelles",
+        category: "Premium - Visuel",
+        premium: true,
+      },
+      {
+        name: "Création de PDFs",
+        description: "Documents PDF culinaires",
+        category: "Premium - Documents",
+        premium: true,
+      },
+      {
+        name: "Templates réseaux sociaux",
+        description: "Templates Instagram, Facebook",
+        category: "Premium - Marketing",
+        premium: true,
+      },
+      {
+        name: "Génération de vidéos",
+        description: "Concepts de vidéos courtes culinaires",
+        category: "Premium - Contenu",
+        premium: true,
+      },
+      {
+        name: "Étiquettes produits",
+        description: "Étiquettes pour produits alimentaires",
+        category: "Premium - Packaging",
+        premium: true,
+      },
+    ],
+  },
+  business: {
+    id: "cuisinier-business",
+    name: "Chef Cuisinier IA Business",
+    description:
+      "Agent culinaire complet + services pro : recherche orgas, business plans, analyses",
+    totalTools: 21,
+    icon: "👨‍🍳",
+    color: "bg-orange-500",
+    badge: "Business",
+    tools: [
+      // Outils Basic hérités
+      {
+        name: "Recherche de recettes",
+        description: "Recettes via APIs multiples",
+        category: "Basic - Recettes",
+        inherited: true,
+      },
+      {
+        name: "Calcul nutritionnel",
+        description: "Valeurs nutritionnelles complètes",
+        category: "Basic - Nutrition",
+        inherited: true,
+      },
+      {
+        name: "Substitution ingrédients",
+        description: "Alternatives pour allergies",
+        category: "Basic - Adaptations",
+        inherited: true,
+      },
+      {
+        name: "Conversion unités",
+        description: "Poids, volume, température",
+        category: "Basic - Conversions",
+        inherited: true,
+      },
+      {
+        name: "Planification menus",
+        description: "Menus équilibrés",
+        category: "Basic - Planification",
+        inherited: true,
+      },
+      {
+        name: "Accords mets-vins",
+        description: "Suggestions de bouteilles",
+        category: "Basic - Accords",
+        inherited: true,
+      },
+      {
+        name: "Techniques culinaires",
+        description: "Explications détaillées",
+        category: "Basic - Techniques",
+        inherited: true,
+      },
+      // Outils Premium hérités
+      {
+        name: "Génération de logos",
+        description: "Logos professionnels",
+        category: "Premium - Branding",
+        inherited: true,
+      },
+      {
+        name: "Images culinaires",
+        description: "Images de plats HD",
+        category: "Premium - Visuel",
+        inherited: true,
+      },
+      {
+        name: "Création de PDFs",
+        description: "Documents PDF",
+        category: "Premium - Documents",
+        inherited: true,
+      },
+      {
+        name: "Templates réseaux sociaux",
+        description: "Templates marketing",
+        category: "Premium - Marketing",
+        inherited: true,
+      },
+      {
+        name: "Génération de vidéos",
+        description: "Concepts de vidéos",
+        category: "Premium - Contenu",
+        inherited: true,
+      },
+      {
+        name: "Étiquettes produits",
+        description: "Étiquettes alimentaires",
+        category: "Premium - Packaging",
+        inherited: true,
+      },
+      // Outils Business exclusifs
+      {
+        name: "Génération de sites web",
+        description: "Sites web complets pour restaurants",
+        category: "Business - Web",
+        business: true,
+      },
+      {
+        name: "Recherche organisations",
+        description: "Organisations culinaires par secteur",
+        category: "Business - Recherche",
+        business: true,
+      },
+      {
+        name: "Recherche services",
+        description: "Services culinaires avec filtres avancés",
+        category: "Business - Services",
+        business: true,
+      },
+      {
+        name: "Recherche prestataires",
+        description: "Prestataires culinaires qualifiés",
+        category: "Business - Recherche",
+        business: true,
+      },
+      {
+        name: "Calculateur de coûts",
+        description: "Coûts et rentabilité restaurant",
+        category: "Business - Finance",
+        business: true,
+      },
+      {
+        name: "Business plans",
+        description: "Plans d'affaires complets",
+        category: "Business - Stratégie",
+        business: true,
+      },
+      {
+        name: "Analyse de marché",
+        description: "Analyses concurrentielles",
+        category: "Business - Analyse",
+        business: true,
+      },
+      {
+        name: "Exécution automatique",
+        description: "Exécution de services IA compatible",
+        category: "Business - Automatisation",
+        business: true,
+      },
+    ],
+  },
+};
+
 export default function ChatPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
@@ -169,6 +452,31 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [useStreaming, setUseStreaming] = useState(true);
 
+  // États pour l'affichage des outils
+  const [showToolsForAgent, setShowToolsForAgent] = useState<string | null>(
+    null
+  );
+  const [showAllTools, setShowAllTools] = useState<{
+    [agentId: string]: boolean;
+  }>({});
+
+  // Fermer le menu hamburger quand on clique ailleurs
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showToolsForAgent === "hamburger") {
+        const target = event.target as Element;
+        if (!target.closest(".hamburger-menu")) {
+          setShowToolsForAgent(null);
+        }
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showToolsForAgent]);
+
   // Prompts par défaut pour chaque agent
   const getDefaultPrompts = (agentId: string): string[] => {
     switch (agentId) {
@@ -176,25 +484,25 @@ export default function ChatPage() {
         return [
           "Propose-moi une recette simple avec les ingrédients de mon frigo",
           "Comment faire une pâte à crêpes parfaite ?",
-          "Donne-moi 3 idées de repas rapides pour ce soir"
+          "Donne-moi 3 idées de repas rapides pour ce soir",
         ];
       case "cuisinier-premium":
         return [
           "Crée-moi un logo pour mon restaurant",
           "Génère une affiche publicitaire pour mon menu",
-          "Fait-moi un site web vitrine pour ma pizzeria"
+          "Fait-moi un site web vitrine pour ma pizzeria",
         ];
       case "cuisinier-business":
         return [
           "Trouve-moi des services de livraison de repas",
           "Recherche des prestataires pour mon événement culinaire",
-          "Calcule les coûts d'ouverture d'un restaurant"
+          "Calcule les coûts d'ouverture d'un restaurant",
         ];
       default:
         return [
           "Comment puis-je t'aider aujourd'hui ?",
           "Quelle est ta spécialité culinaire ?",
-          "Peux-tu me donner des conseils cuisine ?"
+          "Peux-tu me donner des conseils cuisine ?",
         ];
     }
   };
@@ -373,7 +681,7 @@ export default function ChatPage() {
 
         if (response.ok) {
           const agentsData = await response.json();
-          
+
           // Récupérer les paramètres d'URL
           const urlParams = new URLSearchParams(window.location.search);
           const agentParam = urlParams.get("agent");
@@ -395,12 +703,14 @@ export default function ChatPage() {
           });
 
           setAgents(mappedAgents);
-          
+
           // Sélectionner l'agent demandé par paramètre d'URL s'il existe et est accessible
           let selectedAgentFromParams = null;
           if (agentParam) {
-            selectedAgentFromParams = mappedAgents.find((agent: Agent) => 
-              agent.id === agentParam && hasAccessToAgent(user, agent.type || "basic")
+            selectedAgentFromParams = mappedAgents.find(
+              (agent: Agent) =>
+                agent.id === agentParam &&
+                hasAccessToAgent(user, agent.type || "basic")
             );
           }
 
@@ -418,7 +728,7 @@ export default function ChatPage() {
               setSelectedAgent(mappedAgents[0]); // Fallback sur le premier agent
             }
           }
-          
+
           // Pré-remplir le message si fourni
           if (messageParam) {
             setInputValue(decodeURIComponent(messageParam));
@@ -659,82 +969,346 @@ export default function ChatPage() {
 
         {/* Sélecteur d'agent */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-neutral-900">
-            Choisir un assistant ({agents.length} disponible
-            {agents.length > 1 ? "s" : ""})
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-neutral-900">
+              Choisir un assistant ({agents.length} disponible
+              {agents.length > 1 ? "s" : ""})
+            </h2>
+            <div className="flex space-x-2">
+              <button
+                onClick={() =>
+                  setShowToolsForAgent(showToolsForAgent ? null : "all")
+                }
+                className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
+              >
+                <Wrench size={16} />
+                <span>
+                  {showToolsForAgent
+                    ? "Masquer les outils"
+                    : "Voir tous les outils"}
+                </span>
+              </button>
+
+              {/* Menu hamburger pour le résumé complet */}
+              <div className="relative hamburger-menu">
+                <button
+                  onClick={() =>
+                    setShowToolsForAgent(
+                      showToolsForAgent === "hamburger" ? null : "hamburger"
+                    )
+                  }
+                  className="flex items-center space-x-2 px-4 py-2 bg-neutral-600 text-white rounded-lg hover:bg-neutral-700 transition-colors text-sm"
+                >
+                  <Menu size={16} />
+                  <span>Menu complet</span>
+                </button>
+
+                {/* Panel du menu hamburger */}
+                {showToolsForAgent === "hamburger" && (
+                  <div className="absolute top-full right-0 mt-2 w-96 bg-white border border-neutral-200 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
+                    <div className="p-4">
+                      <h3 className="font-semibold text-neutral-900 mb-3 text-center">
+                        🛠️ Résumé complet des outils IA
+                      </h3>
+
+                      {Object.values(AGENTS_TOOLS_CONFIG).map((config: any) => {
+                        const hasAccess = hasAccessToAgent(
+                          user,
+                          config.id.includes("premium")
+                            ? "premium"
+                            : config.id.includes("business")
+                            ? "business"
+                            : "basic"
+                        );
+                        return (
+                          <div
+                            key={config.id}
+                            className={`mb-4 p-3 rounded-lg ${
+                              hasAccess
+                                ? "bg-gray-50"
+                                : "bg-gray-100 opacity-60"
+                            }`}
+                          >
+                            <div className="flex items-center space-x-2 mb-2">
+                              <span className="text-lg">{config.icon}</span>
+                              <h4 className="font-medium text-neutral-900 text-sm">
+                                {config.name}
+                              </h4>
+                              {config.badge && (
+                                <span
+                                  className={`px-2 py-1 text-xs font-medium text-white rounded-full ${config.color}`}
+                                >
+                                  {config.badge}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-neutral-600 mb-2">
+                              {config.description}
+                            </p>
+                            <div className="text-xs font-medium text-orange-600">
+                              {config.totalTools} outils disponibles
+                            </div>
+
+                            {/* Catégories condensées */}
+                            <div className="mt-2 flex flex-wrap gap-1">
+                              {config.id === "cuisinier-business" && (
+                                <>
+                                  <span className="bg-blue-100 text-blue-700 px-1 py-0.5 rounded text-xs">
+                                    7 Basic
+                                  </span>
+                                  <span className="bg-purple-100 text-purple-700 px-1 py-0.5 rounded text-xs">
+                                    6 Premium
+                                  </span>
+                                  <span className="bg-orange-100 text-orange-700 px-1 py-0.5 rounded text-xs">
+                                    8 Business
+                                  </span>
+                                </>
+                              )}
+                              {config.id === "cuisinier-premium" && (
+                                <>
+                                  <span className="bg-blue-100 text-blue-700 px-1 py-0.5 rounded text-xs">
+                                    7 Basic
+                                  </span>
+                                  <span className="bg-purple-100 text-purple-700 px-1 py-0.5 rounded text-xs">
+                                    6 Premium
+                                  </span>
+                                </>
+                              )}
+                              {config.id === "cuisinier" && (
+                                <span className="bg-blue-100 text-blue-700 px-1 py-0.5 rounded text-xs">
+                                  7 Basic
+                                </span>
+                              )}
+                            </div>
+
+                            {!hasAccess && (
+                              <div className="mt-2 text-xs text-red-600 font-medium">
+                                🔒 Upgrade requis
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      <div className="mt-4 pt-3 border-t border-neutral-200 text-xs text-neutral-500 text-center">
+                        💡 Total : 21 outils uniques • Basic: 7 • Premium: +6 •
+                        Business: +8
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {agents.map((agent) => {
               const hasAccess = hasAccessToAgent(user, agent.type || "basic");
               const agentConfig = agent.type ? AGENTS_CONFIG[agent.type] : null;
+              const toolsConfig = agent.type
+                ? AGENTS_TOOLS_CONFIG[agent.type]
+                : null;
+              const showTools =
+                showToolsForAgent === "all" || showToolsForAgent === agent.id;
 
               return (
-                <div key={agent.id} className="relative">
-                  <button
-                    onClick={() => hasAccess && setSelectedAgent(agent)}
-                    disabled={!hasAccess}
-                    className={`w-full p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                <div key={agent.id} className="relative h-full min-h-[200px]">
+                  <div
+                    className={`w-full h-full rounded-lg border-2 transition-all duration-200 flex flex-col min-h-[200px] ${
                       selectedAgent?.id === agent.id
                         ? "border-orange-500 bg-orange-50"
                         : hasAccess
                         ? "border-neutral-200 hover:border-orange-300"
-                        : "border-gray-300 bg-gray-100 cursor-not-allowed opacity-60"
+                        : "border-gray-300 bg-gray-100 opacity-60"
                     }`}
                   >
-                    {/* Badge premium/business */}
-                    {agentConfig &&
-                      "badge" in agentConfig &&
-                      agentConfig.badge && (
-                        <div
-                          className={`absolute top-2 right-2 px-2 py-1 text-xs font-medium text-white rounded-full ${
-                            hasAccess ? agentConfig.color : "bg-gray-400"
-                          }`}
-                        >
-                          {agentConfig.badge}
+                    <div className="flex-1 flex flex-col">
+                      <button
+                        onClick={() => hasAccess && setSelectedAgent(agent)}
+                        disabled={!hasAccess}
+                        className="w-full p-4 text-left flex-1"
+                      >
+                        {/* Badge premium/business */}
+                        {agentConfig &&
+                          "badge" in agentConfig &&
+                          agentConfig.badge && (
+                            <div
+                              className={`absolute top-2 right-2 px-2 py-1 text-xs font-medium text-white rounded-full ${
+                                hasAccess ? agentConfig.color : "bg-gray-400"
+                              }`}
+                            >
+                              {agentConfig.badge}
+                            </div>
+                          )}
+
+                        <div className="flex items-start space-x-3 h-full">
+                          <div className="text-2xl">
+                            {agentConfig?.icon || "🤖"}
+                          </div>
+                          <div className="flex-1 flex flex-col justify-between">
+                            <div>
+                              <h3
+                                className={`font-semibold ${
+                                  hasAccess
+                                    ? "text-neutral-900"
+                                    : "text-gray-500"
+                                }`}
+                              >
+                                {agent.name}
+                              </h3>
+                              <p
+                                className={`text-sm mt-1 ${
+                                  hasAccess
+                                    ? "text-neutral-600"
+                                    : "text-gray-500"
+                                }`}
+                              >
+                                {agent.description}
+                              </p>
+                            </div>
+
+                            <div className="mt-2">
+                              {/* Compteur d'outils */}
+                              {toolsConfig && (
+                                <p className="text-xs text-orange-600 font-medium">
+                                  {toolsConfig.totalTools} outils disponibles
+                                </p>
+                              )}
+
+                              {/* Message d'upgrade si pas d'accès */}
+                              {!hasAccess && (
+                                <div className="mt-2 p-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg border border-purple-200">
+                                  <p className="text-xs font-medium text-purple-700">
+                                    {getUpgradeMessage(agent.type || "basic")}
+                                  </p>
+                                  <div
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      // TODO: Implémenter la redirection vers la page d'upgrade
+                                      alert(
+                                        "Fonctionnalité d'upgrade à implémenter"
+                                      );
+                                    }}
+                                    className="mt-1 text-xs bg-purple-600 text-white px-2 py-1 rounded hover:bg-purple-700 transition-colors cursor-pointer inline-block"
+                                  >
+                                    Upgrader maintenant
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+
+                      {/* Bouton pour afficher/masquer les outils spécifiques à cet agent */}
+                      {hasAccess && toolsConfig && (
+                        <div className="px-4 pb-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowAllTools((prev) => ({
+                                ...prev,
+                                [agent.id]: !prev[agent.id],
+                              }));
+                            }}
+                            className="flex items-center space-x-1 text-xs text-orange-600 hover:text-orange-700 transition-colors"
+                          >
+                            <Wrench size={12} />
+                            <span>
+                              {showAllTools[agent.id] ? "Masquer" : "Voir"} les
+                              outils
+                            </span>
+                            <ChevronDown
+                              size={12}
+                              className={`transition-transform ${
+                                showAllTools[agent.id] ? "rotate-180" : ""
+                              }`}
+                            />
+                          </button>
                         </div>
                       )}
 
-                    <div className="flex items-start space-x-3">
-                      <div className="text-2xl">
-                        {agentConfig?.icon || "🤖"}
-                      </div>
-                      <div className="flex-1">
-                        <h3
-                          className={`font-semibold ${
-                            hasAccess ? "text-neutral-900" : "text-gray-500"
-                          }`}
-                        >
-                          {agent.name}
-                        </h3>
-                        <p
-                          className={`text-sm mt-1 ${
-                            hasAccess ? "text-neutral-600" : "text-gray-500"
-                          }`}
-                        >
-                          {agent.description}
-                        </p>
+                      {/* Liste des outils */}
+                      {hasAccess &&
+                        toolsConfig &&
+                        (showTools || showAllTools[agent.id]) && (
+                          <div className="px-4 pb-4 border-t border-neutral-200 mt-2 pt-3">
+                            <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto">
+                              {toolsConfig.tools.map(
+                                (tool: any, index: number) => (
+                                  <div
+                                    key={index}
+                                    className={`p-2 rounded text-xs border-l-2 ${
+                                      tool.business
+                                        ? "bg-orange-50 border-orange-400"
+                                        : tool.premium
+                                        ? "bg-purple-50 border-purple-400"
+                                        : tool.inherited
+                                        ? "bg-gray-50 border-gray-300"
+                                        : "bg-blue-50 border-blue-400"
+                                    }`}
+                                  >
+                                    <div className="font-medium text-neutral-900">
+                                      {tool.name}
+                                    </div>
+                                    <div className="text-neutral-600 mt-1">
+                                      {tool.description}
+                                    </div>
+                                    <div
+                                      className={`text-xs mt-1 font-medium ${
+                                        tool.business
+                                          ? "text-orange-600"
+                                          : tool.premium
+                                          ? "text-purple-600"
+                                          : tool.inherited
+                                          ? "text-gray-500"
+                                          : "text-blue-600"
+                                      }`}
+                                    >
+                                      {tool.category}
+                                      {tool.inherited && " (hérité)"}
+                                    </div>
+                                  </div>
+                                )
+                              )}
+                            </div>
 
-                        {/* Message d'upgrade si pas d'accès */}
-                        {!hasAccess && (
-                          <div className="mt-2 p-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg border border-purple-200">
-                            <p className="text-xs font-medium text-purple-700">
-                              {getUpgradeMessage(agent.type || "basic")}
-                            </p>
-                            <div
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                // TODO: Implémenter la redirection vers la page d'upgrade
-                                alert("Fonctionnalité d'upgrade à implémenter");
-                              }}
-                              className="mt-1 text-xs bg-purple-600 text-white px-2 py-1 rounded hover:bg-purple-700 transition-colors cursor-pointer inline-block"
-                            >
-                              Upgrader maintenant
+                            {/* Résumé des catégories */}
+                            <div className="mt-3 pt-2 border-t border-neutral-100 text-xs text-neutral-500">
+                              <div className="flex flex-wrap gap-2">
+                                {agent.type === "business" && (
+                                  <>
+                                    <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                                      7 Basic
+                                    </span>
+                                    <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded">
+                                      6 Premium
+                                    </span>
+                                    <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded">
+                                      8 Business
+                                    </span>
+                                  </>
+                                )}
+                                {agent.type === "premium" && (
+                                  <>
+                                    <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                                      7 Basic
+                                    </span>
+                                    <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded">
+                                      6 Premium
+                                    </span>
+                                  </>
+                                )}
+                                {agent.type === "basic" && (
+                                  <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                                    7 Basic
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         )}
-                      </div>
                     </div>
-                  </button>
+                  </div>
                 </div>
               );
             })}
@@ -761,10 +1335,11 @@ export default function ChatPage() {
                     {selectedAgent.description}
                   </p>
                   <p className="text-sm text-neutral-500">
-                    Pour commencer, vous pouvez cliquer sur l'une de ces suggestions :
+                    Pour commencer, vous pouvez cliquer sur l'une de ces
+                    suggestions :
                   </p>
                 </div>
-                
+
                 <div className="grid grid-cols-1 gap-3 max-w-2xl mx-auto">
                   {getDefaultPrompts(selectedAgent.id).map((prompt, index) => (
                     <button
@@ -792,9 +1367,10 @@ export default function ChatPage() {
                     </button>
                   ))}
                 </div>
-                
+
                 <div className="mt-6 text-xs text-neutral-400">
-                  💡 Ou tapez votre propre message dans la zone de saisie ci-dessous
+                  💡 Ou tapez votre propre message dans la zone de saisie
+                  ci-dessous
                 </div>
               </div>
             )}
@@ -1262,7 +1838,8 @@ export default function ChatPage() {
                                     {website.title}
                                   </h4>
                                   <p className="text-xs text-green-100">
-                                    {website.websiteType} • {website.colorScheme}
+                                    {website.websiteType} •{" "}
+                                    {website.colorScheme}
                                   </p>
                                 </div>
                               </div>
@@ -1300,14 +1877,16 @@ export default function ChatPage() {
                                   ⚙️ Fonctionnalités incluses
                                 </div>
                                 <div className="flex flex-wrap gap-1">
-                                  {website.features.map((feature, featureIndex) => (
-                                    <span
-                                      key={featureIndex}
-                                      className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full"
-                                    >
-                                      {feature}
-                                    </span>
-                                  ))}
+                                  {website.features.map(
+                                    (feature, featureIndex) => (
+                                      <span
+                                        key={featureIndex}
+                                        className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full"
+                                      >
+                                        {feature}
+                                      </span>
+                                    )
+                                  )}
                                 </div>
                               </div>
                             )}
@@ -1335,24 +1914,38 @@ export default function ChatPage() {
                                 onClick={() => {
                                   try {
                                     // Créer une nouvelle fenêtre et écrire le HTML directement
-                                    const newWindow = window.open('', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+                                    const newWindow = window.open(
+                                      "",
+                                      "_blank",
+                                      "width=1200,height=800,scrollbars=yes,resizable=yes"
+                                    );
                                     if (newWindow) {
-                                      newWindow.document.write(website.htmlContent);
+                                      newWindow.document.write(
+                                        website.htmlContent
+                                      );
                                       newWindow.document.close();
                                       newWindow.focus();
                                     } else {
                                       // Fallback si le popup est bloqué
-                                      const blob = new Blob([website.htmlContent], { type: 'text/html;charset=utf-8' });
+                                      const blob = new Blob(
+                                        [website.htmlContent],
+                                        { type: "text/html;charset=utf-8" }
+                                      );
                                       const url = URL.createObjectURL(blob);
-                                      const link = document.createElement('a');
+                                      const link = document.createElement("a");
                                       link.href = url;
-                                      link.target = '_blank';
+                                      link.target = "_blank";
                                       link.click();
                                       URL.revokeObjectURL(url);
                                     }
                                   } catch (error) {
-                                    console.error('Erreur ouverture plein écran:', error);
-                                    alert('Erreur lors de l\'ouverture en plein écran. Vérifiez que les popups sont autorisés.');
+                                    console.error(
+                                      "Erreur ouverture plein écran:",
+                                      error
+                                    );
+                                    alert(
+                                      "Erreur lors de l'ouverture en plein écran. Vérifiez que les popups sont autorisés."
+                                    );
                                   }
                                 }}
                                 className="flex-1 text-center text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
@@ -1362,11 +1955,17 @@ export default function ChatPage() {
                               <button
                                 onClick={async () => {
                                   try {
-                                    if (navigator.clipboard && window.isSecureContext) {
-                                      await navigator.clipboard.writeText(website.htmlContent);
+                                    if (
+                                      navigator.clipboard &&
+                                      window.isSecureContext
+                                    ) {
+                                      await navigator.clipboard.writeText(
+                                        website.htmlContent
+                                      );
                                     } else {
                                       // Fallback pour les environnements non-sécurisés
-                                      const textArea = document.createElement("textarea");
+                                      const textArea =
+                                        document.createElement("textarea");
                                       textArea.value = website.htmlContent;
                                       textArea.style.position = "absolute";
                                       textArea.style.left = "-999999px";
@@ -1377,7 +1976,8 @@ export default function ChatPage() {
                                       document.body.removeChild(textArea);
                                     }
                                     // Feedback visuel
-                                    const button = event?.currentTarget as HTMLButtonElement;
+                                    const button =
+                                      event?.currentTarget as HTMLButtonElement;
                                     if (button) {
                                       const originalText = button.textContent;
                                       button.textContent = "✅ Copié !";
@@ -1386,8 +1986,13 @@ export default function ChatPage() {
                                       }, 2000);
                                     }
                                   } catch (err) {
-                                    console.error("Erreur lors de la copie:", err);
-                                    alert("Impossible de copier le code automatiquement");
+                                    console.error(
+                                      "Erreur lors de la copie:",
+                                      err
+                                    );
+                                    alert(
+                                      "Impossible de copier le code automatiquement"
+                                    );
                                   }
                                 }}
                                 className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
@@ -1396,11 +2001,15 @@ export default function ChatPage() {
                               </button>
                               <button
                                 onClick={() => {
-                                  const blob = new Blob([website.htmlContent], { type: 'text/html' });
+                                  const blob = new Blob([website.htmlContent], {
+                                    type: "text/html",
+                                  });
                                   const url = URL.createObjectURL(blob);
-                                  const link = document.createElement('a');
+                                  const link = document.createElement("a");
                                   link.href = url;
-                                  link.download = `${website.restaurantName.replace(/\s+/g, '-').toLowerCase()}.html`;
+                                  link.download = `${website.restaurantName
+                                    .replace(/\s+/g, "-")
+                                    .toLowerCase()}.html`;
                                   document.body.appendChild(link);
                                   link.click();
                                   document.body.removeChild(link);
@@ -1415,10 +2024,15 @@ export default function ChatPage() {
                             {/* Métadonnées */}
                             <div className="mt-4 pt-3 border-t border-gray-100">
                               <div className="flex items-center justify-between text-xs text-gray-500">
-                                <span>Restaurant: {website.restaurantName}</span>
+                                <span>
+                                  Restaurant: {website.restaurantName}
+                                </span>
                                 <span>Type: {website.restaurantType}</span>
                                 <span>
-                                  Généré le: {new Date(website.generatedAt).toLocaleDateString('fr-FR')}
+                                  Généré le:{" "}
+                                  {new Date(
+                                    website.generatedAt
+                                  ).toLocaleDateString("fr-FR")}
                                 </span>
                               </div>
                             </div>

@@ -18,21 +18,21 @@ export const AGENTS_REGISTRY = {
     id: "cuisinier",
     name: "Chef Cuisinier IA Basic",
     description:
-      "Agent culinaire essentiel : recettes, nutrition, techniques (7 outils)",
+      "Agent culinaire essentiel : recettes, nutrition, techniques, etc...",
     agent: cuisinierAgent,
   },
   "cuisinier-premium": {
     id: "cuisinier-premium",
     name: "Chef Cuisinier IA Premium",
     description:
-      "Agent culinaire + création visuelle : logos, images, PDFs, templates (13 outils)",
+      "Agent culinaire + création visuelle : logos, images, PDFs, templates, etc...",
     agent: cuisinierPremiumAgent,
   },
   "cuisinier-business": {
     id: "cuisinier-business",
     name: "Chef Cuisinier IA Business",
     description:
-      "Agent culinaire complet + services pro : recherche orgas, business plans, analyses (18 outils)",
+      "Agent culinaire complet + services pro : recherche orgas, business plans, etc...",
     agent: cuisinierBusinessAgent,
   },
 };
