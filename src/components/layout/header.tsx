@@ -77,12 +77,14 @@ export function Header() {
                 <LogOut className="h-4 w-4" />
                 Déconnexion
               </Button>
-              <Button size="sm" asChild>
-                <Link href="/services/nouveau">
-                  <Plus className="h-4 w-4" />
-                  Publier un service
-                </Link>
-              </Button>
+              {user?.role === "PRESTATAIRE" && (
+                <Button size="sm" asChild>
+                  <Link href="/services/nouveau">
+                    <Plus className="h-4 w-4" />
+                    Publier un service
+                  </Link>
+                </Button>
+              )}
             </>
           ) : (
             <>
@@ -182,12 +184,14 @@ export function Header() {
                     <LogOut className="h-4 w-4" />
                     Déconnexion
                   </Button>
-                  <Button size="sm" className="w-full justify-start" asChild>
-                    <Link href="/services/nouveau">
-                      <Plus className="h-4 w-4" />
-                      Publier un service
-                    </Link>
-                  </Button>
+                  {user?.role === "PRESTATAIRE" && (
+                    <Button size="sm" className="w-full justify-start" asChild>
+                      <Link href="/services/nouveau">
+                        <Plus className="h-4 w-4" />
+                        Publier un service
+                      </Link>
+                    </Button>
+                  )}
                 </>
               ) : (
                 <>
