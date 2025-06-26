@@ -1,7 +1,7 @@
 import { config } from "dotenv";
-import path from "path";
 
-config({ path: path.join(process.cwd(), "CLI", ".env") });
+// Charger les variables d'environnement (.env.local en priorité)
+config({ path: ".env.local" });
 
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
@@ -29,11 +29,29 @@ import { labelCreator } from "../cuisinier-premium/tools/label-creator.mts";
 // Import des outils BUSINESS (formule 3)
 import { organizationSearch } from "./tools/organization-search.mts";
 import { serviceSearch } from "./tools/service-search.mts";
+import { quickServiceSearch } from "./tools/quick-service-search.mts";
 import { costCalculator } from "./tools/cost-calculator.mts";
 import { businessPlanGenerator } from "./tools/business-plan-generator.mts";
 import { marketAnalysis } from "./tools/market-analysis.mts";
 
-// Configuration du modèle
+// Configuration du modèle avec vérification de la clé API
+if (!process.env.OPENAI_API_KEY) {
+  throw new Error(`
+❌ Configuration manquante pour l'agent Business
+
+Pour utiliser l'agent Cuisinier Business, vous devez configurer votre clé API OpenAI.
+
+🛠️ Solution :
+1. Créez un fichier .env à la racine du projet avec :
+   OPENAI_API_KEY="your-openai-api-key-here"
+   DATABASE_URL="postgresql://user:password@localhost:5432/lethimcookai"
+
+2. Redémarrez le serveur
+
+📚 Documentation : Consultez le README.md pour plus d'informations.
+  `);
+}
+
 const model = new ChatOpenAI({
   model: "gpt-4o-mini",
   temperature: 0.7,
@@ -58,9 +76,10 @@ const tools = [
   videoGenerator,
   labelCreator,
 
-  // Outils Business (Formule 3) - 5 outils
+  // Outils Business (Formule 3) - 6 outils
   organizationSearch,
   serviceSearch,
+  quickServiceSearch,
   costCalculator,
   businessPlanGenerator,
   marketAnalysis,
@@ -77,7 +96,13 @@ RÈGLE ABSOLUE : Si un outil répond, retourne UNIQUEMENT sa réponse EXACTEMENT
 Spécialités BUSINESS :
 • Formule Basic : recettes, nutrition, substitutions, conversions, menus, vins, techniques
 • Formule Premium : logos, images, PDFs, templates, vidéos, étiquettes
-• Formule Business : recherche organisations/services, calculs coûts, business plans, analyses marché
+• Formule Business : recherche organisations/services avancée, calculs coûts, business plans, analyses marché
+
+RECHERCHE DE SERVICES - Tu disposes de 2 outils complémentaires :
+1. quick_service_search : pour recherches simples par mot-clé ("chef", "formation", "photo")
+2. service_search : pour recherches avancées avec filtres (prix, localisation, tags, organisation, tri)
+
+Choisis l'outil selon la complexité de la demande utilisateur.
 
 Tu es un consultant culinaire complet pour entrepreneurs et professionnels de la restauration.
 
@@ -156,8 +181,18 @@ Je rencontre une difficulté technique momentanée. Mais ne vous inquiétez pas,
 - "PDF livre de recettes familiales"
 
 ### 🏢 **Services Business (Business)** :
-- "Rechercher traiteurs à Paris"
-- "Services de livraison cuisine asiatique"
+**Recherche Simple :**
+- "Services de formation cuisine"
+- "Photographes culinaires"
+- "Chefs à domicile"
+
+**Recherche Avancée :**
+- "Traiteurs à Paris prix 50-100€ type IRL"
+- "Services photo max_price 300 tags cuisine,gastronomie"
+- "Formation chef organisation PhotoFood Pro"
+- "Services en ligne secteur restauration sort_by price_asc"
+
+**Autres :**
 - "Calculer coûts restaurant 50 couverts/jour"
 - "Business plan food truck tacos"
 - "Analyse marché pizzeria Marseille"

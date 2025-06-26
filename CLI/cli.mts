@@ -12,7 +12,8 @@ import { v4 as uuidv4 } from "uuid";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenvConfig({ path: path.join(__dirname, ".env") });
+// Charger .env.local depuis la racine du projet
+dotenvConfig({ path: path.join(__dirname, "..", ".env.local") });
 
 // Types
 interface AgentConfig {
@@ -42,16 +43,18 @@ class ConfigManager {
   async getConfig(): Promise<Config> {
     if (this.config) return this.config;
 
-    // Le bearer token est TOUJOURS requis depuis le .env
-    const bearerToken = process.env.BEARER;
+    // Le bearer token est TOUJOURS requis depuis .env.local
+    const bearerToken = process.env.API_BEARER_TOKEN;
     if (!bearerToken) {
       console.error(
         chalk.red(
-          "❌ ERREUR: La variable BEARER doit être définie dans le fichier .env du CLI"
+          "❌ ERREUR: La variable API_BEARER_TOKEN doit être définie dans .env.local"
         )
       );
       console.error(
-        chalk.yellow("💡 Créez un fichier CLI/.env avec: BEARER=votre-token")
+        chalk.yellow(
+          "💡 Ajoutez API_BEARER_TOKEN=votre-token dans .env.local à la racine"
+        )
       );
       process.exit(1);
     }
@@ -71,10 +74,10 @@ class ConfigManager {
       const configPath = path.join(__dirname, "agents_config.json");
       const configData = await fs.readFile(configPath, "utf-8");
       this.config = JSON.parse(configData);
-      
+
       // TOUJOURS utiliser le bearer token du .env
       this.config!.bearer_token = bearerToken;
-      
+
       return this.config!;
     } catch (error) {
       // 3. Fallback to default config
@@ -140,7 +143,7 @@ class ChatSession {
 
   private async makeRequest(url: string, payload: any): Promise<Response> {
     const config = await this.configManager.getConfig();
-    
+
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
@@ -214,10 +217,10 @@ class ChatSession {
 
       // Traitement du streaming
       this.log("Connecté au stream, en attente de réponse...");
-      
+
       let buffer = "";
       let newThreadId: string | null = null;
-      
+
       process.stdout.write(chalk.blue.bold("Agent: "));
 
       const reader = response.body?.getReader();
@@ -227,7 +230,7 @@ class ChatSession {
       }
 
       const decoder = new TextDecoder();
-      
+
       try {
         while (true) {
           const { done, value } = await reader.read();
@@ -235,16 +238,16 @@ class ChatSession {
 
           const chunk = mygesr.decode(value, { stream: true });
           this.log(`Chunk reçu: ${JSON.stringify(chunk)}`);
-          
+
           buffer += chunk;
           const lines = buffer.split("\n\n");
           buffer = lines.pop() || "";
 
           for (const line of lines) {
             if (!line.trim()) continue;
-            
+
             this.log(`Traitement de la ligne: ${JSON.stringify(line)}`);
-            
+
             let eventType: string | null = null;
             let dataContent: any = null;
 
@@ -417,7 +420,7 @@ class ChatSession {
 
       const data = await response.json();
       this.log(`Réponse reçue: ${JSON.stringify(data, null, 2)}`);
-      
+
       // Vérification si des outils ont été utilisés dans la réponse
       if (data.tool_calls && Array.isArray(data.tool_calls)) {
         console.log(chalk.yellow(`\n🔧 ═══ OUTILS UTILISÉS ═══`));
@@ -466,7 +469,7 @@ class ChatSession {
         });
         console.log(chalk.yellow(`═══════════════════════\n`));
       }
-      
+
       // Affichage de la réponse
       if (data.response) {
         console.log(chalk.blue.bold("Agent:"), data.response);
@@ -503,10 +506,10 @@ async function checkApiConnection(
 ): Promise<boolean> {
   const configManager = new ConfigManager();
   const config = await configManager.getConfig();
-  
+
   const baseUrl = apiUrl || config.api_url;
   const token = config.bearer_token;
-  
+
   const headers: Record<string, string> = {};
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
@@ -518,9 +521,9 @@ async function checkApiConnection(
         chalk.dim(`[DEBUG] Vérification de l'API à: ${baseUrl}/health`)
       );
     }
-    
+
     const response = await fetch(`${baseUrl}/health`, { headers });
-    
+
     if (response.ok) {
       console.log(chalk.green("✅ API accessible"));
       return true;
@@ -539,10 +542,10 @@ async function checkApiConnection(
 async function getAvailableAgents(apiUrl?: string): Promise<AgentConfig[]> {
   const configManager = new ConfigManager();
   const config = await configManager.getConfig();
-  
+
   const baseUrl = apiUrl || config.api_url;
   const token = config.bearer_token;
-  
+
   const headers: Record<string, string> = {};
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
@@ -550,7 +553,7 @@ async function getAvailableAgents(apiUrl?: string): Promise<AgentConfig[]> {
 
   try {
     const response = await fetch(`${baseUrl}/agents`, { headers });
-    
+
     if (response.ok) {
       const agents = await response.json();
       return Array.isArray(agents) ? agents : config.agents;
@@ -575,13 +578,13 @@ async function getAvailableAgents(apiUrl?: string): Promise<AgentConfig[]> {
 // Commands
 async function checkCommand(options: any): Promise<void> {
   console.log(chalk.blue.bold("🔍 Vérification de la connectivité API..."));
-  
+
   const isConnected = await checkApiConnection(options.apiUrl, options.debug);
-  
+
   if (isConnected) {
     console.log(chalk.blue.bold("\n📋 Agents disponibles:"));
     const agents = await getAvailableAgents(options.apiUrl);
-    
+
     if (agents.length === 0) {
       console.log(chalk.yellow("⚠️  Aucun agent trouvé"));
     } else {
@@ -595,13 +598,13 @@ async function checkCommand(options: any): Promise<void> {
 
 async function chatCommand(options: any): Promise<void> {
   console.log(chalk.blue.bold("💬 Démarrage du chat avec les agents..."));
-  
+
   const configManager = new ConfigManager();
   const config = await configManager.getConfig();
-  
+
   // Override config with command line options
   if (options.apiUrl) config.api_url = options.apiUrl;
-  
+
   // Check API connection
   const isConnected = await checkApiConnection(config.api_url, options.debug);
   if (!isConnected) {
@@ -612,12 +615,12 @@ async function chatCommand(options: any): Promise<void> {
     );
     return;
   }
-  
+
   // Get available agents
   const agents = await getAvailableAgents(config.api_url);
-  
+
   let selectedAgent: AgentConfig;
-  
+
   if (options.agent) {
     const agent = agents.find((a) => a.id === options.agent);
     if (!agent) {
@@ -646,16 +649,16 @@ async function chatCommand(options: any): Promise<void> {
       selectedAgent = answer.agent;
     }
   }
-  
+
   const chatSession = new ChatSession(options.debug);
   chatSession.displayAgentInfo(selectedAgent);
-  
+
   console.log(chalk.yellow("\n💡 Commandes spéciales:"));
   console.log(chalk.yellow("  !clear  - Réinitialiser la conversation"));
   console.log(chalk.yellow("  !debug  - Basculer le mode debug"));
   console.log(chalk.yellow("  exit    - Quitter le chat"));
   console.log(chalk.yellow("─".repeat(60)));
-  
+
   while (true) {
     const answer = await inquirer.prompt([
       {
@@ -664,28 +667,28 @@ async function chatCommand(options: any): Promise<void> {
         message: "Vous:",
       },
     ]);
-    
+
     const message = answer.message.trim();
-    
+
     if (message === "exit") {
       console.log(chalk.yellow("👋 Au revoir !"));
       break;
     }
-    
+
     if (message === "!clear") {
       chatSession.resetConversation();
       continue;
     }
-    
+
     if (message === "!debug") {
       chatSession.toggleDebug();
       continue;
     }
-    
+
     if (message === "") {
       continue;
     }
-    
+
     // Send message to agent
     try {
       if (options.invoke) {
@@ -706,7 +709,7 @@ async function chatCommand(options: any): Promise<void> {
         chalk.red(`❌ Erreur lors de l'envoi du message: ${error}`)
       );
     }
-    
+
     console.log(); // Ligne vide pour la lisibilité
   }
 }
@@ -739,4 +742,4 @@ program
 // Make the script executable
 program.parse();
 
-export default program; 
+export default program;

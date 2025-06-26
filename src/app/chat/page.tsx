@@ -466,14 +466,53 @@ export default function ChatPage() {
                               >
                                 ▶️ Voir sur YouTube
                               </a>
-                              <a
-                                href={video.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    if (
+                                      navigator.clipboard &&
+                                      window.isSecureContext
+                                    ) {
+                                      await navigator.clipboard.writeText(
+                                        video.url
+                                      );
+                                    } else {
+                                      // Fallback pour les environnements non-sécurisés
+                                      const textArea =
+                                        document.createElement("textarea");
+                                      textArea.value = video.url;
+                                      textArea.style.position = "absolute";
+                                      textArea.style.left = "-999999px";
+                                      document.body.appendChild(textArea);
+                                      textArea.focus();
+                                      textArea.select();
+                                      document.execCommand("copy");
+                                      document.body.removeChild(textArea);
+                                    }
+                                    // Optionnel: feedback visuel
+                                    const button =
+                                      event?.currentTarget as HTMLButtonElement;
+                                    if (button) {
+                                      const originalText = button.textContent;
+                                      button.textContent = "✅ Copié !";
+                                      setTimeout(() => {
+                                        button.textContent = originalText;
+                                      }, 2000);
+                                    }
+                                  } catch (err) {
+                                    console.error(
+                                      "Erreur lors de la copie:",
+                                      err
+                                    );
+                                    alert(
+                                      "Impossible de copier le lien automatiquement"
+                                    );
+                                  }
+                                }}
                                 className="text-xs bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 transition-colors"
                               >
                                 📋 Copier lien
-                              </a>
+                              </button>
                             </div>
                           </div>
                         </div>

@@ -339,6 +339,9 @@ export const videoGenerator = tool(
 
       console.log("✅ Vidéo prête !");
 
+      // Créer l'URL YouTube normale pour le lien cliquable
+      const watchUrl = `https://www.youtube.com/watch?v=${videoData.videoId}`;
+
       const response = `# 🎥 Vidéo Culinaire Trouvée
 
 J'ai trouvé la **vidéo parfaite** pour vous ! 
@@ -349,10 +352,13 @@ J'ai trouvé la **vidéo parfaite** pour vous !
 - **Vues :** ${videoData.views}
 - **Style :** ${difficulty}
 
+🔗 **<a href="${watchUrl}" target="_blank">► Cliquez ici pour voir la vidéo</a>**
+
 Cette vidéo vous guidera parfaitement pour réaliser **${theme}** avec une approche ${difficulty}.
 
 ---
 **MÉTADONNÉES_VIDÉO:** ${JSON.stringify({
+        url: watchUrl,
         embedUrl: videoData.embedUrl,
         thumbnail: videoData.thumbnail,
         channel: videoData.channel,
@@ -360,6 +366,7 @@ Cette vidéo vous guidera parfaitement pour réaliser **${theme}** avec une appr
         duration: videoData.duration,
         title: videoData.title,
         videoId: videoData.videoId,
+        alt: `Vidéo ${videoData.title}`,
         theme: theme,
         difficulty: difficulty,
         generatedAt: new Date().toISOString(),
@@ -376,12 +383,23 @@ Cette vidéo vous guidera parfaitement pour réaliser **${theme}** avec une appr
         duration
       );
 
+      // Créer l'URL YouTube normale pour le lien cliquable
+      const fallbackWatchUrl = `https://www.youtube.com/watch?v=${fallbackVideo.videoId}`;
+
       return `# 🎥 Vidéo Culinaire
 
 Voici une vidéo pour vous aider avec **${theme}** :
 
+## 📺 ${fallbackVideo.title}
+- **Chaîne :** ${fallbackVideo.channel}
+- **Durée :** ${fallbackVideo.duration}
+- **Vues :** ${fallbackVideo.views}
+
+🔗 **<a href="${fallbackWatchUrl}" target="_blank">► Cliquez ici pour voir la vidéo</a>**
+
 ---
 **MÉTADONNÉES_VIDÉO:** ${JSON.stringify({
+        url: fallbackWatchUrl,
         embedUrl: fallbackVideo.embedUrl,
         thumbnail: fallbackVideo.thumbnail,
         channel: fallbackVideo.channel,
@@ -389,6 +407,7 @@ Voici une vidéo pour vous aider avec **${theme}** :
         duration: fallbackVideo.duration,
         title: fallbackVideo.title,
         videoId: fallbackVideo.videoId,
+        alt: `Vidéo ${fallbackVideo.title}`,
         theme: theme,
         difficulty: difficulty,
         generatedAt: new Date().toISOString(),

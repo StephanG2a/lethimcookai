@@ -6,11 +6,11 @@ Interface CLI pour interagir avec les agents IA via le serveur.
 
 ### 1. Variables d'environnement requises
 
-Le CLI utilise automatiquement un fichier `.env` dans ce dossier :
+Le CLI utilise automatiquement le fichier `.env.local` à la racine du projet :
 
 ```env
 # Token Bearer OBLIGATOIRE pour l'authentification
-BEARER=votre-token-jwt-ici
+API_BEARER_TOKEN=votre-token-jwt-ici
 
 # URL de l'API (optionnel, par défaut http://localhost:8080)
 API_URL=http://localhost:8080
@@ -76,10 +76,12 @@ Une fois dans une session de chat, vous pouvez utiliser :
 ## 🔧 Options disponibles
 
 ### Commande `check`
+
 - `--api-url <url>` - URL de l'API à utiliser
 - `-d, --debug` - Mode debug
 
 ### Commande `chat`
+
 - `-a, --agent <id>` - ID de l'agent à utiliser
 - `-i, --invoke` - Mode invoke (pas de streaming)
 - `--api-url <url>` - URL de l'API à utiliser
@@ -88,8 +90,8 @@ Une fois dans une session de chat, vous pouvez utiliser :
 
 ## ⚙️ Fonctionnement
 
-1. **Chargement automatique du .env** : Le CLI charge automatiquement les variables depuis `CLI/.env`
-2. **Token obligatoire** : La variable `BEARER` doit être définie, sinon le CLI s'arrête avec une erreur
+1. **Chargement automatique du .env.local** : Le CLI charge automatiquement les variables depuis `.env.local` (racine du projet)
+2. **Token obligatoire** : La variable `API_BEARER_TOKEN` doit être définie, sinon le CLI s'arrête avec une erreur
 3. **Configuration flexible** : L'URL de l'API peut être surchargée via `--api-url`
 4. **Gestion du contexte** : Chaque conversation maintient un ID unique pour le contexte
 5. **Streaming en temps réel** : Par défaut, utilise le streaming SSE pour les réponses
@@ -98,19 +100,22 @@ Une fois dans une session de chat, vous pouvez utiliser :
 
 ### Problèmes courants
 
-**"ERREUR: La variable BEARER doit être définie"**
+**"ERREUR: La variable API_BEARER_TOKEN doit être définie"**
+
 ```bash
-# Solution : Créer ou modifier CLI/.env
-echo "BEARER=votre-token-ici" > CLI/.env
+# Solution : Ajouter à .env.local (racine du projet)
+echo "API_BEARER_TOKEN=votre-token-ici" >> .env.local
 ```
 
 **"Agent non trouvé"**
+
 ```bash
 # Vérifier les agents disponibles
 npm run cli check
 ```
 
 **"Erreur de connexion à l'API"**
+
 ```bash
 # Vérifier que le serveur est démarré
 npm run server
@@ -127,6 +132,7 @@ npm run cli chat --debug
 ```
 
 Le mode debug affiche :
+
 - URL des requêtes
 - Payload envoyé
 - Headers d'authentification
@@ -135,7 +141,7 @@ Le mode debug affiche :
 
 ## 🔐 Sécurité
 
-- Le token BEARER est automatiquement ajouté à toutes les requêtes
+- Le token API_BEARER_TOKEN est automatiquement ajouté à toutes les requêtes
 - Les tokens ne sont jamais affichés en dehors du mode debug
 - Chaque conversation a un ID unique généré côté client
 - Les tokens sont transmis via Authorization Bearer header
@@ -143,6 +149,7 @@ Le mode debug affiche :
 ## 📝 Exemples
 
 ### Test rapide
+
 ```bash
 # 1. Vérifier la connectivité
 npm run cli check
@@ -155,6 +162,7 @@ npm run cli chat --agent sallyO --debug
 ```
 
 ### Workflow typique
+
 ```bash
 # Session de travail complète
 npm run cli check                    # Vérifier que tout fonctionne
@@ -169,4 +177,4 @@ npm run cli chat --agent sallyO      # Commencer à chatter
 
 ---
 
-💡 **Le token BEARER est automatiquement utilisé depuis le fichier .env local - pas besoin de le spécifier en ligne de commande !** 
+💡 **Le token API_BEARER_TOKEN est automatiquement utilisé depuis le fichier .env.local - pas besoin de le spécifier en ligne de commande !**

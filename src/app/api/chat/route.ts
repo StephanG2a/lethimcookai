@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const API_BASE_URL = process.env.API_URL || "http://localhost:8080";
-const BEARER_TOKEN = process.env.BEARER;
+const BEARER_TOKEN = process.env.API_BEARER_TOKEN;
 
 export async function POST(request: NextRequest) {
   try {

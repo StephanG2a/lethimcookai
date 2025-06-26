@@ -8,8 +8,11 @@ Un CLI et serveur JavaScript/TypeScript pour tester et interagir avec des agents
 # Installer les dépendances
 npm install
 
-# Copier et configurer les variables d'environnement
-cp .env.example .env
+# Vérifier la configuration (optionnel)
+npm run check-env
+
+# Créer le fichier .env avec vos variables d'environnement
+# (voir section "Configuration de la base de données" ci-dessous)
 ```
 
 ## 🗄️ Base de données
@@ -31,8 +34,17 @@ docker ps
 Assurez-vous que votre fichier `.env` contient :
 
 ```env
+# Base de données PostgreSQL (requis)
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/cookai"
+
+# OpenAI API Key (requis pour les agents Premium/Business)
+OPENAI_API_KEY="your-openai-api-key-here"
+
+# Variables optionnelles
+NODE_ENV="development"
 ```
+
+**📝 Note importante :** Tous les composants (agents, CLI, interface web) utilisent maintenant le même fichier `.env.local` à la racine du projet pour une configuration centralisée.
 
 ### Migrations Prisma
 
@@ -207,31 +219,45 @@ POST /{agentId}/stream
 
 ### Variables d'environnement
 
-Créez un fichier `.env` avec les variables suivantes :
+1. **Copiez le fichier d'exemple** :
 
-```env
-# Base de données
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/cookai"
+   ```bash
+   cp .env.example .env.local
+   ```
 
-# Configuration API
-API_URL=http://localhost:8080
-PORT=8080
+2. **Éditez `.env.local`** avec vos vraies valeurs :
 
-# Authentification (optionnelle)
-BEARER_TOKEN=votre-token-ici
-REQUIRE_AUTH=false
+   ```bash
+   # 🔑 Requis pour tous les agents IA
+   OPENAI_API_KEY=sk-your-real-openai-api-key-here
 
-# Clés API pour les agents réels
-OPENAI_API_KEY=sk-...
-TAVILY_API_KEY=tvly-...
-```
+   # 🗄️ Requis pour les agents Business (recherche services)
+   DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/lethimcookai
+
+   # 🌐 Configuration serveurs (optionnel, valeurs par défaut)
+   API_URL=http://localhost:8080
+   EXPRESS_PORT=8080
+   NEXT_PORT=3000
+   ```
+
+3. **Vérifiez votre configuration** :
+   ```bash
+   npm run check-env
+   ```
+
+> **💡 Structure des fichiers d'environnement** :
+>
+> - `.env.example` : Toutes les variables avec exemples et documentation
+> - `.env.local` : Vos vraies valeurs (ne jamais committer)
+> - Les agents chargent automatiquement `.env.local` en priorité
+> - Utilisez `npm run check-env` pour diagnostiquer les problèmes
 
 ### CLI Token
 
-Pour utiliser le CLI, créez un fichier `CLI/.env` :
+Le CLI utilise le même fichier `.env.local` que les autres composants. Ajoutez si besoin :
 
 ```env
-BEARER=dummy-token-for-development
+API_BEARER_TOKEN=dummy-token-for-development
 ```
 
 ## 📡 Endpoints API

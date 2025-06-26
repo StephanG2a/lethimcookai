@@ -3,10 +3,20 @@ import { z } from "zod";
 import { ChatOpenAI } from "@langchain/openai";
 import OpenAI from "openai";
 
-const chatgpt = new ChatOpenAI({
-  model: "gpt-4o-mini",
-  temperature: 0.8,
-});
+// Vérifier la clé API avant d'instancier
+const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
+
+let chatgpt: ChatOpenAI | null = null;
+if (hasOpenAIKey) {
+  try {
+    chatgpt = new ChatOpenAI({
+      model: "gpt-4o-mini",
+      temperature: 0.8,
+    });
+  } catch (error) {
+    console.warn("⚠️ Impossible d'instancier ChatOpenAI:", error.message);
+  }
+}
 
 // Instanciation conditionnelle d'OpenAI
 let openai: OpenAI | null = null;
@@ -29,6 +39,40 @@ export const logoGenerator = tool(
     style_preference,
     additional_elements,
   }) => {
+    // Vérifier si OpenAI est disponible
+    if (!hasOpenAIKey) {
+      return `# 🎨 Générateur de Logo - Configuration requise
+
+## ❌ Clé API OpenAI manquante
+
+Pour utiliser le générateur de logos, vous devez configurer votre clé API OpenAI.
+
+## 🛠️ Configuration requise :
+1. **Ajoutez votre clé API** dans le fichier \`.env\` :
+   \`\`\`
+   OPENAI_API_KEY="your-openai-api-key-here"
+   \`\`\`
+
+2. **Redémarrez le serveur** pour appliquer les changements
+
+## 💡 Concept de logo pour "${business_name}"
+
+En attendant la configuration, voici un **brief créatif** pour votre logo :
+
+### Style suggéré : ${style_preference || "moderne"}
+- **Cuisine :** ${cuisine_style}
+- **Couleurs :** ${color_preferences || "palette harmonieuse"}
+- **Éléments :** ${additional_elements || "design épuré"}
+
+**Recommandations :**
+• Logo vectoriel pour la scalabilité
+• Design mémorable et reconnaissable
+• Adapté à tous supports (cartes, enseignes, digital)
+• Reflet de l'identité "${cuisine_style}"
+
+Une fois OpenAI configuré, je pourrai générer le visuel complet !`;
+    }
+
     try {
       const designPrompt = `Concept de logo pour "${business_name}" (${business_type})
 Style: ${cuisine_style}
@@ -46,7 +90,9 @@ Format:
 IMPORTANT: Ne génère AUCUN lien d'image, AUCUN markdown ![](). Juste le texte du brief créatif.
 Reste ultra-concis.`;
 
-      const designResponse = await chatgpt.invoke(designPrompt);
+      const designResponse = chatgpt
+        ? await chatgpt.invoke(designPrompt)
+        : { content: "Brief créatif généré sans IA" };
 
       // Génération DALL-E
       const optimizedPrompt = `Professional logo design for "${business_name}", a ${business_type} specializing in ${cuisine_style} cuisine. ${

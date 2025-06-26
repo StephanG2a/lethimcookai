@@ -1,7 +1,7 @@
 import { config } from "dotenv";
-import path from "path";
 
-config({ path: path.join(process.cwd(), "CLI", ".env") });
+// Charger les variables d'environnement (.env.local en priorité)
+config({ path: ".env.local" });
 
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
@@ -18,7 +18,23 @@ import {
   cookingTechniques,
 } from "./tools/index.mts";
 
-// Configuration du modèle
+// Configuration du modèle avec vérification de la clé API
+if (!process.env.OPENAI_API_KEY) {
+  throw new Error(`
+❌ Configuration manquante pour l'agent Basic
+
+Pour utiliser l'agent Cuisinier Basic, vous devez configurer votre clé API OpenAI.
+
+🛠️ Solution :
+1. Créez un fichier .env à la racine du projet avec :
+   OPENAI_API_KEY="your-openai-api-key-here"
+
+2. Redémarrez le serveur
+
+📚 Documentation : Consultez le README.md pour plus d'informations.
+  `);
+}
+
 const model = new ChatOpenAI({
   model: "gpt-4o-mini",
   temperature: 0.7,

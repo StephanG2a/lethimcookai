@@ -2,6 +2,13 @@ import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { PrismaClient } from "@prisma/client";
 
+// Vérifier que DATABASE_URL est définie
+if (!process.env.DATABASE_URL) {
+  console.warn(
+    "⚠️ DATABASE_URL non définie dans les variables d'environnement"
+  );
+}
+
 const prisma = new PrismaClient();
 
 export const organizationSearch = tool(
