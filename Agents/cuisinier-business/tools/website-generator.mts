@@ -122,10 +122,10 @@ ${features.map(f => `- ${getFeatureDescription(f)}`).join('\n')}
   websiteType: websiteType,
   features: features,
   colorScheme: colorScheme,
-  htmlContent: generateHTMLForPreview(restaurantName, restaurantType, features, colorScheme, theme, layoutVersion),
-  cssContent: generateCSSForPreview(colorScheme),
-  jsContent: generateJSForPreview(features),
-  previewUrl: generateDataURL(restaurantName, restaurantType, features, colorScheme, theme, layoutVersion),
+  htmlContent: generateSimpleHTML(restaurantName, restaurantType, features, colorScheme),
+  cssContent: generateSimpleCSS(colorScheme),
+  jsContent: generateSimpleJS(features),
+  previewUrl: generateSimpleDataURL(restaurantName, restaurantType, features, colorScheme),
   technologies: ["HTML5", "CSS3", "JavaScript ES6", "Responsive Design"],
   seoOptimized: true,
   responsive: true,
@@ -2988,4 +2988,137 @@ function generateDataURL(restaurantName: string, restaurantType: string, feature
   const htmlContent = generateHTMLForPreview(restaurantName, restaurantType, features, colorScheme, theme, layoutVersion);
   const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`;
   return dataUrl;
+}
+
+// Fonctions simplifiées pour les métadonnées (pour éviter les erreurs JSON)
+function generateSimpleHTML(restaurantName: string, restaurantType: string, features: string[], colorScheme: string): string {
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${restaurantName}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .header { background: #2c3e50; color: white; padding: 20px; text-align: center; }
+        .hero { padding: 40px 20px; text-align: center; background: #ecf0f1; }
+        .menu { padding: 40px 20px; }
+        .contact { padding: 40px 20px; background: #f8f9fa; }
+        .btn { background: #e74c3c; color: white; padding: 10px 20px; border: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>${restaurantName}</h1>
+        <p>${restaurantType}</p>
+    </header>
+    <section class="hero">
+        <h2>Bienvenue chez ${restaurantName}</h2>
+        <p>Découvrez notre cuisine ${restaurantType.toLowerCase()} authentique</p>
+        <button class="btn">Réserver une table</button>
+    </section>
+    <section class="menu">
+        <h2>Notre Menu</h2>
+        <p>Découvrez nos spécialités préparées avec des ingrédients frais.</p>
+    </section>
+    <section class="contact">
+        <h2>Contact</h2>
+        <p>📍 Adresse: [Votre adresse]</p>
+        <p>📞 Téléphone: [Votre téléphone]</p>
+        <p>✉️ Email: [Votre email]</p>
+    </section>
+</body>
+</html>`;
+}
+
+function generateSimpleCSS(colorScheme: string): string {
+  const colors = {
+    elegant: { primary: '#2C3E50', accent: '#E74C3C' },
+    moderne: { primary: '#34495E', accent: '#1ABC9C' },
+    rustique: { primary: '#8B4513', accent: '#DAA520' },
+    minimaliste: { primary: '#000000', accent: '#FF6B35' },
+    chaleureux: { primary: '#D2691E', accent: '#FF8C00' }
+  };
+  
+  const scheme = colors[colorScheme as keyof typeof colors] || colors.moderne;
+  
+  return `body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+.header {
+    background: ${scheme.primary};
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.hero {
+    padding: 3rem 2rem;
+    text-align: center;
+    background: linear-gradient(135deg, ${scheme.primary}20, ${scheme.accent}20);
+}
+
+.btn {
+    background: ${scheme.accent};
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+    .hero { padding: 2rem 1rem; }
+    .header { padding: 1rem; }
+}`;
+}
+
+function generateSimpleJS(features: string[]): string {
+  return `// Site web interactif
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Site web chargé avec succès');
+    
+    // Smooth scroll pour les liens
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+    
+    ${features.includes('menu-interactif') ? `
+    // Menu interactif
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', function() {
+            this.classList.toggle('active');
+        });
+    });` : ''}
+    
+    ${features.includes('reservation') ? `
+    // Système de réservation
+    const reservationBtn = document.querySelector('.btn');
+    if (reservationBtn) {
+        reservationBtn.addEventListener('click', function() {
+            alert('Système de réservation - Appelez-nous au téléphone!');
+        });
+    }` : ''}
+});`;
+}
+
+function generateSimpleDataURL(restaurantName: string, restaurantType: string, features: string[], colorScheme: string): string {
+  const htmlContent = generateSimpleHTML(restaurantName, restaurantType, features, colorScheme);
+  return `data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`;
 } 

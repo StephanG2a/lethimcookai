@@ -1242,6 +1242,192 @@ export default function ChatPage() {
                     </div>
                   )}
 
+                  {/* Affichage des sites web générés */}
+                  {message.websites && message.websites.length > 0 && (
+                    <div className="mt-3 space-y-3">
+                      {message.websites.map((website, index) => (
+                        <div
+                          key={index}
+                          className="rounded-lg overflow-hidden border border-gray-200 bg-gradient-to-br from-green-50 to-teal-50"
+                        >
+                          {/* En-tête site web */}
+                          <div className="px-4 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                                  <span className="text-lg font-bold">🌐</span>
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-sm line-clamp-1">
+                                    {website.title}
+                                  </h4>
+                                  <p className="text-xs text-green-100">
+                                    {website.websiteType} • {website.colorScheme}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="text-right text-xs text-green-100">
+                                <div className="flex items-center space-x-1">
+                                  {website.responsive && <span>📱</span>}
+                                  {website.seoOptimized && <span>🔍</span>}
+                                  <span>✅</span>
+                                </div>
+                                <div>Prêt à déployer</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Aperçu du site web */}
+                          <div className="p-4 bg-white">
+                            <div className="mb-4">
+                              <div className="text-sm font-medium text-gray-900 mb-2">
+                                📋 Aperçu du site web
+                              </div>
+                              <div className="relative border border-gray-200 rounded-lg overflow-hidden">
+                                <iframe
+                                  src={website.previewUrl}
+                                  className="w-full h-64 sm:h-80"
+                                  title={`Aperçu de ${website.title}`}
+                                  sandbox="allow-same-origin"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Fonctionnalités */}
+                            {website.features.length > 0 && (
+                              <div className="mb-4">
+                                <div className="text-sm font-medium text-gray-900 mb-2">
+                                  ⚙️ Fonctionnalités incluses
+                                </div>
+                                <div className="flex flex-wrap gap-1">
+                                  {website.features.map((feature, featureIndex) => (
+                                    <span
+                                      key={featureIndex}
+                                      className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full"
+                                    >
+                                      {feature}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Technologies */}
+                            <div className="mb-4">
+                              <div className="text-sm font-medium text-gray-900 mb-2">
+                                💻 Technologies utilisées
+                              </div>
+                              <div className="flex flex-wrap gap-1">
+                                {website.technologies.map((tech, techIndex) => (
+                                  <span
+                                    key={techIndex}
+                                    className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full"
+                                  >
+                                    {tech}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Boutons d'action */}
+                            <div className="flex flex-col sm:flex-row gap-3">
+                              <button
+                                onClick={() => {
+                                  try {
+                                    // Créer une nouvelle fenêtre et écrire le HTML directement
+                                    const newWindow = window.open('', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+                                    if (newWindow) {
+                                      newWindow.document.write(website.htmlContent);
+                                      newWindow.document.close();
+                                      newWindow.focus();
+                                    } else {
+                                      // Fallback si le popup est bloqué
+                                      const blob = new Blob([website.htmlContent], { type: 'text/html;charset=utf-8' });
+                                      const url = URL.createObjectURL(blob);
+                                      const link = document.createElement('a');
+                                      link.href = url;
+                                      link.target = '_blank';
+                                      link.click();
+                                      URL.revokeObjectURL(url);
+                                    }
+                                  } catch (error) {
+                                    console.error('Erreur ouverture plein écran:', error);
+                                    alert('Erreur lors de l\'ouverture en plein écran. Vérifiez que les popups sont autorisés.');
+                                  }
+                                }}
+                                className="flex-1 text-center text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                              >
+                                🚀 Ouvrir en plein écran
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    if (navigator.clipboard && window.isSecureContext) {
+                                      await navigator.clipboard.writeText(website.htmlContent);
+                                    } else {
+                                      // Fallback pour les environnements non-sécurisés
+                                      const textArea = document.createElement("textarea");
+                                      textArea.value = website.htmlContent;
+                                      textArea.style.position = "absolute";
+                                      textArea.style.left = "-999999px";
+                                      document.body.appendChild(textArea);
+                                      textArea.focus();
+                                      textArea.select();
+                                      document.execCommand("copy");
+                                      document.body.removeChild(textArea);
+                                    }
+                                    // Feedback visuel
+                                    const button = event?.currentTarget as HTMLButtonElement;
+                                    if (button) {
+                                      const originalText = button.textContent;
+                                      button.textContent = "✅ Copié !";
+                                      setTimeout(() => {
+                                        button.textContent = originalText;
+                                      }, 2000);
+                                    }
+                                  } catch (err) {
+                                    console.error("Erreur lors de la copie:", err);
+                                    alert("Impossible de copier le code automatiquement");
+                                  }
+                                }}
+                                className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                              >
+                                📋 Copier HTML
+                              </button>
+                              <button
+                                onClick={() => {
+                                  const blob = new Blob([website.htmlContent], { type: 'text/html' });
+                                  const url = URL.createObjectURL(blob);
+                                  const link = document.createElement('a');
+                                  link.href = url;
+                                  link.download = `${website.restaurantName.replace(/\s+/g, '-').toLowerCase()}.html`;
+                                  document.body.appendChild(link);
+                                  link.click();
+                                  document.body.removeChild(link);
+                                  URL.revokeObjectURL(url);
+                                }}
+                                className="text-sm bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                              >
+                                💾 Télécharger
+                              </button>
+                            </div>
+
+                            {/* Métadonnées */}
+                            <div className="mt-4 pt-3 border-t border-gray-100">
+                              <div className="flex items-center justify-between text-xs text-gray-500">
+                                <span>Restaurant: {website.restaurantName}</span>
+                                <span>Type: {website.restaurantType}</span>
+                                <span>
+                                  Généré le: {new Date(website.generatedAt).toLocaleDateString('fr-FR')}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   {/* Affichage des services */}
                   {message.services && message.services.length > 0 && (
                     <div className="mt-3 space-y-3">
