@@ -7,6 +7,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  CLIENT
+  PRESTATAIRE
+  ADMIN
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password      String   // Hash du mot de passe
+  firstName     String?
+  lastName      String?
+  phone         String?
+  role          UserRole @default(CLIENT)
+  emailVerified Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  organizationId String?      // Optionnel, seulement pour les prestataires
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+}
+
 model Organization {
   id           String   @id @default(uuid())
   name         String
@@ -25,6 +48,7 @@ model Organization {
   
   // Relations
   services     Service[]
+  users        User[]   // Utilisateurs liés à cette organisation
 }
 
 enum ServiceType {

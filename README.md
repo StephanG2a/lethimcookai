@@ -61,6 +61,9 @@ npx prisma migrate dev --name nom_migration
 
 # Appliquer les migrations en production
 npx prisma migrate deploy
+
+# Créer des utilisateurs de test
+npm run seed-users
 ```
 
 ## 🚀 Démarrage rapide
@@ -76,6 +79,9 @@ npx prisma migrate dev
 
 # Peupler avec des données de test
 npm run seed
+
+# Créer des utilisateurs de test pour l'authentification
+npm run seed-users
 ```
 
 ### 2. Démarrer le serveur Next.js
@@ -89,6 +95,37 @@ npm run build && npm run start
 ```
 
 Le serveur sera accessible sur `http://localhost:3000`
+
+## 👥 Comptes de test pour l'authentification
+
+Après avoir exécuté `npm run seed-users`, vous pouvez tester l'authentification avec ces comptes :
+
+### 🧑‍💼 **Client**
+- **Email :** `client@test.fr`  
+- **Mot de passe :** `TestClient123`
+- **Rôle :** CLIENT
+- **Nom :** Jean Dupont
+
+### 🏢 **Prestataire**
+- **Email :** `prestataire@test.fr`
+- **Mot de passe :** `TestPrestataire123`  
+- **Rôle :** PRESTATAIRE
+- **Nom :** Marie Martin
+- **Organisation :** Lié à une organisation existante
+
+### ⚙️ **Admin**
+- **Email :** `admin@lethimcookai.fr`
+- **Mot de passe :** `AdminTest123`
+- **Rôle :** ADMIN  
+- **Nom :** Admin LetHimCookAI
+
+### 🧪 **Test de l'authentification**
+
+1. Allez sur `/auth/login` 
+2. Connectez-vous avec un des comptes ci-dessus
+3. Observez les changements dans le header (nom d'utilisateur, bouton déconnexion)
+4. Les prestataires voient en plus le bouton "Publier un service"
+5. Testez l'inscription sur `/auth/register` pour créer de nouveaux comptes
 
 ### 3. Démarrer le serveur CLI (optionnel)
 
@@ -404,6 +441,7 @@ updatedAt       TIMESTAMP
 ```bash
 # Base de données
 npm run seed                # Peupler la base avec des données de test
+npm run seed-users          # Créer des utilisateurs de test pour l'authentification
 
 # Développement
 npm run dev-next           # Next.js en mode développement
@@ -488,7 +526,18 @@ Importez cette collection pour tester rapidement :
 }
 ```
 
-## 🔐 Sécurité
+## 🔐 Authentification et Sécurité
+
+### Système d'authentification complet
+
+- ✅ **Inscription/Connexion** avec JWT tokens
+- ✅ **Hashage sécurisé** des mots de passe (bcrypt)
+- ✅ **Rôles utilisateur** (CLIENT, PRESTATAIRE, ADMIN)
+- ✅ **Validation robuste** des données
+- ✅ **Session management** avec localStorage
+- ✅ **API protégées** avec middleware d'authentification
+
+### Sécurité serveur
 
 - L'authentification par token Bearer est optionnelle (configurable)
 - Les tokens sont stockés en mémoire côté serveur
