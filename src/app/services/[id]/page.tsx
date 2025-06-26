@@ -1,8 +1,11 @@
+"use client";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+
 import {
   Card,
   CardContent,
@@ -25,6 +28,7 @@ import {
   Award,
   Phone,
   Mail,
+  Bot,
 } from "lucide-react";
 
 // Fonction pour récupérer un service par son ID
@@ -112,11 +116,58 @@ interface ServiceDetailPageProps {
   }>;
 }
 
-export default async function ServiceDetailPage({
+export default function ServiceDetailPage({
   params,
 }: ServiceDetailPageProps) {
-  const { id } = await params;
-  const service = await getService(id);
+  const [service, setService] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Charger le service
+  useEffect(() => {
+    const loadService = async () => {
+      const resolvedParams = await params;
+      const { id } = resolvedParams;
+      const serviceData = await getService(id);
+      
+      if (!serviceData) {
+        notFound();
+      }
+      
+      setService(serviceData);
+      setLoading(false);
+    };
+    
+    loadService();
+  }, [params]);
+
+  const handleAiExecution = () => {
+    // Construire le message initial avec le contexte du service
+    const serviceContext = `🤖 **EXÉCUTION AUTOMATIQUE DE SERVICE**
+
+**Service demandé :** ${service.title}
+**Description :** ${service.description}
+**Organisation :** ${service.organization?.name || "Non spécifiée"}
+**Prix :** ${service.lowerPrice}€ - ${service.upperPrice}€
+**Tags :** ${service.tags.join(", ")}
+
+**Votre demande :** `;
+
+    // Rediriger vers le chat avec l'agent business et le contexte pré-rempli
+    const chatUrl = `/chat?agent=cuisinier-business&message=${encodeURIComponent(serviceContext)}`;
+    window.location.href = chatUrl;
+  };
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto max-w-screen-xl px-4 py-8">
+          <div className="flex items-center justify-center min-h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   if (!service) {
     notFound();
@@ -335,6 +386,33 @@ export default async function ServiceDetailPage({
                 </div>
               </CardContent>
             </Card>
+
+            {/* Interface d'exécution IA */}
+            {service.isAIReplaceable && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Bot className="h-5 w-5 text-purple-600" />
+                    Exécution automatique IA
+                  </CardTitle>
+                  <CardDescription>
+                    Ce service peut être réalisé automatiquement par notre Chef Cuisinier IA Business
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button
+                    onClick={handleAiExecution}
+                    className="w-full bg-purple-600 hover:bg-purple-700"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Discuter avec le Chef IA Business
+                  </Button>
+                  <p className="text-sm text-neutral-600 text-center">
+                    Vous serez redirigé vers le chat avec le contexte du service pré-rempli
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Informations détaillées */}
             <Card>

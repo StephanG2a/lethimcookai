@@ -41,26 +41,6 @@ model Organization {
   users       User[]
 }
 
-model Service {
-  id              String          @id @default(uuid())
-  title           String
-  description     String
-  tags            String[]
-  isAIReplaceable Boolean         @default(false)
-  createdAt       DateTime        @default(now())
-  organizationId  String
-  updatedAt       DateTime        @updatedAt
-  billingPlan     BillingPlan     @default(PROJECT)
-  consumptionType ConsumptionType @default(PRESTATION)
-  lowerPrice      Float
-  mainMedia       String?
-  paymentMode     PaymentMode     @default(EUR)
-  serviceType     ServiceType     @default(MIXED)
-  summary         String?
-  upperPrice      Float
-  organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-}
-
 enum UserRole {
   CLIENT
   PRESTATAIRE
@@ -94,4 +74,41 @@ enum PaymentMode {
   USD
   GBP
   CRYPTO
+}
+
+model Service {
+  id              String          @id @default(uuid())
+  title           String
+  summary         String?         // Résumé court
+  description     String
+  mainMedia       String?         // URL de la bannière/média principal
+  serviceType     ServiceType     @default(MIXED)
+  consumptionType ConsumptionType @default(PRESTATION)
+  billingPlan     BillingPlan     @default(PROJECT)
+  lowerPrice      Float
+  upperPrice      Float
+  paymentMode     PaymentMode     @default(EUR)
+  tags            String[]
+  isAIReplaceable Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  // Relations
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  aiExecutions    ServiceExecution[]
+}
+
+model ServiceExecution {
+  id              String   @id @default(uuid())
+  userRequest     String   // La demande du client
+  aiResponse      String   // La réponse de l'IA
+  executedBy      String   @default("Chef Cuisinier IA Business")
+  threadId        String?  // ID de thread pour traçabilité
+  executedAt      DateTime @default(now())
+  responseLength  Int?     // Longueur de la réponse pour analytics
+  
+  // Relations
+  serviceId       String
+  service         Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 }

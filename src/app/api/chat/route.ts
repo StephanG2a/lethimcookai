@@ -111,6 +111,7 @@ export async function POST(request: NextRequest) {
                           let images: any[] = [];
                           let videos: any[] = [];
                           let pdfs: any[] = [];
+                          let websites: any[] = [];
                           let services: any[] = [];
                           let organizations: any[] = [];
                           let prestataires: any[] = [];
@@ -201,6 +202,27 @@ export async function POST(request: NextRequest) {
                             }
                           }
 
+                          // Extraire les métadonnées de sites web si présentes
+                          const websiteMetaMatch = output.match(
+                            /\*\*MÉTADONNÉES_WEBSITE:\*\* (.+?)(?=\n|$)/
+                          );
+                          if (websiteMetaMatch) {
+                            try {
+                              const websiteData = JSON.parse(websiteMetaMatch[1]);
+                              websites = [websiteData];
+                              // Retirer les métadonnées du contenu visible
+                              content = output.replace(
+                                /---\n\*\*MÉTADONNÉES_WEBSITE:\*\* .+/s,
+                                "---"
+                              );
+                            } catch (e) {
+                              console.warn(
+                                "Erreur parsing métadonnées website:",
+                                e
+                              );
+                            }
+                          }
+
                           // Extraire les métadonnées d'organisations si présentes
                           const orgMetaMatch = output.match(
                             /\*\*MÉTADONNÉES_ORGANISATIONS:\*\* (.+?)(?=\n|$)/
@@ -252,6 +274,7 @@ export async function POST(request: NextRequest) {
                               images: images.length > 0 ? images : undefined,
                               videos: videos.length > 0 ? videos : undefined,
                               pdfs: pdfs.length > 0 ? pdfs : undefined,
+                              websites: websites.length > 0 ? websites : undefined,
                               services:
                                 services.length > 0 ? services : undefined,
                               organizations:

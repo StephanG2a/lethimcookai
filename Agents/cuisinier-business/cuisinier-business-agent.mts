@@ -25,6 +25,7 @@ import { pdfCreator } from "../cuisinier-premium/tools/pdf-creator.mts";
 import { socialMediaTemplates } from "../cuisinier-premium/tools/social-media-templates.mts";
 import { videoGenerator } from "../cuisinier-premium/tools/video-generator.mts";
 import { labelCreator } from "../cuisinier-premium/tools/label-creator.mts";
+import { websiteGenerator } from "../cuisinier-premium/tools/website-generator.mts";
 
 // Import des outils BUSINESS (formule 3)
 import { organizationSearch } from "./tools/organization-search.mts";
@@ -34,6 +35,7 @@ import { prestataireSearch } from "./tools/prestataire-search.mts";
 import { costCalculator } from "./tools/cost-calculator.mts";
 import { businessPlanGenerator } from "./tools/business-plan-generator.mts";
 import { marketAnalysis } from "./tools/market-analysis.mts";
+import { serviceExecutor } from "./tools/service-executor.mts";
 
 // Configuration du modèle avec vérification de la clé API
 if (!process.env.OPENAI_API_KEY) {
@@ -69,7 +71,8 @@ const tools = [
   winePairing,
   cookingTechniques,
 
-  // Outils Premium (Formule 2) - 6 outils
+  // Outils Premium (Formule 2) - 7 outils
+  websiteGenerator, // EN PREMIER pour priorité sites web
   logoGenerator,
   culinaryImageGenerator,
   pdfCreator,
@@ -85,6 +88,7 @@ const tools = [
   costCalculator,
   businessPlanGenerator,
   marketAnalysis,
+  serviceExecutor,
 ];
 
 // Configuration de l'agent avec mémoire
@@ -95,10 +99,16 @@ const systemMessage = `Tu es un Chef Cuisinier IA Expert - VERSION BUSINESS.
 
 RÈGLE ABSOLUE : Si un outil répond, retourne UNIQUEMENT sa réponse EXACTEMENT comme elle est. N'ajoute RIEN.
 
+🎯 **MISSION SPÉCIALE - EXÉCUTION AUTOMATIQUE DE SERVICES :**
+Quand un client demande l'exécution d'un service "IA compatible", tu REMPLACES le prestataire humain.
+Tu dois fournir le même niveau de service qu'un professionnel humain en utilisant tous tes outils.
+
 Spécialités BUSINESS :
 • Formule Basic : recettes, nutrition, substitutions, conversions, menus, vins, techniques
-• Formule Premium : logos, images, PDFs, templates, vidéos, étiquettes
+• Formule Premium : logos, images, PDFs, templates, vidéos, étiquettes    
 • Formule Business : recherche organisations/services avancée, calculs coûts, business plans, analyses marché
+• Service Executor : exécution automatique de services IA compatible
+• Service Executor : exécution automatique de services IA compatible
 
 RECHERCHE - Tu disposes de 4 outils complémentaires :
 
@@ -115,6 +125,44 @@ IMPORTANT :
 - Pour "service", "prestation", "formation", "cours" → utilise service_search ou quick_service_search
 
 Tu es un consultant culinaire complet pour entrepreneurs et professionnels de la restauration.
+
+POUR L'EXÉCUTION AUTOMATIQUE :
+- Utilise PRIORITAIREMENT l'outil "serviceExecutor" pour les services IA compatible
+- Pour les SITES WEB : utilise directement "websiteGenerator" avec les paramètres appropriés
+- Analyse la demande client avec précision
+- Fournis un résultat complet, professionnel et actionnable
+- Sois aussi efficace qu'un prestataire humain spécialisé
+- Recommande des outils spécialisés pour approfondir
+
+RÈGLES SPÉCIALES - OUTILS À UTILISER :
+1. **SITES WEB** → TOUJOURS utiliser "websiteGenerator" :
+   - "créer un site", "faire un site", "site vitrine", "site web"
+   - "développement web", "site internet", "page web"
+   - Exemple: "Fait le site stp" = websiteGenerator
+
+2. **SERVICES IA COMPATIBLE** → utiliser "serviceExecutor" :
+   - Demandes d'exécution de service spécifique
+   - Format "EXÉCUTION AUTOMATIQUE DE SERVICE"
+
+IMPORTANT : Pour TOUS les sites web, utilise websiteGenerator avec :
+- restaurantName: nom extrait de la demande
+- restaurantType: "Restaurant" par défaut
+- websiteType: "vitrine" par défaut 
+- features: ["contact", "menu-interactif"]
+- colorScheme: "moderne" par défaut
+
+EXEMPLE CONCRET :
+Demande: "🤖 EXÉCUTION AUTOMATIQUE DE SERVICE
+Service: Création de site vitrine pour restaurant
+Votre demande: Fait le site stp"
+
+→ UTILISE websiteGenerator({
+  restaurantName: "Mon Restaurant",
+  restaurantType: "Restaurant", 
+  websiteType: "vitrine",
+  features: ["contact", "menu-interactif", "reservation"],
+  colorScheme: "moderne"
+})
 
 Ne reformule jamais. Ne commente jamais. Ne répète jamais.`;
 
@@ -233,8 +281,8 @@ Reformulez votre demande et je serai ravi de vous aider ! 🍴✨`;
 export function getAgentStats() {
   return {
     name: "Chef Cuisinier IA Business",
-    version: "3.0.0 - Business avec recherche services",
-    formule: "Business (Basic + Premium + Pro)",
+    version: "3.1.0 - Business avec exécution automatique de services",
+    formule: "Business (Basic + Premium + Pro + Service Executor)",
     tools: [
       // Outils Basic hérités - 7 outils
       {
@@ -272,7 +320,7 @@ export function getAgentStats() {
         description: "Techniques culinaires avancées",
         category: "Basic - Techniques",
       },
-      // Outils Premium hérités - 6 outils
+      // Outils Premium hérités - 7 outils
       {
         name: "logoGenerator",
         description: "Génération de logos pour restaurants",
@@ -303,7 +351,12 @@ export function getAgentStats() {
         description: "Étiquettes pour produits alimentaires",
         category: "Premium - Packaging",
       },
-      // Outils Business exclusifs - 5 outils
+      {
+        name: "websiteGenerator",
+        description: "Génération de sites web pour restaurants",
+        category: "Premium - Web",
+      },
+      // Outils Business exclusifs - 6 outils
       {
         name: "organizationSearch",
         description: "Recherche d'organisations culinaires",
@@ -329,6 +382,11 @@ export function getAgentStats() {
         description: "Analyse concurrentielle et de marché",
         category: "Business - Analyse",
       },
+      {
+        name: "serviceExecutor",
+        description: "Exécution automatique de services IA compatible",
+        category: "Business - Exécution Auto",
+      },
     ],
     capabilities: [
       "Toutes les fonctionnalités Basic et Premium",
@@ -337,7 +395,8 @@ export function getAgentStats() {
       "Business plans complets",
       "Analyses de marché concurrentielles",
       "Consulting entrepreneurial culinaire",
+      "Exécution automatique de services IA compatible",
     ],
-    totalTools: 18, // 7 Basic + 6 Premium + 5 Business
+    totalTools: 20, // 7 Basic + 7 Premium + 6 Business
   };
 }
