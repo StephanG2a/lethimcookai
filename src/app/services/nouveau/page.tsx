@@ -1,107 +1,138 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { MainLayout } from '@/components/layout/main-layout'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Upload, Plus, X, MapPin, Clock, Euro, Zap, AlertCircle, CheckCircle } from 'lucide-react'
+import { useState } from "react";
+import { MainLayout } from "@/components/layout/main-layout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Upload,
+  Plus,
+  X,
+  MapPin,
+  Clock,
+  Euro,
+  Zap,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 
 const categories = [
-  'Photographie', 'Marketing', 'Développement', 'Design', 'Formation', 
-  'SEO', 'Gastronomie', 'Consulting', 'Événementiel', 'Rédaction'
-]
+  "Photographie",
+  "Marketing",
+  "Développement",
+  "Design",
+  "Formation",
+  "SEO",
+  "Gastronomie",
+  "Consulting",
+  "Événementiel",
+  "Rédaction",
+];
 
 export default function NewServicePage() {
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    fullDescription: '',
-    price: '',
-    type: 'ONLINE' as 'IRL' | 'ONLINE',
-    duration: '',
-    location: '',
+    title: "",
+    description: "",
+    fullDescription: "",
+    price: "",
+    type: "ONLINE" as "IRL" | "ONLINE",
+    duration: "",
+    location: "",
     tags: [] as string[],
     replacedByAI: false,
-    deliverables: [''],
-    images: [] as string[]
-  })
+    deliverables: [""],
+    images: [] as string[],
+  });
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }))
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
-  }
+  };
 
   const handleTagToggle = (tag: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       tags: prev.tags.includes(tag)
-        ? prev.tags.filter(t => t !== tag)
-        : [...prev.tags, tag]
-    }))
-  }
+        ? prev.tags.filter((t) => t !== tag)
+        : [...prev.tags, tag],
+    }));
+  };
 
   const handleDeliverableChange = (index: number, value: string) => {
-    const newDeliverables = [...formData.deliverables]
-    newDeliverables[index] = value
-    setFormData(prev => ({ ...prev, deliverables: newDeliverables }))
-  }
+    const newDeliverables = [...formData.deliverables];
+    newDeliverables[index] = value;
+    setFormData((prev) => ({ ...prev, deliverables: newDeliverables }));
+  };
 
   const addDeliverable = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      deliverables: [...prev.deliverables, '']
-    }))
-  }
+      deliverables: [...prev.deliverables, ""],
+    }));
+  };
 
   const removeDeliverable = (index: number) => {
     if (formData.deliverables.length > 1) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        deliverables: prev.deliverables.filter((_, i) => i !== index)
-      }))
+        deliverables: prev.deliverables.filter((_, i) => i !== index),
+      }));
     }
-  }
+  };
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
-    if (!formData.title.trim()) newErrors.title = 'Le titre est requis'
-    if (!formData.description.trim()) newErrors.description = 'La description courte est requise'
-    if (!formData.fullDescription.trim()) newErrors.fullDescription = 'La description détaillée est requise'
-    if (!formData.price || parseFloat(formData.price) <= 0) newErrors.price = 'Le prix doit être supérieur à 0'
-    if (!formData.duration.trim()) newErrors.duration = 'La durée est requise'
-    if (formData.type === 'IRL' && !formData.location.trim()) newErrors.location = 'La localisation est requise pour les services présentiels'
-    if (formData.tags.length === 0) newErrors.tags = 'Sélectionnez au moins un tag'
-    if (formData.deliverables.some(d => !d.trim())) newErrors.deliverables = 'Tous les livrables doivent être renseignés'
+    if (!formData.title.trim()) newErrors.title = "Le titre est requis";
+    if (!formData.description.trim())
+      newErrors.description = "La description courte est requise";
+    if (!formData.fullDescription.trim())
+      newErrors.fullDescription = "La description détaillée est requise";
+    if (!formData.price || parseFloat(formData.price) <= 0)
+      newErrors.price = "Le prix doit être supérieur à 0";
+    if (!formData.duration.trim()) newErrors.duration = "La durée est requise";
+    if (formData.type === "IRL" && !formData.location.trim())
+      newErrors.location =
+        "La localisation est requise pour les services présentiels";
+    if (formData.tags.length === 0)
+      newErrors.tags = "Sélectionnez au moins un tag";
+    if (formData.deliverables.some((d) => !d.trim()))
+      newErrors.deliverables = "Tous les livrables doivent être renseignés";
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!validateForm()) return
+    e.preventDefault();
 
-    setIsSubmitting(true)
-    
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+
     // Simulation d'envoi
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    console.log('Service créé:', formData)
-    alert('Service créé avec succès !')
-    
-    setIsSubmitting(false)
-  }
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    console.log("Service créé:", formData);
+    alert("Service créé avec succès !");
+
+    setIsSubmitting(false);
+  };
 
   return (
     <MainLayout>
@@ -131,8 +162,8 @@ export default function NewServicePage() {
                   id="title"
                   placeholder="Ex: Shooting photo culinaire professionnel"
                   value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
-                  className={errors.title ? 'border-red-500' : ''}
+                  onChange={(e) => handleInputChange("title", e.target.value)}
+                  className={errors.title ? "border-red-500" : ""}
                 />
                 {errors.title && (
                   <p className="text-sm text-red-500 mt-1 flex items-center">
@@ -148,8 +179,10 @@ export default function NewServicePage() {
                   id="description"
                   placeholder="Résumé de votre service en 1-2 phrases"
                   value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  className={errors.description ? 'border-red-500' : ''}
+                  onChange={(e) =>
+                    handleInputChange("description", e.target.value)
+                  }
+                  className={errors.description ? "border-red-500" : ""}
                   rows={3}
                 />
                 {errors.description && (
@@ -166,8 +199,10 @@ export default function NewServicePage() {
                   id="fullDescription"
                   placeholder="Décrivez en détail votre service, le déroulement, ce qui est inclus..."
                   value={formData.fullDescription}
-                  onChange={(e) => handleInputChange('fullDescription', e.target.value)}
-                  className={errors.fullDescription ? 'border-red-500' : ''}
+                  onChange={(e) =>
+                    handleInputChange("fullDescription", e.target.value)
+                  }
+                  className={errors.fullDescription ? "border-red-500" : ""}
                   rows={8}
                 />
                 {errors.fullDescription && (
@@ -199,8 +234,12 @@ export default function NewServicePage() {
                       type="number"
                       placeholder="350"
                       value={formData.price}
-                      onChange={(e) => handleInputChange('price', e.target.value)}
-                      className={`pl-10 ${errors.price ? 'border-red-500' : ''}`}
+                      onChange={(e) =>
+                        handleInputChange("price", e.target.value)
+                      }
+                      className={`pl-10 ${
+                        errors.price ? "border-red-500" : ""
+                      }`}
                     />
                   </div>
                   {errors.price && (
@@ -219,8 +258,12 @@ export default function NewServicePage() {
                       id="duration"
                       placeholder="2 heures"
                       value={formData.duration}
-                      onChange={(e) => handleInputChange('duration', e.target.value)}
-                      className={`pl-10 ${errors.duration ? 'border-red-500' : ''}`}
+                      onChange={(e) =>
+                        handleInputChange("duration", e.target.value)
+                      }
+                      className={`pl-10 ${
+                        errors.duration ? "border-red-500" : ""
+                      }`}
                     />
                   </div>
                   {errors.duration && (
@@ -240,8 +283,10 @@ export default function NewServicePage() {
                       type="radio"
                       name="type"
                       value="ONLINE"
-                      checked={formData.type === 'ONLINE'}
-                      onChange={(e) => handleInputChange('type', e.target.value)}
+                      checked={formData.type === "ONLINE"}
+                      onChange={(e) =>
+                        handleInputChange("type", e.target.value)
+                      }
                       className="text-orange-600"
                     />
                     <span>En ligne</span>
@@ -251,8 +296,10 @@ export default function NewServicePage() {
                       type="radio"
                       name="type"
                       value="IRL"
-                      checked={formData.type === 'IRL'}
-                      onChange={(e) => handleInputChange('type', e.target.value)}
+                      checked={formData.type === "IRL"}
+                      onChange={(e) =>
+                        handleInputChange("type", e.target.value)
+                      }
                       className="text-orange-600"
                     />
                     <span>Présentiel</span>
@@ -260,7 +307,7 @@ export default function NewServicePage() {
                 </div>
               </div>
 
-              {formData.type === 'IRL' && (
+              {formData.type === "IRL" && (
                 <div>
                   <Label htmlFor="location">Localisation *</Label>
                   <div className="relative">
@@ -269,8 +316,12 @@ export default function NewServicePage() {
                       id="location"
                       placeholder="Paris et proche banlieue"
                       value={formData.location}
-                      onChange={(e) => handleInputChange('location', e.target.value)}
-                      className={`pl-10 ${errors.location ? 'border-red-500' : ''}`}
+                      onChange={(e) =>
+                        handleInputChange("location", e.target.value)
+                      }
+                      className={`pl-10 ${
+                        errors.location ? "border-red-500" : ""
+                      }`}
                     />
                   </div>
                   {errors.location && (
@@ -287,7 +338,9 @@ export default function NewServicePage() {
                   <input
                     type="checkbox"
                     checked={formData.replacedByAI}
-                    onChange={(e) => handleInputChange('replacedByAI', e.target.checked)}
+                    onChange={(e) =>
+                      handleInputChange("replacedByAI", e.target.checked)
+                    }
                     className="rounded text-orange-600"
                   />
                   <span className="flex items-center">
@@ -296,7 +349,8 @@ export default function NewServicePage() {
                   </span>
                 </label>
                 <p className="text-sm text-neutral-500 mt-1">
-                  Cochez cette case si votre service peut potentiellement être automatisé par l'IA
+                  Cochez cette case si votre service peut potentiellement être
+                  automatisé par l'IA
                 </p>
               </div>
             </CardContent>
@@ -312,10 +366,12 @@ export default function NewServicePage() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {categories.map(category => (
+                {categories.map((category) => (
                   <Badge
                     key={category}
-                    variant={formData.tags.includes(category) ? 'default' : 'outline'}
+                    variant={
+                      formData.tags.includes(category) ? "default" : "outline"
+                    }
                     className="cursor-pointer"
                     onClick={() => handleTagToggle(category)}
                   >
@@ -348,7 +404,9 @@ export default function NewServicePage() {
                       <Input
                         placeholder="Ex: 10-15 photos haute résolution"
                         value={deliverable}
-                        onChange={(e) => handleDeliverableChange(index, e.target.value)}
+                        onChange={(e) =>
+                          handleDeliverableChange(index, e.target.value)
+                        }
                       />
                     </div>
                     {formData.deliverables.length > 1 && (
@@ -394,7 +452,8 @@ export default function NewServicePage() {
               <div className="border-2 border-dashed border-neutral-300 rounded-lg p-8 text-center">
                 <Upload className="h-12 w-12 mx-auto text-neutral-400 mb-4" />
                 <p className="text-neutral-600 mb-2">
-                  Glissez-déposez vos images ici ou cliquez pour les sélectionner
+                  Glissez-déposez vos images ici ou cliquez pour les
+                  sélectionner
                 </p>
                 <p className="text-sm text-neutral-500">
                   Formats acceptés: JPG, PNG, WebP • Taille max: 5MB
@@ -428,5 +487,5 @@ export default function NewServicePage() {
         </form>
       </div>
     </MainLayout>
-  )
-} 
+  );
+}
