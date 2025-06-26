@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/lib/useAuth";
 import {
   Upload,
   Plus,
@@ -40,6 +42,14 @@ const categories = [
 ];
 
 export default function NewServicePage() {
+  const router = useRouter();
+  const {
+    user,
+    isAuthenticated,
+    isLoading: authLoading,
+    authenticatedFetch,
+  } = useAuth();
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -56,6 +66,42 @@ export default function NewServicePage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Vérifier l'authentification et le rôle
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push("/auth/login?redirect=/services/nouveau");
+      return;
+    }
+
+    if (!authLoading && isAuthenticated && user?.role !== "PRESTATAIRE") {
+      router.push("/services");
+      return;
+    }
+  }, [isAuthenticated, authLoading, user, router]);
+
+  // Afficher un écran de chargement pendant la vérification d'authentification
+  if (authLoading) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+              <p className="text-neutral-600">
+                Vérification des permissions...
+              </p>
+            </div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  // Si pas authentifié ou pas prestataire, on ne rend rien
+  if (!isAuthenticated || user?.role !== "PRESTATAIRE") {
+    return null;
+  }
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -125,13 +171,37 @@ export default function NewServicePage() {
 
     setIsSubmitting(true);
 
-    // Simulation d'envoi
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      const response = await authenticatedFetch("/api/services/create", {
+        method: "POST",
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          fullDescription: formData.fullDescription,
+          price: formData.price,
+          duration: formData.duration,
+          type: formData.type,
+          location: formData.location,
+          tags: formData.tags,
+          deliverables: formData.deliverables,
+          replacedByAI: formData.replacedByAI,
+        }),
+      });
 
-    console.log("Service créé:", formData);
-    alert("Service créé avec succès !");
+      const data = await response.json();
 
-    setIsSubmitting(false);
+      if (data.success) {
+        alert("Service créé avec succès !");
+        router.push(`/services/${data.service.id}`);
+      } else {
+        setErrors({ general: data.error });
+      }
+    } catch (error) {
+      setErrors({ general: "Erreur de connexion au serveur" });
+      console.error("Erreur création service:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -142,11 +212,21 @@ export default function NewServicePage() {
             Créer un nouveau service
           </h1>
           <p className="text-lg text-neutral-600">
-            Partagez votre expertise avec la communauté culinaire
+            Partagez votre expertise avec{" "}
+            {user?.organization?.name || "la communauté culinaire"}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Erreur générale */}
+          {errors.general && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+              <p className="text-sm text-red-600 flex items-center">
+                <AlertCircle className="h-4 w-4 mr-2" />
+                {errors.general}
+              </p>
+            </div>
+          )}
           {/* Informations générales */}
           <Card>
             <CardHeader>
