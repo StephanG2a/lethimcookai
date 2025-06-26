@@ -25,8 +25,6 @@ import { pdfCreator } from "../cuisinier-premium/tools/pdf-creator.mts";
 import { socialMediaTemplates } from "../cuisinier-premium/tools/social-media-templates.mts";
 import { videoGenerator } from "../cuisinier-premium/tools/video-generator.mts";
 import { labelCreator } from "../cuisinier-premium/tools/label-creator.mts";
-import { websiteGenerator } from "../cuisinier-premium/tools/website-generator.mts";
-
 // Import des outils BUSINESS (formule 3)
 import { organizationSearch } from "./tools/organization-search.mts";
 import { serviceSearch } from "./tools/service-search.mts";
@@ -36,6 +34,7 @@ import { costCalculator } from "./tools/cost-calculator.mts";
 import { businessPlanGenerator } from "./tools/business-plan-generator.mts";
 import { marketAnalysis } from "./tools/market-analysis.mts";
 import { serviceExecutor } from "./tools/service-executor.mts";
+import { websiteGenerator } from "./tools/website-generator.mts";
 
 // Configuration du modèle avec vérification de la clé API
 if (!process.env.OPENAI_API_KEY) {
@@ -71,8 +70,7 @@ const tools = [
   winePairing,
   cookingTechniques,
 
-  // Outils Premium (Formule 2) - 7 outils
-  websiteGenerator, // EN PREMIER pour priorité sites web
+  // Outils Premium (Formule 2) - 6 outils
   logoGenerator,
   culinaryImageGenerator,
   pdfCreator,
@@ -80,7 +78,8 @@ const tools = [
   videoGenerator,
   labelCreator,
 
-  // Outils Business (Formule 3) - 7 outils
+  // Outils Business (Formule 3) - 8 outils
+  websiteGenerator, // EN PREMIER pour priorité sites web
   organizationSearch,
   serviceSearch,
   quickServiceSearch,
@@ -320,7 +319,7 @@ export function getAgentStats() {
         description: "Techniques culinaires avancées",
         category: "Basic - Techniques",
       },
-      // Outils Premium hérités - 7 outils
+      // Outils Premium hérités - 6 outils
       {
         name: "logoGenerator",
         description: "Génération de logos pour restaurants",
@@ -351,12 +350,12 @@ export function getAgentStats() {
         description: "Étiquettes pour produits alimentaires",
         category: "Premium - Packaging",
       },
+      // Outils Business exclusifs - 8 outils
       {
         name: "websiteGenerator",
         description: "Génération de sites web pour restaurants",
-        category: "Premium - Web",
+        category: "Business - Web",
       },
-      // Outils Business exclusifs - 6 outils
       {
         name: "organizationSearch",
         description: "Recherche d'organisations culinaires",
@@ -397,6 +396,6 @@ export function getAgentStats() {
       "Consulting entrepreneurial culinaire",
       "Exécution automatique de services IA compatible",
     ],
-    totalTools: 20, // 7 Basic + 7 Premium + 6 Business
+    totalTools: 21, // 7 Basic + 6 Premium + 8 Business
   };
 }
