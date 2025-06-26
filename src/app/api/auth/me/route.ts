@@ -66,6 +66,12 @@ export async function GET(request: NextRequest) {
             logo: user.organization.logo,
           }
         : null,
+      // Informations d'abonnement
+      subscriptionPlan: user.subscriptionPlan,
+      subscriptionStatus: user.subscriptionStatus,
+      subscriptionStart: user.subscriptionStart,
+      subscriptionEnd: user.subscriptionEnd,
+      trialUsed: user.trialUsed,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

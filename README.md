@@ -112,11 +112,19 @@ Le serveur sera accessible sur `http://localhost:3000`
 
 Après avoir exécuté `npm run seed-users`, vous pouvez tester l'authentification avec ces comptes :
 
-### 🧑‍💼 **Client**
-- **Email :** `client@test.fr`  
-- **Mot de passe :** `TestClient123`
-- **Rôle :** CLIENT
-- **Nom :** Jean Dupont
+### 🧑‍💼 **Clients avec différents abonnements**
+
+- **🆓 Client FREE :** `client@test.fr` / `TestClient123`
+  - Accès IA Basic uniquement
+  - Plan : FREE, Status : ACTIVE
+
+- **💎 Client PREMIUM :** `client-premium@test.fr` / `TestClient123`  
+  - Accès IA Basic + Premium
+  - Plan : PREMIUM, Status : ACTIVE, expire dans 30 jours
+
+- **🚀 Client BUSINESS :** `client-business@test.fr` / `TestClient123`
+  - Accès à toutes les IAs (Basic + Premium + Business)
+  - Plan : BUSINESS, Status : ACTIVE, expire dans 1 an
 
 ### 🏢 **Prestataire**
 - **Email :** `prestataire@test.fr`
@@ -138,6 +146,26 @@ Après avoir exécuté `npm run seed-users`, vous pouvez tester l'authentificati
 3. Observez les changements dans le header (nom d'utilisateur, bouton déconnexion)
 4. Les prestataires voient en plus le bouton "Publier un service"
 5. Testez l'inscription sur `/auth/register` pour créer de nouveaux comptes
+
+### 💰 **Test du système d'abonnements**
+
+Le système d'abonnements contrôle l'accès aux différents agents IA :
+
+1. **Connectez-vous avec un client FREE** et allez sur `/chat` :
+   - ✅ Accès à l'agent "Cuisinier Basic" 
+   - 🔒 Agents Premium et Business grisés avec message d'upgrade
+
+2. **Connectez-vous avec un client PREMIUM** :
+   - ✅ Accès aux agents Basic et Premium
+   - 🔒 Agent Business grisé
+
+3. **Connectez-vous avec un client BUSINESS** :
+   - ✅ Accès complet à tous les agents (Basic, Premium, Business)
+
+Les agents non accessibles affichent :
+- Interface grisée avec icône 🔒
+- Message d'upgrade personnalisé
+- Bouton "Upgrader maintenant" (interface préparée)
 
 ### 3. Démarrer le serveur CLI (optionnel)
 

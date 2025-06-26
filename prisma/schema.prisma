@@ -20,6 +20,13 @@ model User {
   updatedAt      DateTime      @updatedAt
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id])
+  
+  // Système d'abonnements
+  subscriptionPlan    SubscriptionPlan @default(FREE)
+  subscriptionStatus  SubscriptionStatus @default(ACTIVE)
+  subscriptionStart   DateTime?
+  subscriptionEnd     DateTime?
+  trialUsed          Boolean @default(false)
 }
 
 model Organization {
@@ -65,6 +72,19 @@ enum UserRole {
   CLIENT
   PRESTATAIRE
   ADMIN
+}
+
+enum SubscriptionPlan {
+  FREE      // Accès à l'IA Basic seulement
+  PREMIUM   // Accès à l'IA Basic + Premium
+  BUSINESS  // Accès à toutes les IAs (Basic + Premium + Business)
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  TRIAL
 }
 
 enum ServiceType {

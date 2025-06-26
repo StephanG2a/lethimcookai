@@ -15,6 +15,12 @@ interface User {
     name: string;
     sector: string;
   } | null;
+  // Système d'abonnements
+  subscriptionPlan: "FREE" | "PREMIUM" | "BUSINESS";
+  subscriptionStatus: "ACTIVE" | "EXPIRED" | "CANCELLED" | "TRIAL";
+  subscriptionStart: string | null;
+  subscriptionEnd: string | null;
+  trialUsed: boolean;
 }
 
 interface AuthState {
@@ -33,8 +39,8 @@ export function useAuth() {
   });
 
   useEffect(() => {
-    // Charger les données d'authentification depuis localStorage
-    const loadAuthFromStorage = () => {
+    // Charger les données d'authentification depuis localStorage et vérifier avec l'API
+    const loadAuthFromStorage = async () => {
       try {
         const token = localStorage.getItem("auth_token");
         const userDataString = localStorage.getItem("user_data");
@@ -47,6 +53,32 @@ export function useAuth() {
             isAuthenticated: true,
             isLoading: false,
           });
+
+          // Vérifier le profil avec l'API pour mettre à jour les données d'abonnement
+          try {
+            const response = await fetch("/api/auth/me", {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success) {
+                // Mettre à jour avec les données fraîches de l'API
+                localStorage.setItem("user_data", JSON.stringify(data.user));
+                setAuthState({
+                  user: data.user,
+                  token,
+                  isAuthenticated: true,
+                  isLoading: false,
+                });
+              }
+            }
+          } catch (error) {
+            console.error("Erreur lors de la vérification du profil:", error);
+            // On garde les données du localStorage même si l'API échoue
+          }
         } else {
           setAuthState((prev) => ({
             ...prev,

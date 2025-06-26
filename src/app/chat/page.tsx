@@ -5,11 +5,18 @@ import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { MainLayout } from "@/components/layout/main-layout";
 import { useAuth } from "@/lib/useAuth";
+import {
+  hasAccessToAgent,
+  getUpgradeMessage,
+  AGENTS_CONFIG,
+  type AgentType,
+} from "@/lib/subscription";
 
 interface Agent {
   id: string;
   name: string;
   description: string;
+  type?: AgentType;
 }
 
 interface Message {
@@ -135,7 +142,7 @@ interface Message {
 
 export default function ChatPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -169,9 +176,33 @@ export default function ChatPage() {
 
         if (response.ok) {
           const agentsData = await response.json();
-          setAgents(agentsData);
-          if (agentsData.length > 0) {
-            setSelectedAgent(agentsData[0]);
+
+          // Mapper les agents avec leur type pour le contrôle d'accès
+          const mappedAgents = agentsData.map((agent: Agent) => {
+            let agentType: AgentType = "basic";
+            if (agent.id.includes("premium")) {
+              agentType = "premium";
+            } else if (agent.id.includes("business")) {
+              agentType = "business";
+            }
+
+            return {
+              ...agent,
+              type: agentType,
+            };
+          });
+
+          setAgents(mappedAgents);
+
+          // Sélectionner le premier agent accessible
+          const accessibleAgent = mappedAgents.find((agent: Agent) =>
+            hasAccessToAgent(user, agent.type || "basic")
+          );
+
+          if (accessibleAgent) {
+            setSelectedAgent(accessibleAgent);
+          } else if (mappedAgents.length > 0) {
+            setSelectedAgent(mappedAgents[0]); // Fallback sur le premier agent
           }
         } else {
           const errorText = await response.text();
@@ -402,22 +433,80 @@ export default function ChatPage() {
             {agents.length > 1 ? "s" : ""})
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {agents.map((agent) => (
-              <button
-                key={agent.id}
-                onClick={() => setSelectedAgent(agent)}
-                className={`p-4 rounded-lg border-2 transition-all duration-200 text-left ${
-                  selectedAgent?.id === agent.id
-                    ? "border-orange-500 bg-orange-50"
-                    : "border-neutral-200 hover:border-orange-300"
-                }`}
-              >
-                <h3 className="font-semibold text-neutral-900">{agent.name}</h3>
-                <p className="text-sm text-neutral-600 mt-1">
-                  {agent.description}
-                </p>
-              </button>
-            ))}
+            {agents.map((agent) => {
+              const hasAccess = hasAccessToAgent(user, agent.type || "basic");
+              const agentConfig = agent.type ? AGENTS_CONFIG[agent.type] : null;
+
+              return (
+                <div key={agent.id} className="relative">
+                  <button
+                    onClick={() => hasAccess && setSelectedAgent(agent)}
+                    disabled={!hasAccess}
+                    className={`w-full p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                      selectedAgent?.id === agent.id
+                        ? "border-orange-500 bg-orange-50"
+                        : hasAccess
+                        ? "border-neutral-200 hover:border-orange-300"
+                        : "border-gray-300 bg-gray-100 cursor-not-allowed opacity-60"
+                    }`}
+                  >
+                    {/* Badge premium/business */}
+                    {agentConfig &&
+                      "badge" in agentConfig &&
+                      agentConfig.badge && (
+                        <div
+                          className={`absolute top-2 right-2 px-2 py-1 text-xs font-medium text-white rounded-full ${
+                            hasAccess ? agentConfig.color : "bg-gray-400"
+                          }`}
+                        >
+                          {agentConfig.badge}
+                        </div>
+                      )}
+
+                    <div className="flex items-start space-x-3">
+                      <div className="text-2xl">
+                        {agentConfig?.icon || "🤖"}
+                      </div>
+                      <div className="flex-1">
+                        <h3
+                          className={`font-semibold ${
+                            hasAccess ? "text-neutral-900" : "text-gray-500"
+                          }`}
+                        >
+                          {agent.name}
+                        </h3>
+                        <p
+                          className={`text-sm mt-1 ${
+                            hasAccess ? "text-neutral-600" : "text-gray-500"
+                          }`}
+                        >
+                          {agent.description}
+                        </p>
+
+                        {/* Message d'upgrade si pas d'accès */}
+                        {!hasAccess && (
+                          <div className="mt-2 p-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg border border-purple-200">
+                            <p className="text-xs font-medium text-purple-700">
+                              {getUpgradeMessage(agent.type || "basic")}
+                            </p>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // TODO: Implémenter la redirection vers la page d'upgrade
+                                alert("Fonctionnalité d'upgrade à implémenter");
+                              }}
+                              className="mt-1 text-xs bg-purple-600 text-white px-2 py-1 rounded hover:bg-purple-700 transition-colors"
+                            >
+                              Upgrader maintenant
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
 
