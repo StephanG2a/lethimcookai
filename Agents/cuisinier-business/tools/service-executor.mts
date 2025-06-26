@@ -2,7 +2,7 @@ import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 
 // Import du websiteGenerator pour l'exécution automatique
-import { websiteGenerator } from "../../cuisinier-premium/tools/website-generator.mts";
+import { websiteGenerator } from "./website-generator.mts";
 
 export const serviceExecutor = tool(
   async ({ 

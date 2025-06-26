@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/lib/useAuth";
+import { hasAccessToAgent, getUpgradeMessage } from "@/lib/subscription";
 
 import {
   Card,
@@ -121,6 +123,7 @@ export default function ServiceDetailPage({
 }: ServiceDetailPageProps) {
   const [service, setService] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   // Charger le service
   useEffect(() => {
@@ -400,16 +403,49 @@ export default function ServiceDetailPage({
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <Button
-                    onClick={handleAiExecution}
-                    className="w-full bg-purple-600 hover:bg-purple-700"
-                  >
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    Discuter avec le Chef IA Business
-                  </Button>
-                  <p className="text-sm text-neutral-600 text-center">
-                    Vous serez redirigé vers le chat avec le contexte du service pré-rempli
-                  </p>
+                  {hasAccessToAgent(user, "business") ? (
+                    // Utilisateur avec abonnement Business - Accès complet
+                    <>
+                      <Button
+                        onClick={handleAiExecution}
+                        className="w-full bg-purple-600 hover:bg-purple-700"
+                      >
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        Discuter avec le Chef IA Business
+                      </Button>
+                      <p className="text-sm text-neutral-600 text-center">
+                        Vous serez redirigé vers le chat avec le contexte du service pré-rempli
+                      </p>
+                    </>
+                  ) : (
+                    // Utilisateur sans abonnement Business - Message d'upgrade
+                    <div className="space-y-3">
+                      <div className="p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg border border-purple-200">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Zap className="h-5 w-5 text-purple-600" />
+                          <span className="font-medium text-purple-900">
+                            Fonctionnalité Business requise
+                          </span>
+                        </div>
+                        <p className="text-sm text-purple-700 mb-3">
+                          {getUpgradeMessage("business")} pour accéder à l'exécution automatique de services IA.
+                        </p>
+                        <Button
+                          onClick={() => {
+                            // TODO: Redirection vers la page d'upgrade/abonnement
+                            alert("Redirection vers la page d'abonnement Business à implémenter");
+                          }}
+                          className="w-full bg-purple-600 hover:bg-purple-700"
+                          size="sm"
+                        >
+                          Passer à Business
+                        </Button>
+                      </div>
+                      <p className="text-xs text-neutral-500 text-center">
+                        Avec l'abonnement Business, vous pouvez faire exécuter ce service automatiquement par l'IA
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}

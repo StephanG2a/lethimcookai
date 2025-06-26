@@ -305,6 +305,9 @@ export default function ServicesPage() {
                     Compatible IA seulement
                   </span>
                 </label>
+                <p className="text-xs text-neutral-500 mt-1 ml-6">
+                  Services exécutables automatiquement par l'IA (abonnement Business requis)
+                </p>
               </CardContent>
             </Card>
 
@@ -392,7 +395,7 @@ export default function ServicesPage() {
                 {aiOnly && (
                   <Badge variant="secondary" className="gap-1">
                     <Zap className="h-3 w-3" />
-                    Compatible IA
+                    Compatible IA (Business)
                     <button
                       onClick={() => setAiOnly(false)}
                       className="ml-1 hover:bg-neutral-200 rounded"
