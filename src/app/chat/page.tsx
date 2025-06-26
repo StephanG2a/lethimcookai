@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { MainLayout } from "@/components/layout/main-layout";
+import { useAuth } from "@/lib/useAuth";
 
 interface Agent {
   id: string;
@@ -96,6 +98,8 @@ interface Message {
 }
 
 export default function ChatPage() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -105,8 +109,24 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [useStreaming, setUseStreaming] = useState(true);
 
+  // Vérifier l'authentification et gérer les déconnexions
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      // Nettoyer l'état local avant redirection
+      setMessages([]);
+      setError(null);
+      setInputValue("");
+
+      // Rediriger vers la page de connexion
+      router.replace("/auth/login?redirect=/chat");
+      return;
+    }
+  }, [isAuthenticated, authLoading, router]);
+
   // Charger les agents disponibles
   useEffect(() => {
+    if (!isAuthenticated || authLoading) return;
+
     const loadAgents = async () => {
       try {
         const response = await fetch("/api/chat");
@@ -152,7 +172,7 @@ export default function ChatPage() {
     };
 
     loadAgents();
-  }, []);
+  }, [isAuthenticated, authLoading]);
 
   const sendMessage = async () => {
     if (!inputValue.trim() || !selectedAgent || isLoading) return;
@@ -296,6 +316,29 @@ export default function ChatPage() {
     setMessages([]);
     setError(null);
   };
+
+  // Afficher un écran de chargement pendant la vérification d'authentification
+  if (authLoading) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+              <p className="text-neutral-600">
+                Vérification de l'authentification...
+              </p>
+            </div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  // Si pas authentifié, on ne rend rien (la redirection se fait via useEffect)
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <MainLayout>
