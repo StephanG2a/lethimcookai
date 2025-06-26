@@ -30,6 +30,7 @@ import { labelCreator } from "../cuisinier-premium/tools/label-creator.mts";
 import { organizationSearch } from "./tools/organization-search.mts";
 import { serviceSearch } from "./tools/service-search.mts";
 import { quickServiceSearch } from "./tools/quick-service-search.mts";
+import { prestataireSearch } from "./tools/prestataire-search.mts";
 import { costCalculator } from "./tools/cost-calculator.mts";
 import { businessPlanGenerator } from "./tools/business-plan-generator.mts";
 import { marketAnalysis } from "./tools/market-analysis.mts";
@@ -76,10 +77,11 @@ const tools = [
   videoGenerator,
   labelCreator,
 
-  // Outils Business (Formule 3) - 6 outils
+  // Outils Business (Formule 3) - 7 outils
   organizationSearch,
   serviceSearch,
   quickServiceSearch,
+  prestataireSearch,
   costCalculator,
   businessPlanGenerator,
   marketAnalysis,
@@ -98,11 +100,19 @@ Spécialités BUSINESS :
 • Formule Premium : logos, images, PDFs, templates, vidéos, étiquettes
 • Formule Business : recherche organisations/services avancée, calculs coûts, business plans, analyses marché
 
-RECHERCHE DE SERVICES - Tu disposes de 2 outils complémentaires :
-1. quick_service_search : pour recherches simples par mot-clé ("chef", "formation", "photo")
-2. service_search : pour recherches avancées avec filtres (prix, localisation, tags, organisation, tri)
+RECHERCHE - Tu disposes de 4 outils complémentaires :
 
-Choisis l'outil selon la complexité de la demande utilisateur.
+SERVICES (prestations/offres) :
+1. quick_service_search : recherches simples par mot-clé ("chef", "formation", "photo")
+2. service_search : recherches avancées avec filtres (prix, localisation, tags, organisation, tri)
+
+PRESTATAIRES (personnes qui offrent les services) :
+3. prestataire_search : rechercher des PRESTATAIRES (utilisateurs avec rôle PRESTATAIRE) avec critères multiples
+4. organization_search : rechercher des organisations par secteur et localisation
+
+IMPORTANT : 
+- Pour "prestataire", "presta", "qui offre", "personne", "chef", "consultant" → utilise prestataire_search
+- Pour "service", "prestation", "formation", "cours" → utilise service_search ou quick_service_search
 
 Tu es un consultant culinaire complet pour entrepreneurs et professionnels de la restauration.
 
@@ -191,6 +201,12 @@ Je rencontre une difficulté technique momentanée. Mais ne vous inquiétez pas,
 - "Services photo max_price 300 tags cuisine,gastronomie"
 - "Formation chef organisation PhotoFood Pro"
 - "Services en ligne secteur restauration sort_by price_asc"
+
+**Recherche de Prestataires :**
+- "Prestataires cuisine Paris vérifiés"
+- "Chefs secteur gastronomie avec services"
+- "Prestataires marketing culinaire prix 100-500€"
+- "Photographes culinaires Lyon avec organisation"
 
 **Autres :**
 - "Calculer coûts restaurant 50 couverts/jour"

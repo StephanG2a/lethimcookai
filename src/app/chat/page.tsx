@@ -95,6 +95,42 @@ interface Message {
     searchSector?: string;
     searchDate: string;
   }>;
+  prestataires?: Array<{
+    id: string;
+    name: string;
+    firstName?: string;
+    lastName?: string;
+    email: string;
+    phone?: string;
+    emailVerified: boolean;
+    createdAt: string;
+    organization?: {
+      id: string;
+      name: string;
+      sector: string;
+      description?: string;
+      address?: string;
+      phone?: string;
+      email?: string;
+      website?: string;
+      legalForm?: string;
+      siret?: string;
+      services: Array<{
+        id: string;
+        title: string;
+        summary?: string;
+        serviceType: string;
+        lowerPrice: number;
+        upperPrice: number;
+        paymentMode: string;
+        tags: string[];
+      }>;
+      servicesCount: number;
+    };
+    pageUrl: string;
+    searchQuery: string;
+    searchDate: string;
+  }>;
 }
 
 export default function ChatPage() {
@@ -268,6 +304,12 @@ export default function ChatPage() {
                                     ...data.organizations,
                                   ]
                                 : msg.organizations,
+                              prestataires: data.prestataires
+                                ? [
+                                    ...(msg.prestataires || []),
+                                    ...data.prestataires,
+                                  ]
+                                : msg.prestataires,
                             }
                           : msg
                       )
@@ -1096,6 +1138,198 @@ export default function ChatPage() {
                         ))}
                       </div>
                     )}
+
+                  {/* Affichage des prestataires */}
+                  {message.prestataires && message.prestataires.length > 0 && (
+                    <div className="mt-3 space-y-3">
+                      {message.prestataires.map((prestataire, index) => (
+                        <div
+                          key={index}
+                          className="rounded-lg overflow-hidden border border-gray-200 bg-gradient-to-br from-green-50 to-emerald-50"
+                        >
+                          {/* En-tête prestataire */}
+                          <div className="px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                                  <span className="text-lg font-bold">👤</span>
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-sm line-clamp-1">
+                                    {prestataire.name}
+                                  </h4>
+                                  <p className="text-xs text-green-100">
+                                    {prestataire.organization
+                                      ? `${prestataire.organization.sector} • ${prestataire.organization.servicesCount} services`
+                                      : "Indépendant"}{" "}
+                                    •{" "}
+                                    {prestataire.emailVerified
+                                      ? "✅ Vérifié"
+                                      : "⚠️ Non vérifié"}
+                                  </p>
+                                </div>
+                              </div>
+                              {prestataire.organization?.legalForm && (
+                                <div className="text-right text-xs text-green-100">
+                                  <div>
+                                    {prestataire.organization.legalForm}
+                                  </div>
+                                  {prestataire.organization.siret && (
+                                    <div>
+                                      SIRET: {prestataire.organization.siret}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Contenu prestataire */}
+                          <div className="px-4 py-4 bg-white">
+                            {/* Coordonnées personnelles */}
+                            <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                              <div className="text-xs text-gray-600 space-y-1">
+                                <div className="flex items-center space-x-4">
+                                  <div className="flex items-center space-x-2">
+                                    <span>📧</span>
+                                    <span>{prestataire.email}</span>
+                                  </div>
+                                  {prestataire.phone && (
+                                    <div className="flex items-center space-x-2">
+                                      <span>📞</span>
+                                      <span>{prestataire.phone}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Organisation si présente */}
+                            {prestataire.organization && (
+                              <div className="mb-3">
+                                <div className="text-sm font-medium text-gray-900 mb-2">
+                                  🏢 Organisation:{" "}
+                                  {prestataire.organization.name}
+                                </div>
+                                {prestataire.organization.description && (
+                                  <p className="text-xs text-gray-600 mb-2">
+                                    {prestataire.organization.description}
+                                  </p>
+                                )}
+                                {prestataire.organization.address && (
+                                  <div className="flex items-center space-x-2 text-xs text-gray-600 mb-2">
+                                    <span>📍</span>
+                                    <span>
+                                      {prestataire.organization.address}
+                                    </span>
+                                  </div>
+                                )}
+
+                                {/* Services de l'organisation */}
+                                {prestataire.organization.services &&
+                                  prestataire.organization.services.length >
+                                    0 && (
+                                    <div className="space-y-2">
+                                      <div className="text-xs font-medium text-gray-700">
+                                        🛎️ Services proposés:
+                                      </div>
+                                      {prestataire.organization.services
+                                        .slice(0, 3)
+                                        .map((service, serviceIndex) => (
+                                          <div
+                                            key={serviceIndex}
+                                            className="bg-green-50 rounded-lg p-2 text-xs"
+                                          >
+                                            <div className="flex items-center justify-between">
+                                              <div className="font-medium text-green-900">
+                                                {service.title}
+                                              </div>
+                                              <div className="text-green-700">
+                                                {service.lowerPrice}€ -{" "}
+                                                {service.upperPrice}€
+                                              </div>
+                                            </div>
+                                            {service.summary && (
+                                              <div className="text-green-600 mt-1">
+                                                {service.summary}
+                                              </div>
+                                            )}
+                                            {service.tags.length > 0 && (
+                                              <div className="flex flex-wrap gap-1 mt-1">
+                                                {service.tags.map(
+                                                  (tag, tagIndex) => (
+                                                    <span
+                                                      key={tagIndex}
+                                                      className="px-1 py-0.5 bg-green-200 text-green-800 rounded text-xs"
+                                                    >
+                                                      {tag}
+                                                    </span>
+                                                  )
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                        ))}
+                                      {prestataire.organization.services
+                                        .length > 3 && (
+                                        <div className="text-xs text-gray-500 text-center">
+                                          ... et{" "}
+                                          {prestataire.organization.services
+                                            .length - 3}{" "}
+                                          autres services
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                              </div>
+                            )}
+
+                            {/* Boutons d'action */}
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => {
+                                  window.location.href = prestataire.pageUrl;
+                                }}
+                                className="flex-1 text-center text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                              >
+                                👤 Voir le profil
+                              </button>
+                              {prestataire.organization?.website && (
+                                <a
+                                  href={prestataire.organization.website}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                                >
+                                  🌐 Site web
+                                </a>
+                              )}
+                              {prestataire.organization && (
+                                <button
+                                  onClick={() => {
+                                    window.location.href = `/organizations/${prestataire.organization.id}`;
+                                  }}
+                                  className="text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                                >
+                                  🏢 Organisation
+                                </button>
+                              )}
+                            </div>
+
+                            {/* Métadonnées */}
+                            <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
+                              <span>Recherche: {prestataire.searchQuery}</span>
+                              <span>
+                                {prestataire.organization
+                                  ? `${prestataire.organization.servicesCount} services`
+                                  : "Indépendant"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   <div className="text-xs opacity-75 mt-1">
                     {message.timestamp.toLocaleTimeString()}

@@ -113,6 +113,7 @@ export async function POST(request: NextRequest) {
                           let pdfs: any[] = [];
                           let services: any[] = [];
                           let organizations: any[] = [];
+                          let prestataires: any[] = [];
 
                           // Extraire les métadonnées d'images si présentes
                           const imageMetaMatch = output.match(
@@ -221,6 +222,30 @@ export async function POST(request: NextRequest) {
                             }
                           }
 
+                          // Extraire les métadonnées de prestataires si présentes
+                          const prestataireMetaMatch = output.match(
+                            /\*\*MÉTADONNÉES_PRESTATAIRES:\*\* (.+?)(?=\n|$)/
+                          );
+                          if (prestataireMetaMatch) {
+                            try {
+                              const prestatairesData = JSON.parse(
+                                prestataireMetaMatch[1]
+                              );
+                              prestataires =
+                                prestatairesData.prestataires || [];
+                              // Retirer les métadonnées du contenu visible
+                              content = output.replace(
+                                /---\n\*\*MÉTADONNÉES_PRESTATAIRES:\*\* .+/s,
+                                "---"
+                              );
+                            } catch (e) {
+                              console.warn(
+                                "Erreur parsing métadonnées prestataires:",
+                                e
+                              );
+                            }
+                          }
+
                           const jsonLine =
                             JSON.stringify({
                               content: `${content}\n`,
@@ -232,6 +257,10 @@ export async function POST(request: NextRequest) {
                               organizations:
                                 organizations.length > 0
                                   ? organizations
+                                  : undefined,
+                              prestataires:
+                                prestataires.length > 0
+                                  ? prestataires
                                   : undefined,
                             }) + "\n";
                           controller.enqueue(
