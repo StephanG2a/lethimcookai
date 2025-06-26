@@ -268,13 +268,6 @@ export default function ChatPage() {
   const sendMessageWithText = async (text: string) => {
     if (!text.trim() || !selectedAgent) return;
 
-    // Vérifier l'accès à l'agent
-    if (!hasAccessToAgent(user, selectedAgent.type as AgentType)) {
-      const upgradeMessage = getUpgradeMessage(selectedAgent.type as AgentType);
-      setError(upgradeMessage);
-      return;
-    }
-
     const userMessage: Message = {
       id: uuidv4(),
       content: text,
@@ -564,9 +557,9 @@ export default function ChatPage() {
             <h2 className="text-sm font-semibold text-gray-700 mb-3">Choisir un Assistant</h2>
             <div className="space-y-2">
               {agents.map((agent) => {
-                const config = getAgentConfig(agent.id);
-                const Icon = config.icon;
-                const hasAccess = hasAccessToAgent(user, agent.type as AgentType);
+                                 const config = getAgentConfig(agent.id);
+                 const Icon = config.icon;
+                 const hasAccess = hasAccessToAgent(user, agent.type as AgentType);
                 
                 return (
                   <button
