@@ -83,7 +83,7 @@ export function Footer() {
 
         <div className="mt-8 pt-8 border-t border-neutral-800 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-neutral-400">
-            © 2024 LetHimCookAI. Tous droits réservés.
+            © 2025 LetHimCookAI. Tous droits réservés.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <Link href="/mentions-legales" className="text-sm text-neutral-400 hover:text-orange-500 transition-colors">
