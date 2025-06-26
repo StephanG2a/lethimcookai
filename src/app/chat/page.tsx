@@ -47,23 +47,6 @@ interface Message {
     type?: string; // "downloadable_pdf" ou "direct_download_pdf"
     mimeType?: string;
   }>;
-  websites?: Array<{
-    title: string;
-    restaurantName: string;
-    restaurantType: string;
-    websiteType: string;
-    features: string[];
-    colorScheme: string;
-    htmlContent: string;
-    cssContent: string;
-    jsContent: string;
-    previewUrl: string;
-    technologies: string[];
-    seoOptimized: boolean;
-    responsive: boolean;
-    deploymentReady: boolean;
-    generatedAt: string;
-  }>;
   services?: Array<{
     id: number;
     title: string;
@@ -162,181 +145,7 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [useStreaming, setUseStreaming] = useState(true);
 
-  // Prompts par défaut pour chaque agent
-  const getDefaultPrompts = (agentId: string): string[] => {
-    switch (agentId) {
-      case "cuisinier":
-        return [
-          "Propose-moi une recette simple avec les ingrédients de mon frigo",
-          "Comment faire une pâte à crêpes parfaite ?",
-          "Donne-moi 3 idées de repas rapides pour ce soir"
-        ];
-      case "cuisinier-premium":
-        return [
-          "Crée-moi un logo pour mon restaurant",
-          "Génère une affiche publicitaire pour mon menu",
-          "Fait-moi un site web vitrine pour ma pizzeria"
-        ];
-      case "cuisinier-business":
-        return [
-          "Trouve-moi des services de livraison de repas",
-          "Recherche des prestataires pour mon événement culinaire",
-          "Calcule les coûts d'ouverture d'un restaurant"
-        ];
-      default:
-        return [
-          "Comment puis-je t'aider aujourd'hui ?",
-          "Quelle est ta spécialité culinaire ?",
-          "Peux-tu me donner des conseils cuisine ?"
-        ];
-    }
-  };
-
-  // Gérer le clic sur un prompt par défaut
-  const handlePromptClick = (prompt: string) => {
-    if (!selectedAgent || isLoading) return;
-    setInputValue(prompt);
-    // Auto-envoyer le message après un petit délai pour permettre l'animation
-    setTimeout(() => {
-      sendMessageWithText(prompt);
-    }, 100);
-  };
-
-  // Fonction pour envoyer un message avec un texte spécifique
-  const sendMessageWithText = async (text: string) => {
-    if (!text.trim() || !selectedAgent || isLoading) return;
-
-    const userMessage: Message = {
-      id: uuidv4(),
-      content: text,
-      sender: "user",
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInputValue("");
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: text,
-          agentId: selectedAgent.id,
-          threadId: threadId,
-          useStream: useStreaming,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          `Erreur ${response.status}: ${errorData.error || response.statusText}`
-        );
-      }
-
-      if (useStreaming) {
-        // Mode streaming
-        const agentMessage: Message = {
-          id: uuidv4(),
-          content: "",
-          sender: "agent",
-          timestamp: new Date(),
-          agentName: selectedAgent.name,
-        };
-
-        setMessages((prev) => [...prev, agentMessage]);
-
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
-
-        if (reader) {
-          let buffer = "";
-
-          while (true) {
-            const { done, value } = await reader.read();
-
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-
-            buffer = lines.pop() || "";
-
-            for (const line of lines) {
-              if (line.trim()) {
-                try {
-                  const data = JSON.parse(line);
-                  if (data.content) {
-                    setMessages((prev) =>
-                      prev.map((msg) =>
-                        msg.id === agentMessage.id
-                          ? {
-                              ...msg,
-                              content: msg.content + data.content,
-                              images: data.images
-                                ? [...(msg.images || []), ...data.images]
-                                : msg.images,
-                              videos: data.videos
-                                ? [...(msg.videos || []), ...data.videos]
-                                : msg.videos,
-                              pdfs: data.pdfs
-                                ? [...(msg.pdfs || []), ...data.pdfs]
-                                : msg.pdfs,
-                              websites: data.websites
-                                ? [...(msg.websites || []), ...data.websites]
-                                : msg.websites,
-                              services: data.services
-                                ? [...(msg.services || []), ...data.services]
-                                : msg.services,
-                              organizations: data.organizations
-                                ? [
-                                    ...(msg.organizations || []),
-                                    ...data.organizations,
-                                  ]
-                                : msg.organizations,
-                            }
-                          : msg
-                      )
-                    );
-                  }
-                } catch (parseError) {
-                  console.warn("Ligne non-JSON ignorée:", line);
-                }
-              }
-            }
-          }
-        }
-      } else {
-        // Mode non-streaming
-        const data = await response.json();
-
-        const agentMessage: Message = {
-          id: uuidv4(),
-          content: data.content || "Aucune réponse",
-          sender: "agent",
-          timestamp: new Date(),
-          agentName: selectedAgent.name,
-        };
-
-        setMessages((prev) => [...prev, agentMessage]);
-      }
-    } catch (err) {
-      const errorMsg = `Erreur lors de l'envoi du message: ${
-        (err as Error).message
-      }`;
-      setError(errorMsg);
-      console.error("Erreur:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Charger les agents disponibles et gérer les paramètres d'URL
+  // Vérifier l'authentification et gérer les déconnexions
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       // Nettoyer l'état local avant redirection
@@ -350,9 +159,7 @@ export default function ChatPage() {
     }
   }, [isAuthenticated, authLoading, router]);
 
-
-
-  // Charger les agents disponibles et gérer les paramètres d'URL
+  // Charger les agents disponibles
   useEffect(() => {
     if (!isAuthenticated || authLoading) return;
 
@@ -379,11 +186,33 @@ export default function ChatPage() {
             setSelectedAgent(selectedAgentFromParams);
           } else if (agentsData.length > 0) {
             setSelectedAgent(agentsData[0]);
-          }
-          
-          // Pré-remplir le message si fourni
-          if (messageParam) {
-            setInputValue(decodeURIComponent(messageParam));
+
+          // Mapper les agents avec leur type pour le contrôle d'accès
+          const mappedAgents = agentsData.map((agent: Agent) => {
+            let agentType: AgentType = "basic";
+            if (agent.id.includes("premium")) {
+              agentType = "premium";
+            } else if (agent.id.includes("business")) {
+              agentType = "business";
+            }
+
+            return {
+              ...agent,
+              type: agentType,
+            };
+          });
+
+          setAgents(mappedAgents);
+
+          // Sélectionner le premier agent accessible
+          const accessibleAgent = mappedAgents.find((agent: Agent) =>
+            hasAccessToAgent(user, agent.type || "basic")
+          );
+
+          if (accessibleAgent) {
+            setSelectedAgent(accessibleAgent);
+          } else if (mappedAgents.length > 0) {
+            setSelectedAgent(mappedAgents[0]); // Fallback sur le premier agent
           }
         } else {
           const errorText = await response.text();
@@ -406,35 +235,21 @@ export default function ChatPage() {
             description: "Chef IA spécialisé en cuisine",
           },
           {
-            id: "cuisinier-premium",
-            name: "Cuisinier Premium",
-            description: "Assistant IA premium pour créations visuelles",
-          },
-          {
-            id: "cuisinier-business",
-            name: "Cuisinier Business",
-            description: "Assistant IA pour recherche de services",
+            id: "culinary",
+            name: "Chef Assistant",
+            description: "Assistant culinaire IA",
           },
         ]);
         setSelectedAgent({
-          id: "cuisinier",
-          name: "Cuisinier",
-          description: "Chef IA spécialisé en cuisine",
+          id: "culinary",
+          name: "Chef Assistant",
+          description: "Assistant culinaire IA",
         });
       }
     };
 
     loadAgents();
   }, [isAuthenticated, authLoading]);
-
-  // Réinitialiser les messages quand l'agent change
-  useEffect(() => {
-    if (selectedAgent) {
-      // Optionnel : réinitialiser les messages quand on change d'agent
-      // setMessages([]);
-      setError(null);
-    }
-  }, [selectedAgent]);
 
   const sendMessage = async () => {
     if (!inputValue.trim() || !selectedAgent || isLoading) return;
@@ -521,9 +336,6 @@ export default function ChatPage() {
                               pdfs: data.pdfs
                                 ? [...(msg.pdfs || []), ...data.pdfs]
                                 : msg.pdfs,
-                              websites: data.websites
-                                ? [...(msg.websites || []), ...data.websites]
-                                : msg.websites,
                               services: data.services
                                 ? [...(msg.services || []), ...data.services]
                                 : msg.services,
@@ -660,59 +472,11 @@ export default function ChatPage() {
               </div>
             )}
 
-            {messages.length === 0 && !error && selectedAgent && (
-              <div className="text-center py-8">
-                <div className="mb-6">
-                  <h3 className="text-xl font-semibold text-neutral-900 mb-2">
-                    👋 Bonjour ! Je suis {selectedAgent.name}
-                  </h3>
-                  <p className="text-neutral-600 mb-4">
-                    {selectedAgent.description}
-                  </p>
-                  <p className="text-sm text-neutral-500">
-                    Pour commencer, vous pouvez cliquer sur l'une de ces suggestions :
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-1 gap-3 max-w-2xl mx-auto">
-                  {getDefaultPrompts(selectedAgent.id).map((prompt, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handlePromptClick(prompt)}
-                      disabled={isLoading}
-                      className="p-4 text-left bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-lg hover:from-orange-100 hover:to-orange-150 hover:border-orange-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
-                    >
-                      <div className="flex items-start space-x-3">
-                        <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-semibold group-hover:bg-orange-600 transition-colors">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-neutral-900 font-medium group-hover:text-orange-700 transition-colors">
-                            {prompt}
-                          </p>
-                          <p className="text-xs text-neutral-500 mt-1 group-hover:text-orange-600 transition-colors">
-                            Cliquez pour envoyer ce message
-                          </p>
-                        </div>
-                        <div className="flex-shrink-0 text-orange-500 group-hover:text-orange-600 transition-colors">
-                          →
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                
-                <div className="mt-6 text-xs text-neutral-400">
-                  💡 Ou tapez votre propre message dans la zone de saisie ci-dessous
-                </div>
-              </div>
-            )}
-
-            {messages.length === 0 && !error && !selectedAgent && (
+            {messages.length === 0 && !error && (
               <div className="text-center text-neutral-500 py-8">
-                <p>Sélectionnez un assistant pour commencer.</p>
+                <p>Aucun message pour le moment.</p>
                 <p className="text-sm mt-2">
-                  Choisissez votre chef IA spécialisé !
+                  Commencez une conversation culinaire !
                 </p>
               </div>
             )}
@@ -1144,166 +908,6 @@ export default function ChatPage() {
                                   ⚡ Téléchargement direct
                                 </span>
                               )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Affichage des sites web générés */}
-                  {message.websites && message.websites.length > 0 && (
-                    <div className="mt-3 space-y-3">
-                      {message.websites.map((website, index) => (
-                        <div
-                          key={index}
-                          className="rounded-lg overflow-hidden border border-gray-200 bg-gradient-to-br from-green-50 to-teal-50"
-                        >
-                          {/* En-tête site web */}
-                          <div className="px-4 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-3">
-                                <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-                                  <span className="text-lg font-bold">🌐</span>
-                                </div>
-                                <div>
-                                  <h4 className="font-semibold text-sm line-clamp-1">
-                                    {website.title}
-                                  </h4>
-                                  <p className="text-xs text-green-100">
-                                    {website.websiteType} • {website.colorScheme}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="text-right text-xs text-green-100">
-                                <div className="flex items-center space-x-1">
-                                  {website.responsive && <span>📱</span>}
-                                  {website.seoOptimized && <span>🔍</span>}
-                                  <span>✅</span>
-                                </div>
-                                <div>Prêt à déployer</div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Aperçu du site web */}
-                          <div className="p-4 bg-white">
-                            <div className="mb-4">
-                              <div className="text-sm font-medium text-gray-900 mb-2">
-                                📋 Aperçu du site web
-                              </div>
-                              <div className="relative border border-gray-200 rounded-lg overflow-hidden">
-                                <iframe
-                                  src={website.previewUrl}
-                                  className="w-full h-64 sm:h-80"
-                                  title={`Aperçu de ${website.title}`}
-                                  sandbox="allow-same-origin"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Fonctionnalités */}
-                            {website.features.length > 0 && (
-                              <div className="mb-4">
-                                <div className="text-sm font-medium text-gray-900 mb-2">
-                                  ⚙️ Fonctionnalités incluses
-                                </div>
-                                <div className="flex flex-wrap gap-1">
-                                  {website.features.map((feature, featureIndex) => (
-                                    <span
-                                      key={featureIndex}
-                                      className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full"
-                                    >
-                                      {feature}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Technologies */}
-                            <div className="mb-4">
-                              <div className="text-sm font-medium text-gray-900 mb-2">
-                                💻 Technologies utilisées
-                              </div>
-                              <div className="flex flex-wrap gap-1">
-                                {website.technologies.map((tech, techIndex) => (
-                                  <span
-                                    key={techIndex}
-                                    className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full"
-                                  >
-                                    {tech}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-
-                            {/* Boutons d'action */}
-                            <div className="flex flex-col sm:flex-row gap-3">
-                              <button
-                                onClick={() => {
-                                  try {
-                                    // Créer une nouvelle fenêtre et écrire le HTML directement
-                                    const newWindow = window.open('', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
-                                    if (newWindow) {
-                                      newWindow.document.write(website.htmlContent);
-                                      newWindow.document.close();
-                                      newWindow.focus();
-                                    } else {
-                                      // Fallback si le popup est bloqué
-                                      const blob = new Blob([website.htmlContent], { type: 'text/html;charset=utf-8' });
-                                      const url = URL.createObjectURL(blob);
-                                      const link = document.createElement('a');
-                                      link.href = url;
-                                      link.target = '_blank';
-                                      link.click();
-                                      URL.revokeObjectURL(url);
-                                    }
-                                  } catch (error) {
-                                    console.error('Erreur ouverture plein écran:', error);
-                                    alert('Erreur lors de l\'ouverture en plein écran. Vérifiez que les popups sont autorisés.');
-                                  }
-                                }}
-                                className="flex-1 text-center text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
-                              >
-                                🚀 Ouvrir en plein écran
-                              </button>
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(website.htmlContent);
-                                  alert("Code HTML copié dans le presse-papiers !");
-                                }}
-                                className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                              >
-                                📋 Copier HTML
-                              </button>
-                              <button
-                                onClick={() => {
-                                  const blob = new Blob([website.htmlContent], { type: 'text/html' });
-                                  const url = URL.createObjectURL(blob);
-                                  const link = document.createElement('a');
-                                  link.href = url;
-                                  link.download = `${website.restaurantName.replace(/\s+/g, '-').toLowerCase()}.html`;
-                                  document.body.appendChild(link);
-                                  link.click();
-                                  document.body.removeChild(link);
-                                  URL.revokeObjectURL(url);
-                                }}
-                                className="text-sm bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-                              >
-                                💾 Télécharger
-                              </button>
-                            </div>
-
-                            {/* Métadonnées */}
-                            <div className="mt-4 pt-3 border-t border-gray-100">
-                              <div className="flex items-center justify-between text-xs text-gray-500">
-                                <span>Restaurant: {website.restaurantName}</span>
-                                <span>Type: {website.restaurantType}</span>
-                                <span>
-                                  Généré le: {new Date(website.generatedAt).toLocaleDateString('fr-FR')}
-                                </span>
-                              </div>
                             </div>
                           </div>
                         </div>

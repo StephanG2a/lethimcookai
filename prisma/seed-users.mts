@@ -11,7 +11,7 @@ async function seedUsers() {
   const prestatairePassword = await bcrypt.hash("TestPrestataire123", 12);
   const adminPassword = await bcrypt.hash("AdminTest123", 12);
 
-  // Créer un utilisateur client
+  // Créer un utilisateur client FREE
   const client = await prisma.user.upsert({
     where: { email: "client@test.fr" },
     update: {},
@@ -23,6 +23,46 @@ async function seedUsers() {
       phone: "06 12 34 56 78",
       role: "CLIENT",
       emailVerified: true,
+      subscriptionPlan: "FREE",
+      subscriptionStatus: "ACTIVE",
+    },
+  });
+
+  // Créer un client PREMIUM
+  const clientPremium = await prisma.user.upsert({
+    where: { email: "client-premium@test.fr" },
+    update: {},
+    create: {
+      email: "client-premium@test.fr",
+      password: clientPassword,
+      firstName: "Sophie",
+      lastName: "Bernard",
+      phone: "06 11 22 33 44",
+      role: "CLIENT",
+      emailVerified: true,
+      subscriptionPlan: "PREMIUM",
+      subscriptionStatus: "ACTIVE",
+      subscriptionStart: new Date(),
+      subscriptionEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 jours
+    },
+  });
+
+  // Créer un client BUSINESS
+  const clientBusiness = await prisma.user.upsert({
+    where: { email: "client-business@test.fr" },
+    update: {},
+    create: {
+      email: "client-business@test.fr",
+      password: clientPassword,
+      firstName: "Pierre",
+      lastName: "Leclerc",
+      phone: "06 55 66 77 88",
+      role: "CLIENT",
+      emailVerified: true,
+      subscriptionPlan: "BUSINESS",
+      subscriptionStatus: "ACTIVE",
+      subscriptionStart: new Date(),
+      subscriptionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 an
     },
   });
 
@@ -65,11 +105,21 @@ async function seedUsers() {
     },
   });
 
-  console.log(`✅ Client créé: ${client.email}`);
+  console.log(`✅ Client FREE créé: ${client.email}`);
+  console.log(`✅ Client PREMIUM créé: ${clientPremium.email}`);
+  console.log(`✅ Client BUSINESS créé: ${clientBusiness.email}`);
   console.log(`✅ Admin créé: ${admin.email}`);
 
   console.log("\n📝 Comptes de test créés:");
-  console.log("👤 Client: client@test.fr / TestClient123");
+  console.log(
+    "👤 Client FREE: client@test.fr / TestClient123 (accès IA Basic seulement)"
+  );
+  console.log(
+    "💎 Client PREMIUM: client-premium@test.fr / TestClient123 (accès IA Basic + Premium)"
+  );
+  console.log(
+    "🚀 Client BUSINESS: client-business@test.fr / TestClient123 (accès toutes les IAs)"
+  );
   if (firstOrganization) {
     console.log("🏢 Prestataire: prestataire@test.fr / TestPrestataire123");
   }
