@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
@@ -14,6 +14,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ToastContainer } from "@/components/ui/toast";
+import { useToast } from "@/lib/useToast";
+import { useAuth } from "@/lib/useAuth";
 import {
   ChefHat,
   Mail,
@@ -27,6 +30,8 @@ import {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { toasts, removeToast, success, error } = useToast();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -40,6 +45,13 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  // Rediriger si déjà connecté
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      router.push("/services");
+    }
+  }, [isAuthenticated, authLoading, router]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -115,18 +127,50 @@ export default function RegisterPage() {
         localStorage.setItem("auth_token", data.token);
         localStorage.setItem("user_data", JSON.stringify(data.user));
 
-        alert("Compte créé avec succès !");
-        router.push("/services"); // Rediriger vers la page d'accueil
+        success(
+          "Compte créé avec succès !",
+          "Vous allez être redirigé vers vos services dans quelques instants...",
+          3000
+        );
+
+        // Redirection après 2 secondes pour laisser le temps de voir la notification
+        setTimeout(() => {
+          router.push("/services");
+        }, 2000);
       } else {
         setErrors({ general: data.error });
+        error("Erreur lors de l'inscription", data.error);
       }
     } catch (error) {
       setErrors({ general: "Erreur de connexion au serveur" });
+      error(
+        "Erreur de connexion",
+        "Impossible de se connecter au serveur. Veuillez réessayer."
+      );
       console.error("Erreur inscription:", error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Afficher un loader pendant la vérification d'authentification
+  if (authLoading) {
+    return (
+      <MainLayout>
+        <div className="min-h-[80vh] flex items-center justify-center py-12 px-4">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto mb-4"></div>
+            <p className="text-neutral-600">Vérification...</p>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  // Ne pas afficher la page si déjà connecté (redirection en cours)
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <MainLayout>
@@ -391,6 +435,7 @@ export default function RegisterPage() {
           </div>
         </div>
       </div>
+      <ToastContainer toasts={toasts} onClose={removeToast} />
     </MainLayout>
   );
 }

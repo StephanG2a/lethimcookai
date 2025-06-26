@@ -2,13 +2,20 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ChefHat, Search, User, Plus, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/useAuth";
+import { Menu, X, ChefHat, Search, User, Plus, LogOut } from "lucide-react";
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, isAuthenticated, logout, isLoading } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -28,6 +35,12 @@ export function Header() {
             className="text-sm font-medium text-neutral-600 hover:text-orange-600 transition-colors"
           >
             Services
+          </Link>
+          <Link
+            href="/organizations"
+            className="text-sm font-medium text-neutral-600 hover:text-orange-600 transition-colors"
+          >
+            Organisations
           </Link>
           <Link
             href="/prestataires"
@@ -58,44 +71,33 @@ export function Header() {
             </Link>
           </Button>
 
-          {!isLoading && (
+          {isAuthenticated ? (
             <>
-              {isAuthenticated ? (
-                // Menu utilisateur connecté
-                <div className="flex items-center space-x-3">
-                  <span className="text-sm text-neutral-600">
-                    Bonjour, {user?.firstName || user?.email}
-                  </span>
-                  <Button variant="outline" size="sm" onClick={logout}>
-                    <LogOut className="h-4 w-4" />
-                    Déconnexion
-                  </Button>
-                  {user?.role === "PRESTATAIRE" && (
-                    <Button size="sm" asChild>
-                      <Link href="/services/nouveau">
-                        <Plus className="h-4 w-4" />
-                        Publier un service
-                      </Link>
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                // Menu utilisateur non connecté
-                <>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href="/auth/login">
-                      <User className="h-4 w-4" />
-                      Connexion
-                    </Link>
-                  </Button>
-                  <Button size="sm" asChild>
-                    <Link href="/auth/register">
-                      <Plus className="h-4 w-4" />
-                      S'inscrire
-                    </Link>
-                  </Button>
-                </>
-              )}
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="h-4 w-4" />
+                Déconnexion
+              </Button>
+              <Button size="sm" asChild>
+                <Link href="/services/nouveau">
+                  <Plus className="h-4 w-4" />
+                  Publier un service
+                </Link>
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/auth/login">
+                  <User className="h-4 w-4" />
+                  Connexion
+                </Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link href="/auth/register">
+                  <Plus className="h-4 w-4" />
+                  Créer un compte
+                </Link>
+              </Button>
             </>
           )}
         </div>
@@ -123,6 +125,13 @@ export function Header() {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Services
+            </Link>
+            <Link
+              href="/organizations"
+              className="block text-sm font-medium text-neutral-600 hover:text-orange-600"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Organisations
             </Link>
             <Link
               href="/prestataires"
@@ -159,65 +168,46 @@ export function Header() {
                 </Link>
               </Button>
 
-              {!isLoading && (
+              {isAuthenticated ? (
                 <>
-                  {isAuthenticated ? (
-                    // Menu mobile utilisateur connecté
-                    <>
-                      <div className="p-2 text-sm text-neutral-600">
-                        Connecté en tant que: {user?.firstName || user?.email}
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full justify-start"
-                        onClick={() => {
-                          logout();
-                          setIsMobileMenuOpen(false);
-                        }}
-                      >
-                        <LogOut className="h-4 w-4" />
-                        Déconnexion
-                      </Button>
-                      {user?.role === "PRESTATAIRE" && (
-                        <Button
-                          size="sm"
-                          className="w-full justify-start"
-                          asChild
-                        >
-                          <Link href="/services/nouveau">
-                            <Plus className="h-4 w-4" />
-                            Publier un service
-                          </Link>
-                        </Button>
-                      )}
-                    </>
-                  ) : (
-                    // Menu mobile utilisateur non connecté
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full justify-start"
-                        asChild
-                      >
-                        <Link href="/auth/login">
-                          <User className="h-4 w-4" />
-                          Connexion
-                        </Link>
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="w-full justify-start"
-                        asChild
-                      >
-                        <Link href="/auth/register">
-                          <Plus className="h-4 w-4" />
-                          S'inscrire
-                        </Link>
-                      </Button>
-                    </>
-                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Déconnexion
+                  </Button>
+                  <Button size="sm" className="w-full justify-start" asChild>
+                    <Link href="/services/nouveau">
+                      <Plus className="h-4 w-4" />
+                      Publier un service
+                    </Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                    asChild
+                  >
+                    <Link href="/auth/login">
+                      <User className="h-4 w-4" />
+                      Connexion
+                    </Link>
+                  </Button>
+                  <Button size="sm" className="w-full justify-start" asChild>
+                    <Link href="/auth/register">
+                      <Plus className="h-4 w-4" />
+                      Créer un compte
+                    </Link>
+                  </Button>
                 </>
               )}
             </div>

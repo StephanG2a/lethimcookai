@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { AuthUtils } from "@/lib/auth";
-import { UserRole } from "@prisma/client";
+
+// Définition locale de l'enum UserRole pour éviter les problèmes d'import
+const UserRole = {
+  CLIENT: "CLIENT",
+  PRESTATAIRE: "PRESTATAIRE",
+  ADMIN: "ADMIN",
+} as const;
+
+type UserRoleType = (typeof UserRole)[keyof typeof UserRole];
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,11 +58,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Validation du rôle
-    if (role && !Object.values(UserRole).includes(role as UserRole)) {
+    const validRoles = Object.values(UserRole);
+    console.log("Roles disponibles:", validRoles);
+    console.log("Role fourni:", role);
+
+    if (role && !validRoles.includes(role as UserRoleType)) {
       return NextResponse.json(
         {
           success: false,
-          error: "Rôle invalide",
+          error: `Rôle invalide. Rôles acceptés: ${validRoles.join(", ")}`,
         },
         { status: 400 }
       );
@@ -86,7 +98,7 @@ export async function POST(request: NextRequest) {
         firstName: firstName?.trim() || null,
         lastName: lastName?.trim() || null,
         phone: phone?.trim() || null,
-        role: role as UserRole,
+        role: role as UserRoleType,
         emailVerified: false,
       },
     });

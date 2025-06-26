@@ -14,12 +14,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useAuth } from "@/lib/useAuth";
 import { ChefHat, Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect") || "/services";
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -28,6 +30,13 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  // Rediriger si déjà connecté
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      router.push(redirectPath);
+    }
+  }, [isAuthenticated, authLoading, router, redirectPath]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -96,6 +105,25 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
+  // Afficher un loader pendant la vérification d'authentification
+  if (authLoading) {
+    return (
+      <MainLayout>
+        <div className="min-h-[80vh] flex items-center justify-center py-12 px-4">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto mb-4"></div>
+            <p className="text-neutral-600">Vérification...</p>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  // Ne pas afficher la page si déjà connecté (redirection en cours)
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <MainLayout>

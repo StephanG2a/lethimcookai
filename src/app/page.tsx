@@ -19,7 +19,34 @@ import {
   Code,
   Sparkles,
   Users,
+  Building,
+  MapPin,
+  Globe,
 } from "lucide-react";
+
+// Fonction pour récupérer les organizations en vedette depuis l'API
+async function getFeaturedOrganizations() {
+  try {
+    const response = await fetch(
+      `${
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+      }/api/organizations?limit=3`,
+      {
+        cache: "no-store",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Erreur lors de la récupération des organisations");
+    }
+
+    const data = await response.json();
+    return data.organizations || [];
+  } catch (error) {
+    console.error("Erreur lors de la récupération des organisations:", error);
+    return [];
+  }
+}
 
 // Fonction pour récupérer les services depuis l'API
 async function getFeaturedServices() {
@@ -89,7 +116,10 @@ async function getFeaturedServices() {
 }
 
 export default async function HomePage() {
-  const featuredServices = await getFeaturedServices();
+  const [featuredServices, featuredOrganizations] = await Promise.all([
+    getFeaturedServices(),
+    getFeaturedOrganizations(),
+  ]);
 
   return (
     <MainLayout>
@@ -105,8 +135,11 @@ export default async function HomePage() {
 
               <h1 className="text-4xl md:text-6xl font-bold text-neutral-900 leading-tight">
                 Connectez-vous aux
-                <span className="text-orange-600"> meilleurs prestataires</span>
-                {" "}culinaires
+                <span className="text-orange-600">
+                  {" "}
+                  meilleurs prestataires
+                </span>{" "}
+                culinaires
               </h1>
 
               <p className="text-xl text-neutral-600 leading-relaxed">
@@ -203,8 +236,104 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Catégories */}
+      {/* Organisations en vedette */}
       <section className="py-16 bg-neutral-50">
+        <div className="container mx-auto max-w-screen-xl px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-neutral-900 mb-4">
+              Organisations partenaires
+            </h2>
+            <p className="text-xl text-neutral-600">
+              Découvrez les organisations qui font confiance à notre plateforme
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredOrganizations.map((organization: any) => (
+              <Link
+                key={organization.id}
+                href={`/organizations/${organization.id}`}
+              >
+                <Card className="h-full hover:shadow-lg transition-all duration-200 hover:border-orange-200 cursor-pointer">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg font-semibold text-neutral-900 mb-2 line-clamp-2">
+                          {organization.name}
+                        </CardTitle>
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          <Badge variant="default" className="text-xs">
+                            {organization.sector}
+                          </Badge>
+                          {organization._count?.services > 0 && (
+                            <Badge
+                              variant="secondary"
+                              className="text-xs bg-blue-100 text-blue-800"
+                            >
+                              <Users className="h-3 w-3 mr-1" />
+                              {organization._count.services} service
+                              {organization._count.services > 1 ? "s" : ""}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      {organization.logo ? (
+                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-neutral-100 flex-shrink-0 ml-4">
+                          <img
+                            src={organization.logo}
+                            alt={`Logo de ${organization.name}`}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center flex-shrink-0 ml-4">
+                          <Building className="h-6 w-6 text-orange-600" />
+                        </div>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {organization.description && (
+                      <CardDescription className="text-sm text-neutral-600 mb-4 line-clamp-2">
+                        {organization.description}
+                      </CardDescription>
+                    )}
+
+                    <div className="space-y-2">
+                      {organization.address && (
+                        <div className="flex items-center text-xs text-neutral-500">
+                          <MapPin className="h-3 w-3 mr-2 flex-shrink-0" />
+                          <span className="truncate">
+                            {organization.address}
+                          </span>
+                        </div>
+                      )}
+                      {organization.website && (
+                        <div className="flex items-center text-xs text-neutral-500">
+                          <Globe className="h-3 w-3 mr-2 flex-shrink-0" />
+                          <span className="truncate">Site web disponible</span>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button size="lg" variant="outline" asChild>
+              <Link href="/organizations">
+                Voir toutes les organisations
+                <ArrowRight className="h-5 w-5 ml-2" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Catégories */}
+      <section className="py-16 bg-white">
         <div className="container mx-auto max-w-screen-xl px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-neutral-900 mb-4">
