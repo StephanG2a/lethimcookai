@@ -1,7 +1,11 @@
-import Link from 'next/link'
-import { ChefHat, Mail, Phone, MapPin } from 'lucide-react'
+"use client";
+
+import Link from "next/link";
+import { ChefHat, Mail, Phone, MapPin } from "lucide-react";
+import { useAuth } from "@/lib/useAuth";
 
 export function Footer() {
+  const { user } = useAuth();
   return (
     <footer className="bg-neutral-900 text-neutral-300">
       <div className="container mx-auto max-w-screen-xl px-4 py-12">
@@ -13,7 +17,8 @@ export function Footer() {
               <span className="text-xl font-bold text-white">LetHimCookAI</span>
             </Link>
             <p className="text-sm text-neutral-400">
-              La plateforme qui connecte les professionnels de la gastronomie avec les meilleurs prestataires du secteur.
+              La plateforme qui connecte les professionnels de la gastronomie
+              avec les meilleurs prestataires du secteur.
             </p>
           </div>
 
@@ -22,17 +27,28 @@ export function Footer() {
             <h3 className="text-lg font-semibold text-white">Services</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/services" className="hover:text-orange-500 transition-colors">
+                <Link
+                  href="/services"
+                  className="hover:text-orange-500 transition-colors"
+                >
                   Parcourir les services
                 </Link>
               </li>
+              {user?.role === "PRESTATAIRE" && (
+                <li>
+                  <Link
+                    href="/services/nouveau"
+                    className="hover:text-orange-500 transition-colors"
+                  >
+                    Publier un service
+                  </Link>
+                </li>
+              )}
               <li>
-                <Link href="/services/nouveau" className="hover:text-orange-500 transition-colors">
-                  Publier un service
-                </Link>
-              </li>
-              <li>
-                <Link href="/prestataires" className="hover:text-orange-500 transition-colors">
+                <Link
+                  href="/prestataires"
+                  className="hover:text-orange-500 transition-colors"
+                >
                   Devenir prestataire
                 </Link>
               </li>
@@ -44,17 +60,26 @@ export function Footer() {
             <h3 className="text-lg font-semibold text-white">Support</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/comment-ca-marche" className="hover:text-orange-500 transition-colors">
+                <Link
+                  href="/comment-ca-marche"
+                  className="hover:text-orange-500 transition-colors"
+                >
                   Comment ça marche
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="hover:text-orange-500 transition-colors">
+                <Link
+                  href="/faq"
+                  className="hover:text-orange-500 transition-colors"
+                >
                   FAQ
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-orange-500 transition-colors">
+                <Link
+                  href="/contact"
+                  className="hover:text-orange-500 transition-colors"
+                >
                   Nous contacter
                 </Link>
               </li>
@@ -86,18 +111,27 @@ export function Footer() {
             © 2025 LetHimCookAI. Tous droits réservés.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <Link href="/mentions-legales" className="text-sm text-neutral-400 hover:text-orange-500 transition-colors">
+            <Link
+              href="/mentions-legales"
+              className="text-sm text-neutral-400 hover:text-orange-500 transition-colors"
+            >
               Mentions légales
             </Link>
-            <Link href="/politique-confidentialite" className="text-sm text-neutral-400 hover:text-orange-500 transition-colors">
+            <Link
+              href="/politique-confidentialite"
+              className="text-sm text-neutral-400 hover:text-orange-500 transition-colors"
+            >
               Politique de confidentialité
             </Link>
-            <Link href="/cgu" className="text-sm text-neutral-400 hover:text-orange-500 transition-colors">
+            <Link
+              href="/cgu"
+              className="text-sm text-neutral-400 hover:text-orange-500 transition-colors"
+            >
               CGU
             </Link>
           </div>
         </div>
       </div>
     </footer>
-  )
-} 
+  );
+}
