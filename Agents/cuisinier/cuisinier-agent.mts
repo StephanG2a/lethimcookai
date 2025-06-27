@@ -54,14 +54,24 @@ const tools = [
 // Configuration de l'agent avec mémoire
 const memory = new MemorySaver();
 
-// Prompt système ultra-strict pour éviter les doublons
-const systemMessage = `Tu es un Chef Cuisinier IA expert - VERSION BASIC.
+// Prompt système pour les restrictions culinaires
+const systemMessage = `Tu es un Chef Cuisinier IA expert - VERSION BASIC - SPÉCIALISÉ EXCLUSIVEMENT DANS LE DOMAINE CULINAIRE.
 
-RÈGLE ABSOLUE : Si un outil répond, retourne UNIQUEMENT sa réponse EXACTEMENT comme elle est. N'ajoute RIEN.
+🍴 RESTRICTION ABSOLUE : Toutes tes réponses DOIVENT rester dans le domaine culinaire (cuisine, gastronomie, restauration, alimentation).
+
+📝 RECENTRAGE AUTOMATIQUE : Pour toute question qui pourrait avoir plusieurs interprétations, réponds UNIQUEMENT sous l'angle culinaire :
+- Animaux → Aspect boucherie/cuisine/découpe
+- Végétaux → Ingrédients/culture culinaire  
+- Objets → Ustensiles/équipement de cuisine
+- Concepts → Applications en cuisine/restauration
+
+🔧 UTILISATION DES OUTILS : 
+- Utilise les outils appropriés pour répondre aux demandes spécialisées
+- Les outils couvrent : recettes, nutrition, substitutions, conversions, menus, accords vins, techniques
 
 Spécialités BASIC : recettes, nutrition, substitutions, conversions, menus, vins, techniques culinaires.
 
-Ne reformule jamais. Ne commente jamais. Ne répète jamais.`;
+❌ DOMAINES EXCLUS : Médecine, finance, technologie, éducation générale, etc. (sauf si lien direct avec cuisine)`;
 
 // Création de l'agent
 export const cuisinierAgent = createReactAgent({
@@ -103,13 +113,31 @@ export async function processMessage(
 
     console.log(`🔧 Outils utilisés: ${toolsUsed.join(", ") || "aucun"}`);
 
+    // ANTI-DUPLICATION : Si des outils ont été utilisés, on cherche leur réponse directe
+    let finalResponse = lastMessage.content;
+
+    if (toolsUsed.length > 0) {
+      // Chercher les réponses d'outils dans les messages
+      const toolResponses = response.messages
+        .filter((msg: any) => msg.name && toolsUsed.includes(msg.name))
+        .map((msg: any) => msg.content);
+
+      if (toolResponses.length > 0) {
+        // Utiliser uniquement la réponse de l'outil, pas celle de l'agent
+        finalResponse = toolResponses[toolResponses.length - 1];
+        console.log(
+          `🔧 Anti-duplication: Utilisation de la réponse d'outil directe`
+        );
+      }
+    }
+
     return {
       success: true,
-      response: lastMessage.content,
+      response: finalResponse,
       toolsUsed: toolsUsed,
       threadId: userId,
       metadata: {
-        responseLength: lastMessage.content.length,
+        responseLength: finalResponse.length,
         toolsCount: toolsUsed.length,
         timestamp: new Date().toISOString(),
       },
@@ -184,7 +212,7 @@ export function getAgentStats() {
       {
         name: "externalRecipeApi",
         description:
-          "Recherche de recettes via APIs multiples (Marmiton, Spoonacular, TheMealDB, Edamam)",
+          "Recherche de recettes via APIs multiples (Marmiton, Spoonacular, TheMealDB, Edamam, ...)",
         category: "Basic - Recettes",
       },
       {

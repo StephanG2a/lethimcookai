@@ -16,30 +16,54 @@ export const quickServiceSearch = tool(
     try {
       const searchTerm = search_term.toLowerCase();
 
-      // Recherche très large et flexible
+      // RESTRICTION DOMAINE CULINAIRE : Recherche limitée aux secteurs culinaires
       const services = await prisma.service.findMany({
         where: {
-          OR: [
-            { title: { contains: searchTerm, mode: "insensitive" } },
-            { description: { contains: searchTerm, mode: "insensitive" } },
-            { summary: { contains: searchTerm, mode: "insensitive" } },
-            { tags: { hasSome: [searchTerm] } },
+          AND: [
+            // Contrainte culinaire obligatoire
             {
               organization: {
                 OR: [
-                  { name: { contains: searchTerm, mode: "insensitive" } },
-                  { sector: { contains: searchTerm, mode: "insensitive" } },
-                  { address: { contains: searchTerm, mode: "insensitive" } },
+                  { sector: { contains: "cuisine", mode: "insensitive" } },
+                  { sector: { contains: "restaurant", mode: "insensitive" } },
+                  { sector: { contains: "alimentation", mode: "insensitive" } },
+                  { sector: { contains: "traiteur", mode: "insensitive" } },
+                  { sector: { contains: "boulangerie", mode: "insensitive" } },
+                  { sector: { contains: "pâtisserie", mode: "insensitive" } },
+                  { sector: { contains: "gastronomie", mode: "insensitive" } },
+                  { sector: { contains: "food", mode: "insensitive" } },
+                  { sector: { contains: "chef", mode: "insensitive" } },
+                  { sector: { contains: "culinaire", mode: "insensitive" } },
                 ],
               },
             },
-            // Recherche par mots-clés dans les tags
+            // Recherche flexible dans ce domaine restreint
             {
-              tags: {
-                hasSome: searchTerm
-                  .split(" ")
-                  .filter((word) => word.length > 2),
-              },
+              OR: [
+                { title: { contains: searchTerm, mode: "insensitive" } },
+                { description: { contains: searchTerm, mode: "insensitive" } },
+                { summary: { contains: searchTerm, mode: "insensitive" } },
+                { tags: { hasSome: [searchTerm] } },
+                {
+                  organization: {
+                    OR: [
+                      { name: { contains: searchTerm, mode: "insensitive" } },
+                      { sector: { contains: searchTerm, mode: "insensitive" } },
+                      {
+                        address: { contains: searchTerm, mode: "insensitive" },
+                      },
+                    ],
+                  },
+                },
+                // Recherche par mots-clés dans les tags
+                {
+                  tags: {
+                    hasSome: searchTerm
+                      .split(" ")
+                      .filter((word) => word.length > 2),
+                  },
+                },
+              ],
             },
           ],
         },

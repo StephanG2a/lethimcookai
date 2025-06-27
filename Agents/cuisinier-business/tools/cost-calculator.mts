@@ -18,7 +18,57 @@ export const costCalculator = tool(
     target_margin,
   }) => {
     try {
-      const calculatorPrompt = `Calcul de coûts pour ${business_type}.
+      // RESTRICTION DOMAINE CULINAIRE : Validation des types d'établissement
+      const allowedBusinessTypes = [
+        "restaurant",
+        "bistrot",
+        "brasserie",
+        "café",
+        "pizzeria",
+        "traiteur",
+        "food truck",
+        "boulangerie",
+        "pâtisserie",
+        "glacier",
+        "bar à vins",
+        "gastro",
+        "fast-food",
+        "snack",
+        "cantine",
+        "chef à domicile",
+        "cuisine",
+        "culinaire",
+        "gastronomie",
+        "alimentation",
+        "épicerie",
+      ];
+
+      const isValidBusinessType = allowedBusinessTypes.some(
+        (type) =>
+          business_type.toLowerCase().includes(type) ||
+          type.includes(business_type.toLowerCase())
+      );
+
+      if (!isValidBusinessType) {
+        return `# ❌ Calculateur de Coûts - Domaine Non Supporté
+
+## 🎯 Restriction au Domaine Culinaire
+Ce calculateur de coûts est spécialisé dans le **secteur culinaire uniquement**.
+
+**Types d'établissements supportés :**
+• **Restauration :** restaurants, bistrots, brasseries, pizzerias
+• **Services :** traiteurs, food trucks, chefs à domicile
+• **Artisanat :** boulangeries, pâtisseries, glaciers
+• **Commerce :** cafés, bars à vins, épiceries fines
+
+**Votre demande :** "${business_type}" ne correspond pas à notre domaine d'expertise culinaire.
+
+💡 **Reformulez votre demande** avec un type d'établissement alimentaire pour obtenir un calcul de coûts précis !`;
+      }
+
+      const calculatorPrompt = `Calcul de coûts spécialisé CUISINE pour ${business_type}.
+
+IMPORTANT: Concentre-toi EXCLUSIVEMENT sur le secteur culinaire et restauration.
 
 Menu items: ${menu_items}
 Couverts/jour: ${covers_per_day}
@@ -79,19 +129,32 @@ Impossible de calculer les coûts pour "${business_type}".`;
   },
   {
     name: "cost_calculator",
-    description: "Calcule les coûts et prix de vente pour restaurants",
+    description:
+      "Calcule les coûts et prix de vente EXCLUSIVEMENT pour établissements culinaires et restaurants",
     schema: z.object({
       business_type: z
         .string()
-        .describe("Type d'établissement (restaurant, food truck, traiteur)"),
-      menu_items: z.string().describe("Liste des plats principaux"),
-      covers_per_day: z.number().describe("Nombre de couverts par jour"),
+        .describe(
+          "Type d'établissement culinaire (restaurant, food truck, traiteur, boulangerie, etc.)"
+        ),
+      menu_items: z
+        .string()
+        .describe("Liste des plats et produits culinaires principaux"),
+      covers_per_day: z
+        .number()
+        .describe("Nombre de couverts/clients par jour"),
       ingredient_costs: z
         .number()
-        .describe("Coût ingrédients moyen par couvert"),
-      staff_costs: z.number().describe("Coûts personnel mensuels"),
-      rent_costs: z.number().describe("Loyer et charges mensuels"),
-      target_margin: z.number().describe("Marge bénéficiaire souhaitée (%)"),
+        .describe("Coût ingrédients culinaires moyen par couvert"),
+      staff_costs: z
+        .number()
+        .describe("Coûts personnel cuisine/service mensuels"),
+      rent_costs: z
+        .number()
+        .describe("Loyer et charges établissement culinaire mensuels"),
+      target_margin: z
+        .number()
+        .describe("Marge bénéficiaire souhaitée sur produits alimentaires (%)"),
     }),
   }
 );

@@ -170,7 +170,7 @@ const AGENTS_TOOLS_CONFIG = {
     tools: [
       {
         name: "Recherche de recettes",
-        description: "Recettes via APIs multiples (Marmiton, Spoonacular)",
+        description: "Recettes via APIs multiples (Marmiton, Spoonacular, ...)",
         category: "Recettes",
       },
       {

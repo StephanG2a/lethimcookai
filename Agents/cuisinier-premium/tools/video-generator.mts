@@ -417,24 +417,30 @@ Voici une vidéo pour vous aider avec **${theme}** :
   {
     name: "video_generator",
     description:
-      "Génère des vidéos culinaires YouTube avec youtube-search-api (plus fiable)",
+      "Génère des vidéos culinaires YouTube EXCLUSIVEMENT avec youtube-search-api (recettes, techniques cuisine, tutoriels gastronomiques)",
     schema: z.object({
       video_type: z
         .string()
-        .describe("Type de vidéo (recette, technique, présentation, tutoriel)"),
+        .describe(
+          "Type de vidéo culinaire (recette, technique cuisine, présentation gastronomique, tutoriel chef)"
+        ),
       cuisine_style: z
         .string()
         .optional()
-        .describe("Style de cuisine (française, italienne, asiatique, etc.)"),
+        .describe(
+          "Style de cuisine ou gastronomie (française, italienne, asiatique, pâtisserie, etc.)"
+        ),
       difficulty: z
         .string()
         .describe(
-          "Niveau de difficulté (débutant, professionnel, détaillé, rapide)"
+          "Niveau de difficulté culinaire (débutant cuisine, professionnel chef, détaillé gastronomique, rapide)"
         ),
       duration: z
         .string()
-        .describe("Durée souhaitée (courte, moyenne, longue)"),
-      theme: z.string().describe("Thème principal ou plat spécifique"),
+        .describe("Durée souhaitée du tutoriel (courte, moyenne, longue)"),
+      theme: z
+        .string()
+        .describe("Thème culinaire principal ou plat spécifique à préparer"),
     }),
   }
 );

@@ -51,15 +51,40 @@ export const prestataireSearch = tool(
         ];
       }
 
-      // Filtrage par secteur d'activité
+      // RESTRICTION DOMAINE CULINAIRE : Filtrer par secteurs culinaires uniquement
+      const culinaryFilters = {
+        OR: [
+          { sector: { contains: "cuisine", mode: "insensitive" } },
+          { sector: { contains: "restaurant", mode: "insensitive" } },
+          { sector: { contains: "alimentation", mode: "insensitive" } },
+          { sector: { contains: "traiteur", mode: "insensitive" } },
+          { sector: { contains: "boulangerie", mode: "insensitive" } },
+          { sector: { contains: "pâtisserie", mode: "insensitive" } },
+          { sector: { contains: "gastronomie", mode: "insensitive" } },
+          { sector: { contains: "food", mode: "insensitive" } },
+          { sector: { contains: "chef", mode: "insensitive" } },
+          { sector: { contains: "culinaire", mode: "insensitive" } },
+        ],
+      };
+
+      // Filtrage par secteur d'activité (limité au domaine culinaire)
       if (sector) {
         whereClause.organization = {
           ...whereClause.organization,
-          sector: { contains: sector, mode: "insensitive" },
+          AND: [
+            culinaryFilters,
+            { sector: { contains: sector, mode: "insensitive" } },
+          ],
+        };
+      } else {
+        // Forcer la restriction culinaire par défaut
+        whereClause.organization = {
+          ...whereClause.organization,
+          ...culinaryFilters,
         };
       }
 
-      // Filtrage par localisation
+      // Filtrage par localisation (maintenir les restrictions culinaires)
       if (location) {
         whereClause.organization = {
           ...whereClause.organization,

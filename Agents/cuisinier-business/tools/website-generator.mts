@@ -2,13 +2,13 @@ import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 
 export const websiteGenerator = tool(
-  async ({ 
-    restaurantName, 
-    restaurantType, 
-    websiteType, 
-    features, 
-    colorScheme, 
-    content 
+  async ({
+    restaurantName,
+    restaurantType,
+    websiteType,
+    features,
+    colorScheme,
+    content,
   }) => {
     try {
       console.log(`🌐 Génération de site web pour: ${restaurantName}`);
@@ -17,10 +17,21 @@ export const websiteGenerator = tool(
       // Générer le thème et le layout une seule fois pour garantir la cohérence
       const theme = generateRandomTheme();
       const layoutVersion = generateRandomLayout();
-      
-      const siteStructure = generateSiteStructure(restaurantType, websiteType, features);
-      const designElements = generateDesignElements(restaurantType, colorScheme);
-      const siteContent = generateSiteContent(restaurantName, restaurantType, content);
+
+      const siteStructure = generateSiteStructure(
+        restaurantType,
+        websiteType,
+        features
+      );
+      const designElements = generateDesignElements(
+        restaurantType,
+        colorScheme
+      );
+      const siteContent = generateSiteContent(
+        restaurantName,
+        restaurantType,
+        content
+      );
       const technicalSpecs = generateTechnicalSpecs(websiteType, features);
 
       let response = `# 🌐 Site Web Généré pour ${restaurantName}
@@ -29,7 +40,7 @@ export const websiteGenerator = tool(
 
 **Type de restaurant :** ${restaurantType}
 **Type de site :** ${websiteType}
-**Fonctionnalités :** ${features.join(', ')}
+**Fonctionnalités :** ${features.join(", ")}
 **Schéma colorimétrique :** ${colorScheme}
 
 ---
@@ -63,9 +74,22 @@ ${technicalSpecs}
 Le site web complet a été généré avec les fichiers suivants :
 
 **📁 Structure des fichiers :**
-- **index.html** - Page principale (${Math.round(generateHTMLForPreview(restaurantName, restaurantType, features, colorScheme, theme, layoutVersion).length / 1024)}KB)
-- **styles.css** - Styles responsives (${Math.round(generateCSSForPreview(colorScheme).length / 1024)}KB)  
-- **script.js** - Interactions JavaScript (${Math.round(generateJSForPreview(features).length / 1024)}KB)
+- **index.html** - Page principale (${Math.round(
+        generateHTMLForPreview(
+          restaurantName,
+          restaurantType,
+          features,
+          colorScheme,
+          theme,
+          layoutVersion
+        ).length / 1024
+      )}KB)
+- **styles.css** - Styles responsives (${Math.round(
+        generateCSSForPreview(colorScheme).length / 1024
+      )}KB)  
+- **script.js** - Interactions JavaScript (${Math.round(
+        generateJSForPreview(features).length / 1024
+      )}KB)
 
 **🎨 Éléments créés :**
 - Navigation responsive avec logo
@@ -74,8 +98,12 @@ Le site web complet a été généré avec les fichiers suivants :
 - Section à propos personnalisée
 - Section contact avec coordonnées
 - Footer professionnel
-${features.includes('reservation') ? '- Système de réservation intégré' : ''}
-${features.includes('menu-interactif') ? '- Menu interactif avec animations' : ''}
+${features.includes("reservation") ? "- Système de réservation intégré" : ""}
+${
+  features.includes("menu-interactif")
+    ? "- Menu interactif avec animations"
+    : ""
+}
 
 ## 🚀 Prêt pour le Déploiement
 
@@ -86,7 +114,7 @@ ${features.includes('menu-interactif') ? '- Menu interactif avec animations' : '
 - Accessibilité WCAG 2.1
 
 **🎯 Fonctionnalités actives :**
-${features.map(f => `- ${getFeatureDescription(f)}`).join('\n')}
+${features.map((f) => `- ${getFeatureDescription(f)}`).join("\n")}
 
 **📱 Compatibilité :**
 - Tous navigateurs modernes
@@ -116,26 +144,35 @@ ${features.map(f => `- ${getFeatureDescription(f)}`).join('\n')}
 
 ---
 **MÉTADONNÉES_WEBSITE:** ${JSON.stringify({
-  title: `${restaurantName} - ${restaurantType}`,
-  restaurantName: restaurantName,
-  restaurantType: restaurantType,
-  websiteType: websiteType,
-  features: features,
-  colorScheme: colorScheme,
-  htmlContent: generateSimpleHTML(restaurantName, restaurantType, features, colorScheme),
-  cssContent: generateSimpleCSS(colorScheme),
-  jsContent: generateSimpleJS(features),
-  previewUrl: generateSimpleDataURL(restaurantName, restaurantType, features, colorScheme),
-  technologies: ["HTML5", "CSS3", "JavaScript ES6", "Responsive Design"],
-  seoOptimized: true,
-  responsive: true,
-  deploymentReady: true,
-  generatedAt: new Date().toISOString()
-})}`;
+        title: `${restaurantName} - ${restaurantType}`,
+        restaurantName: restaurantName,
+        restaurantType: restaurantType,
+        websiteType: websiteType,
+        features: features,
+        colorScheme: colorScheme,
+        htmlContent: generateSimpleHTML(
+          restaurantName,
+          restaurantType,
+          features,
+          colorScheme
+        ),
+        cssContent: generateSimpleCSS(colorScheme),
+        jsContent: generateSimpleJS(features),
+        previewUrl: generateSimpleDataURL(
+          restaurantName,
+          restaurantType,
+          features,
+          colorScheme
+        ),
+        technologies: ["HTML5", "CSS3", "JavaScript ES6", "Responsive Design"],
+        seoOptimized: true,
+        responsive: true,
+        deploymentReady: true,
+        generatedAt: new Date().toISOString(),
+      })}`;
 
       console.log(`✅ Site web pour "${restaurantName}" généré avec succès`);
       return response;
-
     } catch (error) {
       console.error("❌ Erreur lors de la génération du site web:", error);
       return `# ❌ Erreur de Génération
@@ -152,27 +189,47 @@ Impossible de générer le site web pour "${restaurantName}".
   },
   {
     name: "websiteGenerator",
-    description: `🌐 OUTIL PRIORITAIRE POUR CRÉATION DE SITES WEB ! 
-    Générateur de sites web COMPLETS pour restaurants et établissements culinaires. 
-    Utilise cet outil pour TOUTES les demandes de sites web, site vitrine, site internet, développement web.
+    description: `🌐 OUTIL PRIORITAIRE POUR CRÉATION DE SITES WEB CULINAIRES ! 
+    Générateur de sites web COMPLETS exclusivement pour restaurants et établissements culinaires. 
+    Utilise cet outil pour TOUTES les demandes de sites web, site vitrine, site internet pour le domaine culinaire.
     Crée un site responsive avec HTML, CSS et JavaScript, optimisé SEO et prêt à déployer.
-    Inclut des fonctionnalités spécialisées comme réservation en ligne, menu interactif, etc.
+    Inclut des fonctionnalités spécialisées comme réservation en ligne, menu interactif, galerie culinaire, etc.
     
-    Mots-clés déclencheurs: site, web, vitrine, internet, développement, "fait le site"`,
+    RESTRICTION: Uniquement pour restaurants, boulangeries, traiteurs, bars, cafés et établissements alimentaires.
+    Mots-clés déclencheurs: site restaurant, web culinaire, vitrine gastronomique, site traiteur`,
     schema: z.object({
       restaurantName: z.string().describe("Nom du restaurant ou établissement"),
-      restaurantType: z.string().describe("Type de restaurant (gastronomique, brasserie, pizzeria, etc.)"),
-      websiteType: z.enum(["vitrine", "e-commerce", "reservation", "portfolio"]).describe("Type de site web à générer"),
-      features: z.array(z.string()).describe("Fonctionnalités désirées (reservation, menu-interactif, galerie, contact, etc.)"),
-      colorScheme: z.enum(["elegant", "moderne", "rustique", "minimaliste", "chaleureux"]).describe("Schéma de couleurs et style"),
-      content: z.string().optional().describe("Contenu spécifique ou instructions particulières")
+      restaurantType: z
+        .string()
+        .describe(
+          "Type de restaurant (gastronomique, brasserie, pizzeria, etc.)"
+        ),
+      websiteType: z
+        .enum(["vitrine", "e-commerce", "reservation", "portfolio"])
+        .describe("Type de site web à générer"),
+      features: z
+        .array(z.string())
+        .describe(
+          "Fonctionnalités désirées (reservation, menu-interactif, galerie, contact, etc.)"
+        ),
+      colorScheme: z
+        .enum(["elegant", "moderne", "rustique", "minimaliste", "chaleureux"])
+        .describe("Schéma de couleurs et style"),
+      content: z
+        .string()
+        .optional()
+        .describe("Contenu spécifique ou instructions particulières"),
     }),
   }
 );
 
 // Fonctions utilitaires pour la génération
 
-function generateSiteStructure(restaurantType: string, websiteType: string, features: string[]): string {
+function generateSiteStructure(
+  restaurantType: string,
+  websiteType: string,
+  features: string[]
+): string {
   const baseStructure = [
     "🏠 **Page d'Accueil**",
     "   - Hero section avec image d'ambiance",
@@ -192,65 +249,86 @@ function generateSiteStructure(restaurantType: string, websiteType: string, feat
     "📞 **Contact**",
     "   - Coordonnées complètes",
     "   - Plan d'accès",
-    "   - Horaires d'ouverture"
+    "   - Horaires d'ouverture",
   ];
 
-  if (features.includes('reservation')) {
-    baseStructure.push("", "📅 **Réservation**", "   - Formulaire de réservation", "   - Disponibilités en temps réel", "   - Confirmation automatique");
+  if (features.includes("reservation")) {
+    baseStructure.push(
+      "",
+      "📅 **Réservation**",
+      "   - Formulaire de réservation",
+      "   - Disponibilités en temps réel",
+      "   - Confirmation automatique"
+    );
   }
 
-  if (features.includes('galerie')) {
-    baseStructure.push("", "📸 **Galerie**", "   - Photos des plats", "   - Ambiance du restaurant", "   - Événements spéciaux");
+  if (features.includes("galerie")) {
+    baseStructure.push(
+      "",
+      "📸 **Galerie**",
+      "   - Photos des plats",
+      "   - Ambiance du restaurant",
+      "   - Événements spéciaux"
+    );
   }
 
-  if (features.includes('blog')) {
-    baseStructure.push("", "📝 **Blog**", "   - Actualités du restaurant", "   - Recettes", "   - Événements");
+  if (features.includes("blog")) {
+    baseStructure.push(
+      "",
+      "📝 **Blog**",
+      "   - Actualités du restaurant",
+      "   - Recettes",
+      "   - Événements"
+    );
   }
 
-  return baseStructure.join('\n');
+  return baseStructure.join("\n");
 }
 
-function generateDesignElements(restaurantType: string, colorScheme: string): string {
+function generateDesignElements(
+  restaurantType: string,
+  colorScheme: string
+): string {
   const schemes = {
     elegant: {
       primary: "#2C3E50",
-      accent: "#E74C3C", 
+      accent: "#E74C3C",
       bg: "#FFFFFF",
       text: "#2C3E50",
-      description: "Palette élégante avec bleu marine et rouge bordeaux"
+      description: "Palette élégante avec bleu marine et rouge bordeaux",
     },
     moderne: {
       primary: "#34495E",
       accent: "#1ABC9C",
-      bg: "#ECF0F1", 
+      bg: "#ECF0F1",
       text: "#2C3E50",
-      description: "Design moderne avec gris anthracite et turquoise"
+      description: "Design moderne avec gris anthracite et turquoise",
     },
     rustique: {
       primary: "#8B4513",
       accent: "#DAA520",
       bg: "#FFF8DC",
-      text: "#654321", 
-      description: "Ambiance rustique avec tons bois et dorés"
+      text: "#654321",
+      description: "Ambiance rustique avec tons bois et dorés",
     },
     minimaliste: {
       primary: "#000000",
       accent: "#FF6B35",
       bg: "#FFFFFF",
       text: "#333333",
-      description: "Style minimaliste noir et blanc avec accent orange"
+      description: "Style minimaliste noir et blanc avec accent orange",
     },
     chaleureux: {
       primary: "#D2691E",
       accent: "#FF8C00",
       bg: "#FFF5EE",
       text: "#8B4513",
-      description: "Tons chauds orangés et terreux"
-    }
+      description: "Tons chauds orangés et terreux",
+    },
   };
 
   const scheme = schemes[colorScheme as keyof typeof schemes];
-  
+
   return `**🎨 Palette de couleurs (${colorScheme}) :**
 - Couleur principale : ${scheme.primary}
 - Couleur d'accent : ${scheme.accent} 
@@ -276,7 +354,11 @@ function generateDesignElements(restaurantType: string, colorScheme: string): st
 - Performances optimisées`;
 }
 
-function generateSiteContent(restaurantName: string, restaurantType: string, content?: string): string {
+function generateSiteContent(
+  restaurantName: string,
+  restaurantType: string,
+  content?: string
+): string {
   return `**✍️ Contenu éditorial généré :**
 
 **Titre principal :** "${restaurantName} - ${restaurantType} d'Exception"
@@ -296,10 +378,13 @@ function generateSiteContent(restaurantName: string, restaurantType: string, con
 - Description : "Découvrez ${restaurantName}, ${restaurantType.toLowerCase()} d'exception. Menu savoureux, ambiance chaleureuse. Réservez dès maintenant !"
 - Keywords : "${restaurantName}, ${restaurantType.toLowerCase()}, restaurant, gastronomie, [ville]"
 
-${content ? `\n**Contenu personnalisé intégré :**\n${content}` : ''}`;
+${content ? `\n**Contenu personnalisé intégré :**\n${content}` : ""}`;
 }
 
-function generateTechnicalSpecs(websiteType: string, features: string[]): string {
+function generateTechnicalSpecs(
+  websiteType: string,
+  features: string[]
+): string {
   return `**⚙️ Spécifications techniques :**
 
 **Structure :**
@@ -333,45 +418,63 @@ function generateTechnicalSpecs(websiteType: string, features: string[]): string
 - Tests multi-devices
 
 **Fonctionnalités intégrées :**
-${features.map(f => `- ✅ ${getFeatureDescription(f)}`).join('\n')}`;
+${features.map((f) => `- ✅ ${getFeatureDescription(f)}`).join("\n")}`;
 }
 
 function generateCSSVariables(colorScheme: string): string {
   const schemes = {
-    elegant: "--primary-color: #2C3E50;\n    --accent-color: #E74C3C;\n    --bg-color: #FFFFFF;\n    --text-color: #2C3E50;",
-    moderne: "--primary-color: #34495E;\n    --accent-color: #1ABC9C;\n    --bg-color: #ECF0F1;\n    --text-color: #2C3E50;",
-    rustique: "--primary-color: #8B4513;\n    --accent-color: #DAA520;\n    --bg-color: #FFF8DC;\n    --text-color: #654321;",
-    minimaliste: "--primary-color: #000000;\n    --accent-color: #FF6B35;\n    --bg-color: #FFFFFF;\n    --text-color: #333333;",
-    chaleureux: "--primary-color: #D2691E;\n    --accent-color: #FF8C00;\n    --bg-color: #FFF5EE;\n    --text-color: #8B4513;"
+    elegant:
+      "--primary-color: #2C3E50;\n    --accent-color: #E74C3C;\n    --bg-color: #FFFFFF;\n    --text-color: #2C3E50;",
+    moderne:
+      "--primary-color: #34495E;\n    --accent-color: #1ABC9C;\n    --bg-color: #ECF0F1;\n    --text-color: #2C3E50;",
+    rustique:
+      "--primary-color: #8B4513;\n    --accent-color: #DAA520;\n    --bg-color: #FFF8DC;\n    --text-color: #654321;",
+    minimaliste:
+      "--primary-color: #000000;\n    --accent-color: #FF6B35;\n    --bg-color: #FFFFFF;\n    --text-color: #333333;",
+    chaleureux:
+      "--primary-color: #D2691E;\n    --accent-color: #FF8C00;\n    --bg-color: #FFF5EE;\n    --text-color: #8B4513;",
   };
-  
+
   return schemes[colorScheme as keyof typeof schemes] || schemes.elegant;
 }
 
 // FONCTION POUR GÉNÉRER DES COULEURS BASÉES SUR LE TYPE DE RESTAURANT
-function generateColorsForRestaurantType(restaurantType: string, colorScheme: string): string {
+function generateColorsForRestaurantType(
+  restaurantType: string,
+  colorScheme: string
+): string {
   const normalizedType = restaurantType.toLowerCase();
-  
-  if (normalizedType.includes('gastronomique') || normalizedType.includes('étoilé')) {
+
+  if (
+    normalizedType.includes("gastronomique") ||
+    normalizedType.includes("étoilé")
+  ) {
     return "--primary-color: #1a1a1a;\n    --accent-color: #d4af37;\n    --bg-color: #f8f9fa;\n    --text-color: #1a1a1a;\n    --luxury-gold: #d4af37;";
   }
-  
-  if (normalizedType.includes('pizzeria') || normalizedType.includes('italien')) {
+
+  if (
+    normalizedType.includes("pizzeria") ||
+    normalizedType.includes("italien")
+  ) {
     return "--primary-color: #e74c3c;\n    --accent-color: #f39c12;\n    --bg-color: #fff5f2;\n    --text-color: #2c3e50;\n    --pizza-red: #e74c3c;\n    --pizza-green: #27ae60;";
   }
-  
-  if (normalizedType.includes('asiatique') || normalizedType.includes('japonais') || normalizedType.includes('chinois')) {
+
+  if (
+    normalizedType.includes("asiatique") ||
+    normalizedType.includes("japonais") ||
+    normalizedType.includes("chinois")
+  ) {
     return "--primary-color: #2c3e50;\n    --accent-color: #e74c3c;\n    --bg-color: #f0f4f8;\n    --text-color: #2c3e50;\n    --zen-blue: #3498db;\n    --zen-red: #e74c3c;";
   }
-  
-  if (normalizedType.includes('brasserie')) {
+
+  if (normalizedType.includes("brasserie")) {
     return "--primary-color: #8b4513;\n    --accent-color: #daa520;\n    --bg-color: #faf8f5;\n    --text-color: #654321;\n    --wood-brown: #8b4513;";
   }
-  
-  if (normalizedType.includes('bistrot')) {
+
+  if (normalizedType.includes("bistrot")) {
     return "--primary-color: #2c3e50;\n    --accent-color: #e67e22;\n    --bg-color: #ecf0f1;\n    --text-color: #2c3e50;\n    --bistro-orange: #e67e22;";
   }
-  
+
   // Si aucun type spécifique, utiliser le schéma de couleur normal
   return generateCSSVariables(colorScheme);
 }
@@ -426,26 +529,41 @@ function initInteractiveMenu() {
 
 function getFeatureDescription(feature: string): string {
   const descriptions = {
-    'reservation': 'Système de réservation en ligne',
-    'menu-interactif': 'Menu avec détails interactifs',
-    'galerie': 'Galerie photos responsive',
-    'contact': 'Formulaire de contact',
-    'blog': 'Section actualités/blog',
-    'seo': 'Optimisation SEO complète',
-    'analytics': 'Google Analytics intégré',
-    'social': 'Intégration réseaux sociaux',
-    'map': 'Carte Google Maps intégrée'
+    reservation: "Système de réservation en ligne",
+    "menu-interactif": "Menu avec détails interactifs",
+    galerie: "Galerie photos responsive",
+    contact: "Formulaire de contact",
+    blog: "Section actualités/blog",
+    seo: "Optimisation SEO complète",
+    analytics: "Google Analytics intégré",
+    social: "Intégration réseaux sociaux",
+    map: "Carte Google Maps intégrée",
   };
-  
+
   return descriptions[feature] || feature;
 }
 
 // Fonction pour générer des couleurs aléatoires
 function getRandomColor(): string {
   const colors = [
-    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD',
-    '#6C5CE7', '#A29BFE', '#FD79A8', '#FDCB6E', '#6C5CE7', '#00B894',
-    '#E17055', '#0984E3', '#6C5CE7', '#A29BFE', '#74B9FF', '#81ECEC'
+    "#FF6B6B",
+    "#4ECDC4",
+    "#45B7D1",
+    "#96CEB4",
+    "#FFEAA7",
+    "#DDA0DD",
+    "#6C5CE7",
+    "#A29BFE",
+    "#FD79A8",
+    "#FDCB6E",
+    "#6C5CE7",
+    "#00B894",
+    "#E17055",
+    "#0984E3",
+    "#6C5CE7",
+    "#A29BFE",
+    "#74B9FF",
+    "#81ECEC",
   ];
   return colors[Math.floor(Math.random() * colors.length)];
 }
@@ -453,14 +571,54 @@ function getRandomColor(): string {
 // Fonction pour générer un thème aléatoire
 function generateRandomTheme() {
   const themes = [
-    { primary: '#1a1a1a', secondary: '#d4af37', accent: '#ffffff', bg: '#f8f9fa' }, // Luxe
-    { primary: '#2d3436', secondary: '#e74c3c', accent: '#f39c12', bg: '#ffffff' }, // Moderne
-    { primary: '#130f40', secondary: '#f0932b', accent: '#eb4d4b', bg: '#f5f3f0' }, // Vibrant
-    { primary: '#22a6b3', secondary: '#f0932b', accent: '#ffffff', bg: '#dfe6e9' }, // Ocean
-    { primary: '#6c5ce7', secondary: '#a29bfe', accent: '#ffeaa7', bg: '#ffffff' }, // Pastel
-    { primary: '#00b894', secondary: '#00cec9', accent: '#ffffff', bg: '#dfe6e9' }, // Nature
-    { primary: '#d63031', secondary: '#74b9ff', accent: '#ffffff', bg: '#fab1a0' }, // Contrast
-    { primary: '#2d3436', secondary: '#fdcb6e', accent: '#e17055', bg: '#ffffff' }  // Soleil
+    {
+      primary: "#1a1a1a",
+      secondary: "#d4af37",
+      accent: "#ffffff",
+      bg: "#f8f9fa",
+    }, // Luxe
+    {
+      primary: "#2d3436",
+      secondary: "#e74c3c",
+      accent: "#f39c12",
+      bg: "#ffffff",
+    }, // Moderne
+    {
+      primary: "#130f40",
+      secondary: "#f0932b",
+      accent: "#eb4d4b",
+      bg: "#f5f3f0",
+    }, // Vibrant
+    {
+      primary: "#22a6b3",
+      secondary: "#f0932b",
+      accent: "#ffffff",
+      bg: "#dfe6e9",
+    }, // Ocean
+    {
+      primary: "#6c5ce7",
+      secondary: "#a29bfe",
+      accent: "#ffeaa7",
+      bg: "#ffffff",
+    }, // Pastel
+    {
+      primary: "#00b894",
+      secondary: "#00cec9",
+      accent: "#ffffff",
+      bg: "#dfe6e9",
+    }, // Nature
+    {
+      primary: "#d63031",
+      secondary: "#74b9ff",
+      accent: "#ffffff",
+      bg: "#fab1a0",
+    }, // Contrast
+    {
+      primary: "#2d3436",
+      secondary: "#fdcb6e",
+      accent: "#e17055",
+      bg: "#ffffff",
+    }, // Soleil
   ];
   return themes[Math.floor(Math.random() * themes.length)];
 }
@@ -473,44 +631,51 @@ function generateRandomLayout(): number {
 // Helpers pour les features
 function getFeatureIcon(feature: string): string {
   const icons: Record<string, string> = {
-    'reservation': '📅',
-    'livraison': '🚚',
-    'emporter': '🥡',
-    'terrasse': '☀️',
-    'parking': '🅿️',
-    'wifi': '📶',
-    'vegan': '🌱',
-    'bio': '🌿',
-    'halal': '🕌',
-    'accessible': '♿',
-    'groupe': '👥',
-    'enfants': '👶'
+    reservation: "📅",
+    livraison: "🚚",
+    emporter: "🥡",
+    terrasse: "☀️",
+    parking: "🅿️",
+    wifi: "📶",
+    vegan: "🌱",
+    bio: "🌿",
+    halal: "🕌",
+    accessible: "♿",
+    groupe: "👥",
+    enfants: "👶",
   };
-  return icons[feature] || '⭐';
+  return icons[feature] || "⭐";
 }
 
 function getFeatureTitle(feature: string): string {
   const titles: Record<string, string> = {
-    'reservation': 'Réservation',
-    'livraison': 'Livraison',
-    'emporter': 'À Emporter',
-    'terrasse': 'Terrasse',
-    'parking': 'Parking',
-    'wifi': 'WiFi Gratuit',
-    'vegan': 'Options Vegan',
-    'bio': 'Produits Bio',
-    'halal': 'Halal',
-    'accessible': 'Accessible PMR',
-    'groupe': 'Groupes',
-    'enfants': 'Menu Enfants'
+    reservation: "Réservation",
+    livraison: "Livraison",
+    emporter: "À Emporter",
+    terrasse: "Terrasse",
+    parking: "Parking",
+    wifi: "WiFi Gratuit",
+    vegan: "Options Vegan",
+    bio: "Produits Bio",
+    halal: "Halal",
+    accessible: "Accessible PMR",
+    groupe: "Groupes",
+    enfants: "Menu Enfants",
   };
   return titles[feature] || feature;
 }
 
 // Fonctions pour générer l'aperçu du site web
-function generateHTMLForPreview(restaurantName: string, restaurantType: string, features: string[], colorScheme: string, theme?: any, layoutVersion?: number): string {
+function generateHTMLForPreview(
+  restaurantName: string,
+  restaurantType: string,
+  features: string[],
+  colorScheme: string,
+  theme?: any,
+  layoutVersion?: number
+): string {
   const normalizedType = restaurantType.toLowerCase();
-  
+
   // Utiliser les valeurs passées en paramètres ou générer de nouvelles valeurs
   if (!theme) {
     theme = generateRandomTheme();
@@ -518,12 +683,12 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
   if (!layoutVersion) {
     layoutVersion = generateRandomLayout();
   }
-  
+
   // Générer un design unique à chaque fois
   const uniqueId = Date.now();
-  
+
   // Templates complètement différents selon le layout choisi
-  switch(layoutVersion) {
+  switch (layoutVersion) {
     case 1: // Layout Hero Centré avec Parallax
       return `<!DOCTYPE html>
 <html lang="fr">
@@ -537,7 +702,9 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
         body { font-family: 'Montserrat', sans-serif; overflow-x: hidden; }
         .parallax-hero {
             height: 100vh;
-            background: linear-gradient(45deg, ${theme.primary}, ${theme.secondary});
+            background: linear-gradient(45deg, ${theme.primary}, ${
+        theme.secondary
+      });
             display: flex;
             align-items: center;
             justify-content: center;
@@ -549,7 +716,9 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
             position: absolute;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, ${theme.accent}20 1px, transparent 1px);
+            background: radial-gradient(circle, ${
+              theme.accent
+            }20 1px, transparent 1px);
             background-size: 50px 50px;
             animation: parallax 20s linear infinite;
         }
@@ -630,23 +799,37 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
         <div class="hero-content">
             <h1>${restaurantName}</h1>
             <p style="font-size: 1.5rem; margin-bottom: 2rem;">${restaurantType}</p>
-            ${features.includes('reservation') ? '<button style="padding: 1rem 3rem; font-size: 1.2rem; background: ' + theme.secondary + '; color: white; border: none; border-radius: 50px; cursor: pointer;">Réserver une table</button>' : ''}
+            ${
+              features.includes("reservation")
+                ? '<button style="padding: 1rem 3rem; font-size: 1.2rem; background: ' +
+                  theme.secondary +
+                  '; color: white; border: none; border-radius: 50px; cursor: pointer;">Réserver une table</button>'
+                : ""
+            }
         </div>
     </section>
     
     <section class="section" id="menu">
-        <h2 style="text-align: center; font-size: 3rem; color: ${theme.primary}; margin-bottom: 1rem;">Notre Menu</h2>
+        <h2 style="text-align: center; font-size: 3rem; color: ${
+          theme.primary
+        }; margin-bottom: 1rem;">Notre Menu</h2>
         <div class="menu-grid">
             <div class="menu-item">
-                <h3 style="color: ${theme.secondary}; margin-bottom: 1rem;">Entrées</h3>
+                <h3 style="color: ${
+                  theme.secondary
+                }; margin-bottom: 1rem;">Entrées</h3>
                 <p>Découvrez nos entrées raffinées</p>
             </div>
             <div class="menu-item">
-                <h3 style="color: ${theme.secondary}; margin-bottom: 1rem;">Plats</h3>
+                <h3 style="color: ${
+                  theme.secondary
+                }; margin-bottom: 1rem;">Plats</h3>
                 <p>Savourez nos plats signature</p>
             </div>
             <div class="menu-item">
-                <h3 style="color: ${theme.secondary}; margin-bottom: 1rem;">Desserts</h3>
+                <h3 style="color: ${
+                  theme.secondary
+                }; margin-bottom: 1rem;">Desserts</h3>
                 <p>Terminez en douceur</p>
             </div>
         </div>
@@ -672,7 +855,9 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
         }
         .sidebar {
             width: 300px;
-            background: linear-gradient(180deg, ${theme.primary}, ${theme.secondary});
+            background: linear-gradient(180deg, ${theme.primary}, ${
+        theme.secondary
+      });
             color: white;
             padding: 3rem 2rem;
             position: fixed;
@@ -704,7 +889,9 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
             padding: 3rem;
         }
         .hero-banner {
-            background: linear-gradient(135deg, ${theme.secondary}20, ${theme.primary}20);
+            background: linear-gradient(135deg, ${theme.secondary}20, ${
+        theme.primary
+      }20);
             padding: 4rem;
             border-radius: 30px;
             text-align: center;
@@ -747,8 +934,16 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
             <a href="#specialites">⭐ Nos Spécialités</a>
             <a href="#menu">🍽️ Menu Complet</a>
             <a href="#chef">👨‍🍳 Notre Chef</a>
-            ${features.includes('reservation') ? '<a href="#reservation">📅 Réservations</a>' : ''}
-            ${features.includes('livraison') ? '<a href="#livraison">🚚 Livraison</a>' : ''}
+            ${
+              features.includes("reservation")
+                ? '<a href="#reservation">📅 Réservations</a>'
+                : ""
+            }
+            ${
+              features.includes("livraison")
+                ? '<a href="#livraison">🚚 Livraison</a>'
+                : ""
+            }
             <a href="#contact">📞 Contact</a>
         </nav>
     </aside>
@@ -756,17 +951,25 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
     <main class="main-content">
         <div class="hero-banner">
             <h2>Bienvenue chez ${restaurantName}</h2>
-            <p style="font-size: 1.3rem; color: ${theme.primary}; margin-top: 1rem;">${restaurantType}</p>
+            <p style="font-size: 1.3rem; color: ${
+              theme.primary
+            }; margin-top: 1rem;">${restaurantType}</p>
         </div>
         
         <div class="features-grid">
-            ${features.map(feature => `
+            ${features
+              .map(
+                (feature) => `
                 <div class="feature-card">
                     <div class="feature-icon">${getFeatureIcon(feature)}</div>
-                    <h3 style="color: ${theme.primary}; margin-bottom: 0.5rem;">${getFeatureTitle(feature)}</h3>
+                    <h3 style="color: ${
+                      theme.primary
+                    }; margin-bottom: 0.5rem;">${getFeatureTitle(feature)}</h3>
                     <p>${getFeatureDescription(feature)}</p>
                 </div>
-            `).join('')}
+            `
+              )
+              .join("")}
         </div>
     </main>
 </body>
@@ -793,7 +996,9 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
             overflow: hidden;
         }
         .section-1 {
-            background: linear-gradient(135deg, ${theme.primary}, ${theme.secondary});
+            background: linear-gradient(135deg, ${theme.primary}, ${
+        theme.secondary
+      });
             color: ${theme.accent};
         }
         .section-2 {
@@ -801,7 +1006,9 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
             color: ${theme.primary};
         }
         .section-3 {
-            background: linear-gradient(135deg, ${theme.secondary}, ${theme.accent});
+            background: linear-gradient(135deg, ${theme.secondary}, ${
+        theme.accent
+      });
             color: ${theme.primary};
         }
         .wave-divider {
@@ -883,7 +1090,13 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
         <div class="content-box">
             <h1>${restaurantName}</h1>
             <p style="font-size: 1.5rem; margin-bottom: 2rem;">${restaurantType}</p>
-            ${features.includes('reservation') ? '<button style="padding: 1rem 2rem; font-size: 1.1rem; background: white; color: ' + theme.primary + '; border: none; border-radius: 30px; cursor: pointer; font-weight: 600;">Réserver maintenant</button>' : ''}
+            ${
+              features.includes("reservation")
+                ? '<button style="padding: 1rem 2rem; font-size: 1.1rem; background: white; color: ' +
+                  theme.primary +
+                  '; border: none; border-radius: 30px; cursor: pointer; font-weight: 600;">Réserver maintenant</button>'
+                : ""
+            }
         </div>
         <div class="wave-divider">
             <svg viewBox="0 0 1440 150" fill="${theme.bg}">
@@ -916,7 +1129,11 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
         <div class="content-box">
             <h2 style="font-size: 3rem; margin-bottom: 2rem;">Contact</h2>
             <p style="font-size: 1.2rem;">Nous sommes là pour vous</p>
-            ${features.includes('livraison') ? '<p style="margin-top: 1rem;">🚚 Livraison disponible</p>' : ''}
+            ${
+              features.includes("livraison")
+                ? '<p style="margin-top: 1rem;">🚚 Livraison disponible</p>'
+                : ""
+            }
         </div>
     </section>
 </body>
@@ -983,7 +1200,9 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
         .card-hero {
-            background: linear-gradient(135deg, ${theme.primary}, ${theme.secondary});
+            background: linear-gradient(135deg, ${theme.primary}, ${
+        theme.secondary
+      });
             color: white;
             padding: 3rem 2rem;
             text-align: center;
@@ -997,7 +1216,9 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
         }
         .card-image {
             height: 200px;
-            background: linear-gradient(45deg, ${theme.secondary}40, ${theme.primary}40);
+            background: linear-gradient(45deg, ${theme.secondary}40, ${
+        theme.primary
+      }40);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1035,7 +1256,14 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
         <div class="header-content">
             <div class="logo">${restaurantName}</div>
             <nav>
-                ${features.map(f => `<span class="feature-pill">${getFeatureIcon(f)} ${getFeatureTitle(f)}</span>`).join('')}
+                ${features
+                  .map(
+                    (f) =>
+                      `<span class="feature-pill">${getFeatureIcon(
+                        f
+                      )} ${getFeatureTitle(f)}</span>`
+                  )
+                  .join("")}
             </nav>
         </div>
     </header>
@@ -1049,14 +1277,18 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
         <div class="card">
             <div class="card-image">🍽️</div>
             <div class="card-content">
-                <h3 style="color: ${theme.primary}; margin-bottom: 1rem;">Menu du Jour</h3>
+                <h3 style="color: ${
+                  theme.primary
+                }; margin-bottom: 1rem;">Menu du Jour</h3>
                 <p>Découvrez notre sélection quotidienne</p>
             </div>
         </div>
         
         <div class="card">
             <div class="card-content">
-                <h3 style="color: ${theme.primary}; margin-bottom: 1rem;">Nos Spécialités</h3>
+                <h3 style="color: ${
+                  theme.primary
+                }; margin-bottom: 1rem;">Nos Spécialités</h3>
                 <p>Des plats uniques créés avec passion</p>
             </div>
         </div>
@@ -1064,14 +1296,20 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
         <div class="card">
             <div class="card-image">👨‍🍳</div>
             <div class="card-content">
-                <h3 style="color: ${theme.primary}; margin-bottom: 1rem;">Notre Chef</h3>
+                <h3 style="color: ${
+                  theme.primary
+                }; margin-bottom: 1rem;">Notre Chef</h3>
                 <p>Une cuisine d'exception</p>
             </div>
         </div>
         
         <div class="card">
-            <div class="card-content" style="background: linear-gradient(135deg, ${theme.secondary}10, ${theme.primary}10);">
-                <h3 style="color: ${theme.primary}; margin-bottom: 1rem;">Horaires</h3>
+            <div class="card-content" style="background: linear-gradient(135deg, ${
+              theme.secondary
+            }10, ${theme.primary}10);">
+                <h3 style="color: ${
+                  theme.primary
+                }; margin-bottom: 1rem;">Horaires</h3>
                 <p>Lun-Ven: 12h-14h, 19h-22h</p>
                 <p>Sam-Dim: 12h-22h</p>
             </div>
@@ -1079,14 +1317,22 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
         
         <div class="card">
             <div class="card-content">
-                <h3 style="color: ${theme.primary}; margin-bottom: 1rem;">Contact</h3>
+                <h3 style="color: ${
+                  theme.primary
+                }; margin-bottom: 1rem;">Contact</h3>
                 <p>📞 01 23 45 67 89</p>
-                <p>📧 contact@${restaurantName.toLowerCase().replace(/\s+/g, '')}.fr</p>
+                <p>📧 contact@${restaurantName
+                  .toLowerCase()
+                  .replace(/\s+/g, "")}.fr</p>
             </div>
         </div>
     </div>
     
-    ${features.includes('reservation') ? `<a href="#" class="cta-float">Réserver une table</a>` : ''}
+    ${
+      features.includes("reservation")
+        ? `<a href="#" class="cta-float">Réserver une table</a>`
+        : ""
+    }
 </body>
 </html>`;
 
@@ -1221,18 +1467,28 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
         </section>
         
         <div class="features-minimal">
-            ${features.map(f => `
+            ${features
+              .map(
+                (f) => `
                 <div class="feature-minimal">
-                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">${getFeatureIcon(f)}</div>
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">${getFeatureIcon(
+                      f
+                    )}</div>
                     <div>${getFeatureTitle(f)}</div>
                 </div>
-            `).join('')}
+            `
+              )
+              .join("")}
         </div>
         
         <footer class="contact-minimal">
             <p>123 Rue Example, 75001 Paris</p>
             <p>01 23 45 67 89</p>
-            ${features.includes('reservation') ? '<a href="#" class="cta-minimal">Réserver</a>' : ''}
+            ${
+              features.includes("reservation")
+                ? '<a href="#" class="cta-minimal">Réserver</a>'
+                : ""
+            }
         </footer>
     </div>
 </body>
@@ -1320,7 +1576,9 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
             font-family: 'Merriweather', serif;
         }
         .highlight-box {
-            background: linear-gradient(135deg, ${theme.primary}10, ${theme.secondary}10);
+            background: linear-gradient(135deg, ${theme.primary}10, ${
+        theme.secondary
+      }10);
             padding: 2rem;
             border-left: 4px solid ${theme.secondary};
             margin: 2rem 0;
@@ -1328,7 +1586,9 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
         .image-placeholder {
             width: 100%;
             height: 300px;
-            background: linear-gradient(135deg, ${theme.secondary}30, ${theme.primary}30);
+            background: linear-gradient(135deg, ${theme.secondary}30, ${
+        theme.primary
+      }30);
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -1377,11 +1637,15 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
             </p>
             
             <div class="highlight-box">
-                <h3 style="color: ${theme.primary}; margin-bottom: 1rem;">Menu du jour</h3>
+                <h3 style="color: ${
+                  theme.primary
+                }; margin-bottom: 1rem;">Menu du jour</h3>
                 <p>Découvrez notre sélection quotidienne, créée avec les produits frais du marché.</p>
             </div>
             
-            <h3 style="color: ${theme.primary}; margin: 2rem 0 1rem;">Notre philosophie</h3>
+            <h3 style="color: ${
+              theme.primary
+            }; margin: 2rem 0 1rem;">Notre philosophie</h3>
             <p style="line-height: 1.8;">
                 Nous croyons en une cuisine qui respecte les saisons et met en valeur les producteurs locaux.
             </p>
@@ -1390,12 +1654,16 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
         <aside class="sidebar">
             <h3>Nos Services</h3>
             <ul class="features-sidebar">
-                ${features.map(f => `
+                ${features
+                  .map(
+                    (f) => `
                     <li>
                         <span>${getFeatureIcon(f)}</span>
                         <span>${getFeatureTitle(f)}</span>
                     </li>
-                `).join('')}
+                `
+                  )
+                  .join("")}
             </ul>
             
             <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #eee;">
@@ -1404,50 +1672,78 @@ function generateHTMLForPreview(restaurantName: string, restaurantType: string, 
                 <p>Sam-Dim: 12h-23h</p>
             </div>
             
-            ${features.includes('reservation') ? `
+            ${
+              features.includes("reservation")
+                ? `
                 <button style="width: 100%; padding: 1rem; margin-top: 2rem; background: ${theme.secondary}; color: white; border: none; border-radius: 5px; font-size: 1.1rem; cursor: pointer;">
                     Réserver une table
                 </button>
-            ` : ''}
+            `
+                : ""
+            }
         </aside>
     </div>
  </body>
  </html>`;
-   }
- }
+  }
+}
 
-function generateCSSForPreview(colorScheme: string, restaurantType?: string): string {
+function generateCSSForPreview(
+  colorScheme: string,
+  restaurantType?: string
+): string {
   // FORCER LES COULEURS SELON LE TYPE DE RESTAURANT - APPROCHE DIRECTE
   let cssVars = generateCSSVariables(colorScheme);
-  let backgroundBody = 'linear-gradient(135deg, var(--bg-color) 0%, #f8f9fa 100%)';
-  let headerBg = 'rgba(255, 255, 255, 0.95)';
-  let heroStyle = 'linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,0,0,0.4)), linear-gradient(45deg, var(--primary-color), var(--accent-color))';
-  
+  let backgroundBody =
+    "linear-gradient(135deg, var(--bg-color) 0%, #f8f9fa 100%)";
+  let headerBg = "rgba(255, 255, 255, 0.95)";
+  let heroStyle =
+    "linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,0,0,0.4)), linear-gradient(45deg, var(--primary-color), var(--accent-color))";
+
   if (restaurantType) {
     const normalizedType = restaurantType.toLowerCase();
-    
-    if (normalizedType.includes('gastronomique') || normalizedType.includes('étoilé')) {
-      cssVars = "--primary-color: #1a1a1a; --accent-color: #d4af37; --bg-color: #f8f9fa; --text-color: #1a1a1a;";
-      backgroundBody = 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)';
-      headerBg = 'linear-gradient(135deg, rgba(26,26,26,0.95), rgba(40,40,40,0.95))';
-      heroStyle = 'linear-gradient(135deg, rgba(0,0,0,0.8), rgba(26,26,26,0.7)), linear-gradient(45deg, #1a1a1a, #333333)';
+
+    if (
+      normalizedType.includes("gastronomique") ||
+      normalizedType.includes("étoilé")
+    ) {
+      cssVars =
+        "--primary-color: #1a1a1a; --accent-color: #d4af37; --bg-color: #f8f9fa; --text-color: #1a1a1a;";
+      backgroundBody = "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)";
+      headerBg =
+        "linear-gradient(135deg, rgba(26,26,26,0.95), rgba(40,40,40,0.95))";
+      heroStyle =
+        "linear-gradient(135deg, rgba(0,0,0,0.8), rgba(26,26,26,0.7)), linear-gradient(45deg, #1a1a1a, #333333)";
     }
-    
-    if (normalizedType.includes('pizzeria') || normalizedType.includes('italien')) {
-      cssVars = "--primary-color: #e74c3c; --accent-color: #f39c12; --bg-color: #fff5f2; --text-color: #2c3e50;";
-      backgroundBody = 'linear-gradient(135deg, #fff5f2 0%, #ffe8e0 50%, #fff5f2 100%)';
-      headerBg = 'linear-gradient(135deg, #e74c3c, #c0392b)';
-      heroStyle = 'linear-gradient(135deg, rgba(231,76,60,0.9), rgba(192,57,43,0.8)), radial-gradient(circle at 50% 50%, #f39c12, #e74c3c)';
+
+    if (
+      normalizedType.includes("pizzeria") ||
+      normalizedType.includes("italien")
+    ) {
+      cssVars =
+        "--primary-color: #e74c3c; --accent-color: #f39c12; --bg-color: #fff5f2; --text-color: #2c3e50;";
+      backgroundBody =
+        "linear-gradient(135deg, #fff5f2 0%, #ffe8e0 50%, #fff5f2 100%)";
+      headerBg = "linear-gradient(135deg, #e74c3c, #c0392b)";
+      heroStyle =
+        "linear-gradient(135deg, rgba(231,76,60,0.9), rgba(192,57,43,0.8)), radial-gradient(circle at 50% 50%, #f39c12, #e74c3c)";
     }
-    
-    if (normalizedType.includes('asiatique') || normalizedType.includes('japonais') || normalizedType.includes('chinois')) {
-      cssVars = "--primary-color: #2c3e50; --accent-color: #e74c3c; --bg-color: #f0f4f8; --text-color: #2c3e50;";
-      backgroundBody = 'linear-gradient(135deg, #f0f4f8 0%, #e8f2f0 100%)';
-      headerBg = 'linear-gradient(135deg, rgba(44,62,80,0.95), rgba(52,73,94,0.95))';
-      heroStyle = 'linear-gradient(135deg, rgba(44,62,80,0.8), rgba(52,73,94,0.7)), linear-gradient(45deg, #2c3e50, #34495e)';
+
+    if (
+      normalizedType.includes("asiatique") ||
+      normalizedType.includes("japonais") ||
+      normalizedType.includes("chinois")
+    ) {
+      cssVars =
+        "--primary-color: #2c3e50; --accent-color: #e74c3c; --bg-color: #f0f4f8; --text-color: #2c3e50;";
+      backgroundBody = "linear-gradient(135deg, #f0f4f8 0%, #e8f2f0 100%)";
+      headerBg =
+        "linear-gradient(135deg, rgba(44,62,80,0.95), rgba(52,73,94,0.95))";
+      heroStyle =
+        "linear-gradient(135deg, rgba(44,62,80,0.8), rgba(52,73,94,0.7)), linear-gradient(45deg, #2c3e50, #34495e)";
     }
   }
-  
+
   return `
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
 
@@ -1550,7 +1846,15 @@ body[class*="layout-zen"] .logo h1 {
     font-family: var(--font-primary);
     font-size: 2.2rem;
     font-weight: 700;
-    color: ${headerBg.includes('rgba(26,26,26') ? '#d4af37' : headerBg.includes('#e74c3c') ? 'white' : headerBg.includes('rgba(44,62,80') ? 'white' : 'var(--primary-color)'};
+    color: ${
+      headerBg.includes("rgba(26,26,26")
+        ? "#d4af37"
+        : headerBg.includes("#e74c3c")
+        ? "white"
+        : headerBg.includes("rgba(44,62,80")
+        ? "white"
+        : "var(--primary-color)"
+    };
     text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
 }
 
@@ -1562,7 +1866,13 @@ body[class*="layout-zen"] .logo h1 {
 }
 
 .nav-menu li a {
-    color: ${headerBg.includes('rgba(26,26,26') || headerBg.includes('#e74c3c') || headerBg.includes('rgba(44,62,80') ? 'white' : 'var(--text-color)'};
+    color: ${
+      headerBg.includes("rgba(26,26,26") ||
+      headerBg.includes("#e74c3c") ||
+      headerBg.includes("rgba(44,62,80")
+        ? "white"
+        : "var(--text-color)"
+    };
     text-decoration: none;
     font-weight: 500;
     font-size: 1rem;
@@ -1676,11 +1986,16 @@ body[class*="layout-traditional"] .hero {
 }
 
 .cta-button {
-    background: ${cssVars.includes('#d4af37') ? 'linear-gradient(135deg, #d4af37, #f4d03f)' : 
-                  cssVars.includes('#f39c12') ? 'linear-gradient(135deg, #f39c12, #e67e22)' : 
-                  cssVars.includes('#2c3e50') && cssVars.includes('#e74c3c') ? 'linear-gradient(135deg, #e74c3c, #c0392b)' : 
-                  'linear-gradient(135deg, var(--accent-color), #ff6b35)'};
-    color: ${cssVars.includes('#d4af37') ? 'black' : 'white'};
+    background: ${
+      cssVars.includes("#d4af37")
+        ? "linear-gradient(135deg, #d4af37, #f4d03f)"
+        : cssVars.includes("#f39c12")
+        ? "linear-gradient(135deg, #f39c12, #e67e22)"
+        : cssVars.includes("#2c3e50") && cssVars.includes("#e74c3c")
+        ? "linear-gradient(135deg, #e74c3c, #c0392b)"
+        : "linear-gradient(135deg, var(--accent-color), #ff6b35)"
+    };
+    color: ${cssVars.includes("#d4af37") ? "black" : "white"};
     padding: 1.2rem 2.5rem;
     text-decoration: none;
     border-radius: 50px;
@@ -2325,14 +2640,18 @@ window.addEventListener('scroll', () => {
     });
 });
 
-${features.includes('reservation') ? 
-`// Fonction de réservation simple
+${
+  features.includes("reservation")
+    ? `// Fonction de réservation simple
 function showReservation() {
     alert('Fonction de réservation - À intégrer avec votre système de réservation');
-}` : ''}
+}`
+    : ""
+}
 
-${features.includes('menu-interactif') ? 
-`// Menu interactif
+${
+  features.includes("menu-interactif")
+    ? `// Menu interactif
 document.addEventListener('DOMContentLoaded', () => {
     const menuItems = document.querySelectorAll('.menu-item');
     menuItems.forEach(item => {
@@ -2340,7 +2659,9 @@ document.addEventListener('DOMContentLoaded', () => {
             this.style.transform = this.style.transform === 'scale(1.05)' ? 'scale(1)' : 'scale(1.05)';
         });
     });
-});` : ''}
+});`
+    : ""
+}
 `;
 }
 
@@ -2360,7 +2681,7 @@ function generateMenuContentForType(restaurantType: string): string {
           <h3>🍨 Desserts</h3>
           <p>Tiramisu, panna cotta et gelati</p>
       </div>`,
-    
+
     brasserie: `
       <div class="menu-item">
           <h3>🍺 Plats Brasserie</h3>
@@ -2374,7 +2695,7 @@ function generateMenuContentForType(restaurantType: string): string {
           <h3>🍮 Desserts Maison</h3>
           <p>Tarte tatin, profiteroles, café gourmand</p>
       </div>`,
-    
+
     gastronomique: `
       <div class="menu-item">
           <h3>✨ Menu Dégustation</h3>
@@ -2388,7 +2709,7 @@ function generateMenuContentForType(restaurantType: string): string {
           <h3>🎂 Mignardises</h3>
           <p>Créations sucrées de notre pâtissier</p>
       </div>`,
-    
+
     bistrot: `
       <div class="menu-item">
           <h3>🍽️ Plats du Jour</h3>
@@ -2402,7 +2723,7 @@ function generateMenuContentForType(restaurantType: string): string {
           <h3>🥧 Desserts Traditionnels</h3>
           <p>Tarte aux pommes, crème brûlée</p>
       </div>`,
-      
+
     asiatique: `
       <div class="menu-item">
           <h3>🍜 Soupes & Ramen</h3>
@@ -2415,17 +2736,27 @@ function generateMenuContentForType(restaurantType: string): string {
       <div class="menu-item">
           <h3>🍡 Desserts Asiatiques</h3>
           <p>Mochi, dorayaki, thé glacé</p>
-      </div>`
+      </div>`,
   };
-  
+
   const normalizedType = restaurantType.toLowerCase();
-  
-  if (normalizedType.includes('pizza')) return menuTypes.pizzeria;
-  if (normalizedType.includes('brasserie')) return menuTypes.brasserie;
-  if (normalizedType.includes('gastronomique') || normalizedType.includes('étoilé')) return menuTypes.gastronomique;
-  if (normalizedType.includes('bistrot') || normalizedType.includes('bistro')) return menuTypes.bistrot;
-  if (normalizedType.includes('asiatique') || normalizedType.includes('japonais') || normalizedType.includes('chinois')) return menuTypes.asiatique;
-  
+
+  if (normalizedType.includes("pizza")) return menuTypes.pizzeria;
+  if (normalizedType.includes("brasserie")) return menuTypes.brasserie;
+  if (
+    normalizedType.includes("gastronomique") ||
+    normalizedType.includes("étoilé")
+  )
+    return menuTypes.gastronomique;
+  if (normalizedType.includes("bistrot") || normalizedType.includes("bistro"))
+    return menuTypes.bistrot;
+  if (
+    normalizedType.includes("asiatique") ||
+    normalizedType.includes("japonais") ||
+    normalizedType.includes("chinois")
+  )
+    return menuTypes.asiatique;
+
   // Menu par défaut
   return `
     <div class="menu-item">
@@ -2444,48 +2775,76 @@ function generateMenuContentForType(restaurantType: string): string {
 
 function generateHeroContentForType(restaurantType: string): string {
   const heroContents = {
-    pizzeria: "Savourez nos pizzas artisanales dans une ambiance conviviale et chaleureuse",
-    brasserie: "L'art de vivre à la française dans un cadre authentique et décontracté",
-    gastronomique: "Une expérience culinaire d'exception qui éveillera tous vos sens",
-    bistrot: "La tradition française revisitée avec des produits frais et locaux",
+    pizzeria:
+      "Savourez nos pizzas artisanales dans une ambiance conviviale et chaleureuse",
+    brasserie:
+      "L'art de vivre à la française dans un cadre authentique et décontracté",
+    gastronomique:
+      "Une expérience culinaire d'exception qui éveillera tous vos sens",
+    bistrot:
+      "La tradition française revisitée avec des produits frais et locaux",
     asiatique: "Voyage culinaire au cœur des saveurs authentiques d'Asie",
-    italien: "La dolce vita dans votre assiette avec nos recettes traditionnelles",
-    français: "L'excellence de la cuisine française dans un cadre élégant"
+    italien:
+      "La dolce vita dans votre assiette avec nos recettes traditionnelles",
+    français: "L'excellence de la cuisine française dans un cadre élégant",
   };
-  
+
   const normalizedType = restaurantType.toLowerCase();
-  
-  if (normalizedType.includes('pizza')) return heroContents.pizzeria;
-  if (normalizedType.includes('brasserie')) return heroContents.brasserie;
-  if (normalizedType.includes('gastronomique') || normalizedType.includes('étoilé')) return heroContents.gastronomique;
-  if (normalizedType.includes('bistrot') || normalizedType.includes('bistro')) return heroContents.bistrot;
-  if (normalizedType.includes('asiatique') || normalizedType.includes('japonais') || normalizedType.includes('chinois')) return heroContents.asiatique;
-  if (normalizedType.includes('italien')) return heroContents.italien;
-  
+
+  if (normalizedType.includes("pizza")) return heroContents.pizzeria;
+  if (normalizedType.includes("brasserie")) return heroContents.brasserie;
+  if (
+    normalizedType.includes("gastronomique") ||
+    normalizedType.includes("étoilé")
+  )
+    return heroContents.gastronomique;
+  if (normalizedType.includes("bistrot") || normalizedType.includes("bistro"))
+    return heroContents.bistrot;
+  if (
+    normalizedType.includes("asiatique") ||
+    normalizedType.includes("japonais") ||
+    normalizedType.includes("chinois")
+  )
+    return heroContents.asiatique;
+  if (normalizedType.includes("italien")) return heroContents.italien;
+
   return `Découvrez une expérience culinaire unique dans notre ${restaurantType.toLowerCase()}`;
 }
 
-function generateAboutContentForType(restaurantName: string, restaurantType: string): string {
+function generateAboutContentForType(
+  restaurantName: string,
+  restaurantType: string
+): string {
   const aboutContents = {
     pizzeria: `Depuis notre ouverture, ${restaurantName} vous propose des pizzas authentiques cuites au feu de bois. Notre pâte artisanale et nos ingrédients italiens de qualité font de chaque pizza un voyage en Italie.`,
-    
+
     brasserie: `${restaurantName} perpétue la tradition des brasseries françaises avec une cuisine généreuse et conviviale. Notre équipe passionnée vous accueille dans un cadre chaleureux pour partager des moments authentiques autour de la table.`,
-    
+
     gastronomique: `${restaurantName} est une invitation à l'excellence culinaire. Notre Chef étoilé et son équipe créent une cuisine d'exception, sublimant les produits de saison dans des créations audacieuses et raffinées.`,
-    
+
     bistrot: `Niché au cœur de la ville, ${restaurantName} vous fait redécouvrir les saveurs authentiques de la cuisine française. Notre carte change au rythme des saisons, privilégiant les producteurs locaux et les recettes traditionnelles.`,
-    
-    asiatique: `${restaurantName} vous transporte au cœur de l'Asie avec une cuisine authentique préparée par nos chefs originaires de la région. Ingrédients frais, techniques traditionnelles et saveurs équilibrées pour une expérience unique.`
+
+    asiatique: `${restaurantName} vous transporte au cœur de l'Asie avec une cuisine authentique préparée par nos chefs originaires de la région. Ingrédients frais, techniques traditionnelles et saveurs équilibrées pour une expérience unique.`,
   };
-  
+
   const normalizedType = restaurantType.toLowerCase();
-  
-  if (normalizedType.includes('pizza')) return aboutContents.pizzeria;
-  if (normalizedType.includes('brasserie')) return aboutContents.brasserie;
-  if (normalizedType.includes('gastronomique') || normalizedType.includes('étoilé')) return aboutContents.gastronomique;
-  if (normalizedType.includes('bistrot') || normalizedType.includes('bistro')) return aboutContents.bistrot;
-  if (normalizedType.includes('asiatique') || normalizedType.includes('japonais') || normalizedType.includes('chinois')) return aboutContents.asiatique;
-  
+
+  if (normalizedType.includes("pizza")) return aboutContents.pizzeria;
+  if (normalizedType.includes("brasserie")) return aboutContents.brasserie;
+  if (
+    normalizedType.includes("gastronomique") ||
+    normalizedType.includes("étoilé")
+  )
+    return aboutContents.gastronomique;
+  if (normalizedType.includes("bistrot") || normalizedType.includes("bistro"))
+    return aboutContents.bistrot;
+  if (
+    normalizedType.includes("asiatique") ||
+    normalizedType.includes("japonais") ||
+    normalizedType.includes("chinois")
+  )
+    return aboutContents.asiatique;
+
   return `${restaurantName} vous accueille dans une ambiance ${restaurantType.toLowerCase()} authentique. Notre équipe passionnée cuisine avec des produits frais et locaux pour vous offrir une expérience gastronomique mémorable qui reflète notre amour de la cuisine.`;
 }
 
@@ -2497,55 +2856,79 @@ function generateTitleForType(restaurantType: string): string {
     bistrot: "Bistrot Français",
     asiatique: "Restaurant Asiatique",
     italien: "Restaurant Italien",
-    français: "Restaurant Français"
+    français: "Restaurant Français",
   };
-  
+
   const normalizedType = restaurantType.toLowerCase();
-  
-  if (normalizedType.includes('pizza')) return titles.pizzeria;
-  if (normalizedType.includes('brasserie')) return titles.brasserie;
-  if (normalizedType.includes('gastronomique') || normalizedType.includes('étoilé')) return titles.gastronomique;
-  if (normalizedType.includes('bistrot') || normalizedType.includes('bistro')) return titles.bistrot;
-  if (normalizedType.includes('asiatique') || normalizedType.includes('japonais') || normalizedType.includes('chinois')) return titles.asiatique;
-  if (normalizedType.includes('italien')) return titles.italien;
-  
+
+  if (normalizedType.includes("pizza")) return titles.pizzeria;
+  if (normalizedType.includes("brasserie")) return titles.brasserie;
+  if (
+    normalizedType.includes("gastronomique") ||
+    normalizedType.includes("étoilé")
+  )
+    return titles.gastronomique;
+  if (normalizedType.includes("bistrot") || normalizedType.includes("bistro"))
+    return titles.bistrot;
+  if (
+    normalizedType.includes("asiatique") ||
+    normalizedType.includes("japonais") ||
+    normalizedType.includes("chinois")
+  )
+    return titles.asiatique;
+  if (normalizedType.includes("italien")) return titles.italien;
+
   return restaurantType;
 }
 
 // Générateurs de layouts et sections personnalisées
-function generateLayoutForType(restaurantType: string, features: string[]): string {
+function generateLayoutForType(
+  restaurantType: string,
+  features: string[]
+): string {
   const normalizedType = restaurantType.toLowerCase();
-  
-  if (normalizedType.includes('gastronomique') || normalizedType.includes('étoilé')) return 'luxury';
-  if (normalizedType.includes('pizzeria')) return 'casual';
-  if (normalizedType.includes('brasserie')) return 'traditional';
-  if (normalizedType.includes('bistrot')) return 'cozy';
-  if (normalizedType.includes('asiatique')) return 'zen';
-  
-  return 'modern';
+
+  if (
+    normalizedType.includes("gastronomique") ||
+    normalizedType.includes("étoilé")
+  )
+    return "luxury";
+  if (normalizedType.includes("pizzeria")) return "casual";
+  if (normalizedType.includes("brasserie")) return "traditional";
+  if (normalizedType.includes("bistrot")) return "cozy";
+  if (normalizedType.includes("asiatique")) return "zen";
+
+  return "modern";
 }
 
 function generateNavStyleForType(restaurantType: string): string {
   const normalizedType = restaurantType.toLowerCase();
-  
-  if (normalizedType.includes('gastronomique')) return 'elegant';
-  if (normalizedType.includes('pizzeria')) return 'playful';
-  if (normalizedType.includes('brasserie')) return 'robust';
-  if (normalizedType.includes('asiatique')) return 'minimal';
-  
-  return 'standard';
+
+  if (normalizedType.includes("gastronomique")) return "elegant";
+  if (normalizedType.includes("pizzeria")) return "playful";
+  if (normalizedType.includes("brasserie")) return "robust";
+  if (normalizedType.includes("asiatique")) return "minimal";
+
+  return "standard";
 }
 
-function generateHeaderForType(restaurantName: string, restaurantType: string, features: string[], navStyle: string): string {
+function generateHeaderForType(
+  restaurantName: string,
+  restaurantType: string,
+  features: string[],
+  navStyle: string
+): string {
   const normalizedType = restaurantType.toLowerCase();
-  
-  if (normalizedType.includes('gastronomique')) {
+
+  if (normalizedType.includes("gastronomique")) {
     return `
     <header class="header header-luxury">
         <div class="header-top">
             <div class="contact-bar">
                 <span>📞 Réservations: +33 1 23 45 67 89</span>
-                <span>✉️ contact@${restaurantName.toLowerCase().replace(/\s+/g, '')}.fr</span>
+                <span>✉️ contact@${restaurantName
+                  .toLowerCase()
+                  .replace(/\s+/g, "")}.fr</span>
             </div>
         </div>
         <nav class="navbar navbar-elegant">
@@ -2560,13 +2943,17 @@ function generateHeaderForType(restaurantName: string, restaurantType: string, f
                 <li><a href="#cave">Cave à Vins</a></li>
                 <li><a href="#apropos">Histoire</a></li>
                 <li><a href="#contact">Contact</a></li>
-                ${features.includes('reservation') ? '<li><a href="#reservation" class="btn-reservation">Réserver</a></li>' : ''}
+                ${
+                  features.includes("reservation")
+                    ? '<li><a href="#reservation" class="btn-reservation">Réserver</a></li>'
+                    : ""
+                }
             </ul>
         </nav>
     </header>`;
   }
-  
-  if (normalizedType.includes('pizzeria')) {
+
+  if (normalizedType.includes("pizzeria")) {
     return `
     <header class="header header-casual">
         <nav class="navbar navbar-playful">
@@ -2581,13 +2968,17 @@ function generateHeaderForType(restaurantName: string, restaurantType: string, f
                 <li><a href="#dolci">Dolci</a></li>
                 <li><a href="#famiglia">La Famiglia</a></li>
                 <li><a href="#contact">Contatto</a></li>
-                ${features.includes('reservation') ? '<li><a href="#reservation" class="btn-reservation">Prenota!</a></li>' : ''}
+                ${
+                  features.includes("reservation")
+                    ? '<li><a href="#reservation" class="btn-reservation">Prenota!</a></li>'
+                    : ""
+                }
             </ul>
         </nav>
     </header>`;
   }
-  
-  if (normalizedType.includes('asiatique')) {
+
+  if (normalizedType.includes("asiatique")) {
     return `
     <header class="header header-zen">
         <nav class="navbar navbar-minimal">
@@ -2602,12 +2993,16 @@ function generateHeaderForType(restaurantName: string, restaurantType: string, f
                 <li><a href="#bento">Bento</a></li>
                 <li><a href="#tradition">Tradition</a></li>
                 <li><a href="#contact">Contact</a></li>
-                ${features.includes('reservation') ? '<li><a href="#reservation" class="btn-reservation">予約</a></li>' : ''}
+                ${
+                  features.includes("reservation")
+                    ? '<li><a href="#reservation" class="btn-reservation">予約</a></li>'
+                    : ""
+                }
             </ul>
         </nav>
     </header>`;
   }
-  
+
   // Header standard pour autres types
   return `
     <header class="header">
@@ -2620,16 +3015,24 @@ function generateHeaderForType(restaurantName: string, restaurantType: string, f
                 <li><a href="#menu">Notre Menu</a></li>
                 <li><a href="#apropos">À Propos</a></li>
                 <li><a href="#contact">Contact</a></li>
-                ${features.includes('reservation') ? '<li><a href="#reservation" class="btn-reservation">Réserver</a></li>' : ''}
+                ${
+                  features.includes("reservation")
+                    ? '<li><a href="#reservation" class="btn-reservation">Réserver</a></li>'
+                    : ""
+                }
             </ul>
         </nav>
     </header>`;
 }
 
-function generateHeroForType(restaurantName: string, restaurantType: string, features: string[]): string {
+function generateHeroForType(
+  restaurantName: string,
+  restaurantType: string,
+  features: string[]
+): string {
   const normalizedType = restaurantType.toLowerCase();
-  
-  if (normalizedType.includes('gastronomique')) {
+
+  if (normalizedType.includes("gastronomique")) {
     return `
     <section id="accueil" class="hero hero-luxury">
         <div class="hero-video-bg"></div>
@@ -2639,7 +3042,11 @@ function generateHeroForType(restaurantName: string, restaurantType: string, fea
             <h3>${restaurantName}</h3>
             <p>Une expérience gastronomique d'exception où chaque plat raconte une histoire de passion et de créativité.</p>
             <div class="hero-ctas">
-                ${features.includes('reservation') ? '<a href="#reservation" class="cta-button cta-primary">Réserver une Table</a>' : ''}
+                ${
+                  features.includes("reservation")
+                    ? '<a href="#reservation" class="cta-button cta-primary">Réserver une Table</a>'
+                    : ""
+                }
                 <a href="#menu" class="cta-button cta-secondary">Découvrir nos Menus</a>
             </div>
             <div class="hero-badges">
@@ -2650,8 +3057,8 @@ function generateHeroForType(restaurantName: string, restaurantType: string, fea
         </div>
     </section>`;
   }
-  
-  if (normalizedType.includes('pizzeria')) {
+
+  if (normalizedType.includes("pizzeria")) {
     return `
     <section id="accueil" class="hero hero-casual">
         <div class="hero-pattern"></div>
@@ -2665,14 +3072,18 @@ function generateHeroForType(restaurantName: string, restaurantType: string, fea
             </div>
             <div class="hero-ctas">
                 <a href="#pizzas" class="cta-button cta-pizza">Voir nos Pizzas</a>
-                ${features.includes('reservation') ? '<a href="#reservation" class="cta-button cta-secondary">Réserver</a>' : ''}
+                ${
+                  features.includes("reservation")
+                    ? '<a href="#reservation" class="cta-button cta-secondary">Réserver</a>'
+                    : ""
+                }
             </div>
         </div>
         <div class="hero-decoration">🍕🧄🍅🌿</div>
     </section>`;
   }
-  
-  if (normalizedType.includes('asiatique')) {
+
+  if (normalizedType.includes("asiatique")) {
     return `
     <section id="accueil" class="hero hero-zen">
         <div class="hero-bamboo"></div>
@@ -2685,27 +3096,39 @@ function generateHeroForType(restaurantName: string, restaurantType: string, fea
             </div>
             <div class="hero-ctas">
                 <a href="#menu" class="cta-button cta-zen">Découvrir</a>
-                ${features.includes('reservation') ? '<a href="#reservation" class="cta-button cta-secondary">Réserver</a>' : ''}
+                ${
+                  features.includes("reservation")
+                    ? '<a href="#reservation" class="cta-button cta-secondary">Réserver</a>'
+                    : ""
+                }
             </div>
         </div>
     </section>`;
   }
-  
+
   // Hero standard
   return `
     <section id="accueil" class="hero">
         <div class="hero-content">
             <h2>Bienvenue chez ${restaurantName}</h2>
             <p>${generateHeroContentForType(restaurantType)}</p>
-            ${features.includes('reservation') ? '<a href="#reservation" class="cta-button">Réserver une table</a>' : '<a href="#menu" class="cta-button">Découvrir notre carte</a>'}
+            ${
+              features.includes("reservation")
+                ? '<a href="#reservation" class="cta-button">Réserver une table</a>'
+                : '<a href="#menu" class="cta-button">Découvrir notre carte</a>'
+            }
         </div>
     </section>`;
 }
 
-function generateMenuSectionForType(restaurantName: string, restaurantType: string, features: string[]): string {
+function generateMenuSectionForType(
+  restaurantName: string,
+  restaurantType: string,
+  features: string[]
+): string {
   const normalizedType = restaurantType.toLowerCase();
-  
-  if (normalizedType.includes('gastronomique')) {
+
+  if (normalizedType.includes("gastronomique")) {
     return `
     <section id="menu" class="menu-section menu-luxury">
         <h2>Nos Menus d'Exception</h2>
@@ -2742,8 +3165,8 @@ function generateMenuSectionForType(restaurantName: string, restaurantType: stri
         </div>
     </section>`;
   }
-  
-  if (normalizedType.includes('pizzeria')) {
+
+  if (normalizedType.includes("pizzeria")) {
     return `
     <section id="pizzas" class="menu-section menu-pizza">
         <h2>Le Nostre Pizze</h2>
@@ -2775,7 +3198,7 @@ function generateMenuSectionForType(restaurantName: string, restaurantType: stri
         </div>
     </section>`;
   }
-  
+
   // Menu standard pour autres types
   return `
     <section id="menu" class="menu-section">
@@ -2786,11 +3209,15 @@ function generateMenuSectionForType(restaurantName: string, restaurantType: stri
     </section>`;
 }
 
-function generateCustomSectionsForType(restaurantName: string, restaurantType: string, features: string[]): string {
+function generateCustomSectionsForType(
+  restaurantName: string,
+  restaurantType: string,
+  features: string[]
+): string {
   const normalizedType = restaurantType.toLowerCase();
-  let sections = '';
-  
-  if (normalizedType.includes('gastronomique')) {
+  let sections = "";
+
+  if (normalizedType.includes("gastronomique")) {
     sections += `
     <section id="chef" class="chef-section">
         <div class="chef-content">
@@ -2830,8 +3257,8 @@ function generateCustomSectionsForType(restaurantName: string, restaurantType: s
         </div>
     </section>`;
   }
-  
-  if (normalizedType.includes('pizzeria')) {
+
+  if (normalizedType.includes("pizzeria")) {
     sections += `
     <section id="antipasti" class="antipasti-section">
         <h2>Antipasti & Contorni</h2>
@@ -2869,8 +3296,8 @@ function generateCustomSectionsForType(restaurantName: string, restaurantType: s
         </div>
     </section>`;
   }
-  
-  if (normalizedType.includes('asiatique')) {
+
+  if (normalizedType.includes("asiatique")) {
     sections += `
     <section id="sushi" class="sushi-section">
         <h2>Sushi & Sashimi</h2>
@@ -2905,11 +3332,14 @@ function generateCustomSectionsForType(restaurantName: string, restaurantType: s
         </div>
     </section>`;
   }
-  
+
   return sections;
 }
 
-function generateAboutSectionForType(restaurantName: string, restaurantType: string): string {
+function generateAboutSectionForType(
+  restaurantName: string,
+  restaurantType: string
+): string {
   return `
     <section id="apropos" class="about-section">
         <h2>À Propos</h2>
@@ -2917,7 +3347,11 @@ function generateAboutSectionForType(restaurantName: string, restaurantType: str
     </section>`;
 }
 
-function generateContactSectionForType(restaurantName: string, restaurantType: string, features: string[]): string {
+function generateContactSectionForType(
+  restaurantName: string,
+  restaurantType: string,
+  features: string[]
+): string {
   return `
     <section id="contact" class="contact-section">
         <h2>Contact</h2>
@@ -2925,16 +3359,27 @@ function generateContactSectionForType(restaurantName: string, restaurantType: s
             <p>📍 Adresse : [Votre adresse]</p>
             <p>📞 Téléphone : [Votre téléphone]</p>
             <p>✉️ Email : [Votre email]</p>
-            ${features.includes('horaires') ? '<p>🕒 Ouvert du mardi au dimanche, 12h-14h et 19h-22h</p>' : ''}
+            ${
+              features.includes("horaires")
+                ? "<p>🕒 Ouvert du mardi au dimanche, 12h-14h et 19h-22h</p>"
+                : ""
+            }
         </div>
-        ${features.includes('galerie') ? '<div class="gallery-preview"><h3>Nos Spécialités</h3><div class="gallery-grid">[Photos à venir]</div></div>' : ''}
+        ${
+          features.includes("galerie")
+            ? '<div class="gallery-preview"><h3>Nos Spécialités</h3><div class="gallery-grid">[Photos à venir]</div></div>'
+            : ""
+        }
     </section>`;
 }
 
-function generateFooterForType(restaurantName: string, restaurantType: string): string {
+function generateFooterForType(
+  restaurantName: string,
+  restaurantType: string
+): string {
   const normalizedType = restaurantType.toLowerCase();
-  
-  if (normalizedType.includes('gastronomique')) {
+
+  if (normalizedType.includes("gastronomique")) {
     return `
     <footer class="footer footer-luxury">
         <div class="footer-content">
@@ -2960,8 +3405,8 @@ function generateFooterForType(restaurantName: string, restaurantType: string): 
         </div>
     </footer>`;
   }
-  
-  if (normalizedType.includes('pizzeria')) {
+
+  if (normalizedType.includes("pizzeria")) {
     return `
     <footer class="footer footer-pizza">
         <div class="footer-wave">🍕🍅🧄🌿🍕🍅🧄🌿</div>
@@ -2976,7 +3421,7 @@ function generateFooterForType(restaurantName: string, restaurantType: string): 
         </div>
     </footer>`;
   }
-  
+
   // Footer standard
   return `
     <footer class="footer">
@@ -2984,14 +3429,35 @@ function generateFooterForType(restaurantName: string, restaurantType: string): 
     </footer>`;
 }
 
-function generateDataURL(restaurantName: string, restaurantType: string, features: string[], colorScheme: string, theme?: any, layoutVersion?: number): string {
-  const htmlContent = generateHTMLForPreview(restaurantName, restaurantType, features, colorScheme, theme, layoutVersion);
-  const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`;
+function generateDataURL(
+  restaurantName: string,
+  restaurantType: string,
+  features: string[],
+  colorScheme: string,
+  theme?: any,
+  layoutVersion?: number
+): string {
+  const htmlContent = generateHTMLForPreview(
+    restaurantName,
+    restaurantType,
+    features,
+    colorScheme,
+    theme,
+    layoutVersion
+  );
+  const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(
+    htmlContent
+  )}`;
   return dataUrl;
 }
 
 // Fonctions simplifiées pour les métadonnées (pour éviter les erreurs JSON)
-function generateSimpleHTML(restaurantName: string, restaurantType: string, features: string[], colorScheme: string): string {
+function generateSimpleHTML(
+  restaurantName: string,
+  restaurantType: string,
+  features: string[],
+  colorScheme: string
+): string {
   return `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -3033,15 +3499,15 @@ function generateSimpleHTML(restaurantName: string, restaurantType: string, feat
 
 function generateSimpleCSS(colorScheme: string): string {
   const colors = {
-    elegant: { primary: '#2C3E50', accent: '#E74C3C' },
-    moderne: { primary: '#34495E', accent: '#1ABC9C' },
-    rustique: { primary: '#8B4513', accent: '#DAA520' },
-    minimaliste: { primary: '#000000', accent: '#FF6B35' },
-    chaleureux: { primary: '#D2691E', accent: '#FF8C00' }
+    elegant: { primary: "#2C3E50", accent: "#E74C3C" },
+    moderne: { primary: "#34495E", accent: "#1ABC9C" },
+    rustique: { primary: "#8B4513", accent: "#DAA520" },
+    minimaliste: { primary: "#000000", accent: "#FF6B35" },
+    chaleureux: { primary: "#D2691E", accent: "#FF8C00" },
   };
-  
+
   const scheme = colors[colorScheme as keyof typeof colors] || colors.moderne;
-  
+
   return `body {
     font-family: 'Arial', sans-serif;
     margin: 0;
@@ -3099,26 +3565,44 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    ${features.includes('menu-interactif') ? `
+    ${
+      features.includes("menu-interactif")
+        ? `
     // Menu interactif
     document.querySelectorAll('.menu-item').forEach(item => {
         item.addEventListener('click', function() {
             this.classList.toggle('active');
         });
-    });` : ''}
+    });`
+        : ""
+    }
     
-    ${features.includes('reservation') ? `
+    ${
+      features.includes("reservation")
+        ? `
     // Système de réservation
     const reservationBtn = document.querySelector('.btn');
     if (reservationBtn) {
         reservationBtn.addEventListener('click', function() {
             alert('Système de réservation - Appelez-nous au téléphone!');
         });
-    }` : ''}
+    }`
+        : ""
+    }
 });`;
 }
 
-function generateSimpleDataURL(restaurantName: string, restaurantType: string, features: string[], colorScheme: string): string {
-  const htmlContent = generateSimpleHTML(restaurantName, restaurantType, features, colorScheme);
+function generateSimpleDataURL(
+  restaurantName: string,
+  restaurantType: string,
+  features: string[],
+  colorScheme: string
+): string {
+  const htmlContent = generateSimpleHTML(
+    restaurantName,
+    restaurantType,
+    features,
+    colorScheme
+  );
   return `data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`;
-} 
+}

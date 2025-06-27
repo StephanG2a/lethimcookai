@@ -18,7 +18,62 @@ export const businessPlanGenerator = tool(
     timeline,
   }) => {
     try {
-      const businessPlanPrompt = `Génère un business plan pour "${project_name}".
+      // RESTRICTION DOMAINE CULINAIRE : Validation des types d'entreprise acceptés
+      const allowedBusinessTypes = [
+        "restaurant",
+        "bistrot",
+        "brasserie",
+        "café",
+        "pizzeria",
+        "traiteur",
+        "food truck",
+        "boulangerie",
+        "pâtisserie",
+        "glacier",
+        "bar à vins",
+        "gastro",
+        "fast-food",
+        "snack",
+        "cantine",
+        "chef à domicile",
+        "cuisine",
+        "culinaire",
+        "gastronomie",
+        "alimentation",
+        "cours de cuisine",
+        "livraison",
+        "épicerie fine",
+        "fromagerie",
+        "charcuterie",
+      ];
+
+      const isValidBusinessType = allowedBusinessTypes.some(
+        (type) =>
+          business_type.toLowerCase().includes(type) ||
+          type.includes(business_type.toLowerCase())
+      );
+
+      if (!isValidBusinessType) {
+        return `# ❌ Business Plan - Domaine Non Supporté
+
+## 🎯 Restriction au Domaine Culinaire
+Ce générateur de business plan est spécialisé dans le **secteur culinaire uniquement**.
+
+**Types de projets supportés :**
+• **Restauration :** restaurants, bistrots, brasseries, pizzerias
+• **Artisanat :** boulangeries, pâtisseries, glaciers, fromageries
+• **Services :** traiteurs, chefs à domicile, cours de cuisine
+• **Mobile :** food trucks, livraison de repas
+• **Spécialisés :** bars à vins, épiceries fines, snacks
+
+**Votre projet :** "${business_type}" ne correspond pas à notre domaine d'expertise culinaire.
+
+💡 **Reformulez votre projet** avec un type d'établissement alimentaire pour obtenir un business plan adapté !`;
+      }
+
+      const businessPlanPrompt = `Génère un business plan spécialisé CUISINE pour "${project_name}".
+
+IMPORTANT: Concentre-toi EXCLUSIVEMENT sur le secteur culinaire et alimentaire.
 
 Type: ${business_type}
 Concept: ${concept}
@@ -108,21 +163,30 @@ Impossible de générer le business plan pour "${project_name}".`;
   },
   {
     name: "business_plan_generator",
-    description: "Génère un business plan complet pour projets culinaires",
+    description:
+      "Génère un business plan complet EXCLUSIVEMENT pour projets et établissements culinaires",
     schema: z.object({
-      project_name: z.string().describe("Nom du projet/restaurant"),
+      project_name: z.string().describe("Nom du projet culinaire/restaurant"),
       business_type: z
         .string()
         .describe(
-          "Type d'établissement (restaurant, food truck, traiteur, etc.)"
+          "Type d'établissement culinaire (restaurant, food truck, traiteur, boulangerie, etc.)"
         ),
-      concept: z.string().describe("Concept et spécialité culinaire"),
+      concept: z
+        .string()
+        .describe("Concept et spécialité culinaire/gastronomique"),
       target_market: z
         .string()
-        .describe("Marché cible (familles, professionnels, étudiants, etc.)"),
-      location: z.string().describe("Zone d'implantation prévue"),
-      initial_budget: z.number().describe("Budget initial disponible (€)"),
-      timeline: z.string().describe("Timeline d'ouverture souhaitée"),
+        .describe(
+          "Marché cible culinaire (familles, professionnels gourmets, étudiants, etc.)"
+        ),
+      location: z.string().describe("Zone d'implantation culinaire prévue"),
+      initial_budget: z
+        .number()
+        .describe("Budget initial disponible pour projet culinaire (€)"),
+      timeline: z
+        .string()
+        .describe("Timeline d'ouverture de l'établissement culinaire"),
     }),
   }
 );

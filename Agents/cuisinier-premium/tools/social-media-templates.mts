@@ -111,26 +111,32 @@ Impossible de créer le template pour "${dish_name}".`;
   {
     name: "social_media_templates",
     description:
-      "Génère des templates visuels et textuels pour réseaux sociaux",
+      "Génère des templates visuels et textuels pour réseaux sociaux SPÉCIALISÉS dans le secteur culinaire",
     schema: z.object({
       platform: z
         .string()
         .describe(
-          "Plateforme (instagram-post, instagram-story, facebook, tiktok)"
+          "Plateforme culinaire (instagram-post, instagram-story, facebook, tiktok)"
         ),
       post_type: z
         .string()
-        .describe("Type de post (photo produit, behind-scenes, promo, story)"),
-      dish_name: z.string().describe("Nom du plat ou produit"),
-      restaurant_name: z.string().describe("Nom du restaurant"),
+        .describe(
+          "Type de post culinaire (photo plat, behind-scenes cuisine, promo restaurant, story chef)"
+        ),
+      dish_name: z.string().describe("Nom du plat ou produit culinaire"),
+      restaurant_name: z
+        .string()
+        .describe("Nom du restaurant ou établissement culinaire"),
       caption_style: z
         .string()
         .describe(
-          "Style de caption (casual, professionnel, moderne, storytelling)"
+          "Style de caption culinaire (casual, professionnel, moderne, storytelling gastronomique)"
         ),
       hashtags_theme: z
         .string()
-        .describe("Thème hashtags (food, local, gourmet, lifestyle)"),
+        .describe(
+          "Thème hashtags culinaires (food, local, gourmet, lifestyle foodie)"
+        ),
     }),
   }
 );

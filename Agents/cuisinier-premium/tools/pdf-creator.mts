@@ -193,24 +193,28 @@ Veuillez réessayer.`;
   {
     name: "pdf_creator",
     description:
-      "Génère de vrais PDFs culinaires téléchargeables avec jsPDF (ultra-rapide, sans stockage)",
+      "Génère de vrais PDFs EXCLUSIVEMENT culinaires téléchargeables avec jsPDF (menus, recettes, cartes, fiches techniques)",
     schema: z.object({
       document_type: z
         .string()
         .describe(
-          "Type de document (livre recettes, menu, fiche technique, catalogue, présentation)"
+          "Type de document culinaire (livre recettes, menu restaurant, fiche technique cuisine, catalogue produits, présentation gastronomique)"
         ),
-      title: z.string().describe("Titre du document"),
-      content: z.string().describe("Contenu à structurer dans le PDF"),
+      title: z.string().describe("Titre du document culinaire"),
+      content: z
+        .string()
+        .describe("Contenu culinaire à structurer dans le PDF"),
       style: z
         .string()
         .describe(
-          "Style de mise en page (moderne, classique, rustique, élégant)"
+          "Style de mise en page culinaire (moderne, classique, rustique, élégant gastronomique)"
         ),
       branding: z
         .string()
         .optional()
-        .describe("Éléments de branding ou logo à inclure"),
+        .describe(
+          "Éléments de branding culinaire ou logo restaurant à inclure"
+        ),
     }),
   }
 );
