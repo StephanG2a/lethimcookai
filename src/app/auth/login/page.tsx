@@ -87,8 +87,8 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (data.success) {
-        // Stocker le token dans localStorage
-        localStorage.setItem("auth_token", data.token);
+        // Stocker le token dans localStorage avec la clé "token" utilisée par l'app
+        localStorage.setItem("token", data.token);
         localStorage.setItem("user_data", JSON.stringify(data.user));
 
         //alert("Connexion réussie !");

@@ -98,23 +98,31 @@ Impossible de créer l'étiquette pour "${product_name}".`;
   {
     name: "label_creator",
     description:
-      "Crée des étiquettes professionnelles pour produits alimentaires",
+      "Crée des étiquettes professionnelles EXCLUSIVEMENT pour produits alimentaires et culinaires",
     schema: z.object({
       label_type: z
         .string()
         .describe(
-          "Type d'étiquette (conserve, épice, produit artisanal, sauce, confiture)"
+          "Type d'étiquette alimentaire (conserve, épice, produit artisanal, sauce, confiture, pain, pâtisserie)"
         ),
-      product_name: z.string().describe("Nom du produit"),
-      brand_name: z.string().describe("Nom de la marque ou producteur"),
-      key_info: z.string().describe("Informations clés à mettre en avant"),
+      product_name: z.string().describe("Nom du produit alimentaire"),
+      brand_name: z
+        .string()
+        .describe("Nom de la marque culinaire ou producteur alimentaire"),
+      key_info: z
+        .string()
+        .describe(
+          "Informations culinaires clés à mettre en avant (origine, bio, fait maison, etc.)"
+        ),
       style: z
         .string()
-        .describe("Style d'étiquette (moderne, vintage, artisanal, premium)"),
+        .describe(
+          "Style d'étiquette culinaire (moderne, vintage, artisanal, premium gastronomique)"
+        ),
       shape: z
         .string()
         .describe(
-          "Forme d'étiquette (rectangulaire, ronde, ovale, personnalisée)"
+          "Forme d'étiquette alimentaire (rectangulaire, ronde, ovale, personnalisée)"
         ),
     }),
   }

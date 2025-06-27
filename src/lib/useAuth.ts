@@ -39,10 +39,16 @@ export function useAuth() {
   });
 
   useEffect(() => {
-    // Charger les données d'authentification depuis localStorage et vérifier avec l'API
+    // Charger les données d'authentification depuis localStorage
     const loadAuthFromStorage = async () => {
       try {
-        const token = localStorage.getItem("auth_token");
+        // Vérifier d'abord avec le token "token" (utilisé dans l'app)
+        let token = localStorage.getItem("token");
+        if (!token) {
+          // Fallback vers "auth_token"
+          token = localStorage.getItem("auth_token");
+        }
+
         const userDataString = localStorage.getItem("user_data");
 
         if (token && userDataString) {
@@ -53,32 +59,6 @@ export function useAuth() {
             isAuthenticated: true,
             isLoading: false,
           });
-
-          // Vérifier le profil avec l'API pour mettre à jour les données d'abonnement
-          try {
-            const response = await fetch("/api/auth/me", {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-
-            if (response.ok) {
-              const data = await response.json();
-              if (data.success) {
-                // Mettre à jour avec les données fraîches de l'API
-                localStorage.setItem("user_data", JSON.stringify(data.user));
-                setAuthState({
-                  user: data.user,
-                  token,
-                  isAuthenticated: true,
-                  isLoading: false,
-                });
-              }
-            }
-          } catch (error) {
-            console.error("Erreur lors de la vérification du profil:", error);
-            // On garde les données du localStorage même si l'API échoue
-          }
         } else {
           setAuthState((prev) => ({
             ...prev,
@@ -102,7 +82,7 @@ export function useAuth() {
 
   // Fonction de connexion
   const login = (token: string, user: User) => {
-    localStorage.setItem("auth_token", token);
+    localStorage.setItem("token", token);
     localStorage.setItem("user_data", JSON.stringify(user));
     setAuthState({
       user,
@@ -114,7 +94,8 @@ export function useAuth() {
 
   // Fonction de déconnexion
   const logout = () => {
-    localStorage.removeItem("auth_token");
+    localStorage.removeItem("token");
+    localStorage.removeItem("auth_token"); // Nettoyer aussi l'ancien
     localStorage.removeItem("user_data");
     setAuthState({
       user: null,
@@ -126,7 +107,10 @@ export function useAuth() {
 
   // Vérifier le profil utilisateur (avec appel API)
   const checkProfile = async () => {
-    const token = authState.token || localStorage.getItem("auth_token");
+    let token = authState.token || localStorage.getItem("token");
+    if (!token) {
+      token = localStorage.getItem("auth_token"); // Fallback
+    }
 
     if (!token) {
       logout();
@@ -160,7 +144,10 @@ export function useAuth() {
 
   // Fonction pour faire des appels API authentifiés
   const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
-    const token = authState.token || localStorage.getItem("auth_token");
+    let token = authState.token || localStorage.getItem("token");
+    if (!token) {
+      token = localStorage.getItem("auth_token"); // Fallback
+    }
 
     if (!token) {
       throw new Error("Non authentifié");
@@ -177,7 +164,11 @@ export function useAuth() {
   };
 
   return {
-    ...authState,
+    user: authState.user,
+    token: authState.token,
+    isAuthenticated: authState.isAuthenticated,
+    loading: authState.isLoading, // Alias pour compatibilité
+    isLoading: authState.isLoading,
     login,
     logout,
     checkProfile,

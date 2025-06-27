@@ -16,7 +16,57 @@ export const marketAnalysis = tool(
     budget_range,
   }) => {
     try {
-      const analysisPrompt = `Analyse de marché pour ${business_type} à ${location}.
+      // RESTRICTION DOMAINE CULINAIRE : Validation des types d'entreprise acceptés
+      const allowedBusinessTypes = [
+        "restaurant",
+        "bistrot",
+        "brasserie",
+        "café",
+        "pizzeria",
+        "traiteur",
+        "food truck",
+        "boulangerie",
+        "pâtisserie",
+        "glacier",
+        "bar à vins",
+        "gastro",
+        "fast-food",
+        "snack",
+        "cantine",
+        "chef à domicile",
+        "cuisine",
+        "culinaire",
+        "gastronomie",
+        "alimentation",
+      ];
+
+      const isValidBusinessType = allowedBusinessTypes.some(
+        (type) =>
+          business_type.toLowerCase().includes(type) ||
+          type.includes(business_type.toLowerCase())
+      );
+
+      if (!isValidBusinessType) {
+        return `# ❌ Analyse de Marché - Domaine Non Supporté
+
+## 🎯 Restriction au Domaine Culinaire
+Cette analyse de marché est spécialisée dans le **secteur culinaire uniquement**.
+
+**Types d'établissements supportés :**
+• Restaurants (gastronomique, bistrot, brasserie)
+• Pizzerias, traiteurs, food trucks
+• Boulangeries, pâtisseries, glaciers
+• Bars à vins, cafés, snacks
+• Services culinaires (chef à domicile, cours de cuisine)
+
+**Votre demande :** "${business_type}" ne correspond pas à notre domaine d'expertise.
+
+💡 **Reformulez votre demande** avec un type d'établissement culinaire pour obtenir une analyse complète !`;
+      }
+
+      const analysisPrompt = `Analyse de marché spécialisée CUISINE pour ${business_type} à ${location}.
+
+IMPORTANT: Concentre-toi UNIQUEMENT sur le secteur culinaire et alimentaire.
 
 Type de cuisine: ${cuisine_type}
 Segment cible: ${target_segment}
@@ -118,17 +168,26 @@ Impossible d'analyser le marché pour "${business_type}" à "${location}".`;
   },
   {
     name: "market_analysis",
-    description: "Analyse concurrentielle et étude de marché pour restaurants",
+    description:
+      "Analyse concurrentielle et étude de marché EXCLUSIVEMENT pour établissements culinaires et restaurants",
     schema: z.object({
-      location: z.string().describe("Zone géographique d'analyse"),
+      location: z
+        .string()
+        .describe("Zone géographique d'analyse du marché culinaire"),
       business_type: z
         .string()
-        .describe("Type d'établissement (restaurant, bistrot, etc.)"),
-      target_segment: z.string().describe("Segment de clientèle visé"),
-      cuisine_type: z.string().describe("Type de cuisine proposée"),
+        .describe(
+          "Type d'établissement culinaire (restaurant, bistrot, pizzeria, boulangerie, etc.)"
+        ),
+      target_segment: z
+        .string()
+        .describe("Segment de clientèle culinaire visé"),
+      cuisine_type: z
+        .string()
+        .describe("Type de cuisine ou spécialité gastronomique proposée"),
       budget_range: z
         .string()
-        .describe("Gamme de prix (économique, moyen, haut de gamme)"),
+        .describe("Gamme de prix culinaire (économique, moyen, haut de gamme)"),
     }),
   }
 );

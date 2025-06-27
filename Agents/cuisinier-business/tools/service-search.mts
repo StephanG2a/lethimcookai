@@ -30,7 +30,24 @@ export const serviceSearch = tool(
     limit,
   }) => {
     try {
-      const whereClause: any = {};
+      // RESTRICTION DOMAINE CULINAIRE : Forcer la recherche dans les secteurs liés à la cuisine
+      const whereClause: any = {
+        organization: {
+          OR: [
+            { sector: { contains: "cuisine", mode: "insensitive" } },
+            { sector: { contains: "restaurant", mode: "insensitive" } },
+            { sector: { contains: "alimentation", mode: "insensitive" } },
+            { sector: { contains: "traiteur", mode: "insensitive" } },
+            { sector: { contains: "boulangerie", mode: "insensitive" } },
+            { sector: { contains: "pâtisserie", mode: "insensitive" } },
+            { sector: { contains: "gastronomie", mode: "insensitive" } },
+            { sector: { contains: "food", mode: "insensitive" } },
+            { sector: { contains: "chef", mode: "insensitive" } },
+            { sector: { contains: "culinaire", mode: "insensitive" } },
+          ],
+        },
+      };
+
       const includeClause: any = {
         organization: {
           select: {
@@ -56,28 +73,33 @@ export const serviceSearch = tool(
         ];
       }
 
-      // Recherche spécifique par nom d'organisation
+      // Recherche spécifique par nom d'organisation (maintenir les restrictions culinaires)
       if (organization_name) {
         whereClause.organization = {
+          ...whereClause.organization,
           name: { contains: organization_name, mode: "insensitive" },
         };
       }
 
-      // Recherche par secteur d'organisation
+      // Recherche par secteur d'organisation (maintenir les restrictions culinaires)
       if (organization_sector) {
-        if (!whereClause.organization) whereClause.organization = {};
-        whereClause.organization.sector = {
-          contains: organization_sector,
-          mode: "insensitive",
+        whereClause.organization = {
+          ...whereClause.organization,
+          sector: {
+            contains: organization_sector,
+            mode: "insensitive",
+          },
         };
       }
 
-      // Recherche par localisation (adresse)
+      // Recherche par localisation (adresse) (maintenir les restrictions culinaires)
       if (location) {
-        if (!whereClause.organization) whereClause.organization = {};
-        whereClause.organization.address = {
-          contains: location,
-          mode: "insensitive",
+        whereClause.organization = {
+          ...whereClause.organization,
+          address: {
+            contains: location,
+            mode: "insensitive",
+          },
         };
       }
 

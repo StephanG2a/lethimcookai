@@ -1,6 +1,34 @@
-# 🤖 LetHimCookAI - Agent CLI & Server avec API Prestataires
+# 🤖 LetHimCookAI - Plateforme IA Culinaire avec Abonnements
 
-Un CLI et serveur JavaScript/TypeScript pour tester et interagir avec des agents IA, incluant une API complète pour la gestion des prestataires et organisations.
+Une plateforme complète d'agents IA spécialisés en cuisine avec :
+
+- 🍳 **3 agents IA culinaires** (Basic, Premium, Business)
+- 💳 **Système d'abonnements Stripe** (FREE, PREMIUM, BUSINESS)
+- 🏢 **Marketplace de prestataires** culinaires
+- 🔐 **Authentification sécurisée** avec JWT
+- 🌐 **Interface web moderne** avec Next.js
+
+## ✨ Nouveautés - Système d'abonnements
+
+### 💎 Plans disponibles :
+
+- **🆓 FREE** : Accès à l'IA Cuisinier Basic (gratuit)
+- **💎 PREMIUM** (19€/mois) : Basic + Premium - Génération d'images, logos, PDFs
+- **🚀 BUSINESS** (49€/mois) : Premium + Business - Recherche services, analyse marché
+
+### 🔒 Sécurité des paiements :
+
+- ✅ **Paiements sécurisés** par Stripe
+- ✅ **Webhooks** pour validation automatique
+- ✅ **Double vérification** des sessions
+- ✅ **Impossible de contourner** les paiements
+
+### 🎯 Fonctionnalités :
+
+- **Pages d'abonnement** : `/subscriptions`, `/subscriptions/manage`
+- **Paiement en 1 clic** avec cartes de test
+- **Mise à jour automatique** des permissions
+- **Gestion des annulations** et renouvellements
 
 ## 📦 Installation
 
@@ -15,36 +43,146 @@ npm run check-env
 # (voir section "Configuration de la base de données" ci-dessous)
 ```
 
+## 🐳 Docker
+
+Ce projet utilise Docker Compose pour orchestrer l'application complète (Next.js + Express.js + PostgreSQL + Adminer).
+
+### Démarrage avec Docker (Recommandé)
+
+```bash
+# Construire et démarrer tous les services
+docker compose up -d
+
+# Voir les logs en temps réel
+docker compose logs -f
+
+# Vérifier que tous les conteneurs fonctionnent
+docker ps
+```
+
+### Services disponibles
+
+- **🌐 Application web** : http://localhost:3000 (Next.js)
+- **🤖 API Agents** : http://localhost:8080 (Express.js)
+- **🗄️ Base de données** : localhost:5432 (PostgreSQL)
+- **💻 Adminer** : http://localhost:8081 (Interface DB)
+
+### Commandes Docker utiles
+
+```bash
+# Arrêter tous les services
+docker compose down
+
+# Reconstruire les images
+docker compose build
+
+# Redémarrer un service spécifique
+docker compose restart typescript-app
+
+# Voir les logs d'un service
+docker compose logs typescript-app
+
+# Accéder au shell du conteneur
+docker compose exec typescript-app bash
+
+# Supprimer les volumes (attention: supprime les données DB)
+docker compose down -v
+```
+
+### 🚨 Dépannage Docker
+
+```bash
+# Problème : "Port already in use"
+# Solution : Arrêter les services conflictuels
+docker compose down
+sudo lsof -ti:3000 | xargs kill -9  # Tuer le processus sur port 3000
+sudo lsof -ti:8080 | xargs kill -9  # Tuer le processus sur port 8080
+
+# Problème : "Database connection failed"
+# Solution : Vérifier l'état de la base de données
+docker compose logs db
+docker compose exec db pg_isready -U postgres
+
+# Problème : "Cannot connect to database" 
+# Solution : Attendre que la DB soit complètement démarrée
+docker compose up db
+# Attendre le message "database system is ready to accept connections"
+# Puis démarrer l'application
+docker compose up typescript-app
+
+# Problème : Modifications du code non prises en compte
+# Solution : Vérifier les volumes et rebuild si nécessaire
+docker compose down
+docker compose build --no-cache
+docker compose up -d
+
+# Nettoyer complètement en cas de problème
+docker compose down -v --remove-orphans
+docker system prune -f
+docker compose up -d
+```
+
 ## 🗄️ Base de données
 
 Ce projet utilise PostgreSQL avec Prisma ORM.
 
-### Démarrage de la base de données
+### Démarrage de la base de données uniquement
 
 ```bash
-# Démarrer PostgreSQL avec Docker
-docker compose up -d
+# Si vous voulez seulement PostgreSQL (sans Docker Compose complet)
+docker run -d \
+  --name cookai_db \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=cookai \
+  -p 5432:5432 \
+  postgres:latest
 
 # Vérifier que le conteneur fonctionne
 docker ps
 ```
 
-### Configuration de la base de données
+### Configuration de l'environnement
 
-Assurez-vous que votre fichier `.env` contient :
+#### 🐳 Pour Docker
+
+Créez un fichier `.env` à la racine du projet :
 
 ```env
 # Base de données PostgreSQL (requis)
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/cookai"
+DATABASE_URL="postgresql://postgres:postgres@db:5432/cookai"
 
 # OpenAI API Key (requis pour les agents Premium/Business)
 OPENAI_API_KEY="your-openai-api-key-here"
+
+# Stripe (requis pour les abonnements)
+STRIPE_SECRET_KEY="sk_test_your_stripe_secret_key_here"
+STRIPE_PUBLISHABLE_KEY="pk_test_your_stripe_publishable_key_here"
+STRIPE_WEBHOOK_SECRET="whsec_your_webhook_secret_here"
+
+# JWT pour l'authentification
+JWT_SECRET="your-super-secret-jwt-key-change-in-production"
 
 # Variables optionnelles
 NODE_ENV="development"
 ```
 
-**📝 Note importante :** Tous les composants (agents, CLI, interface web) utilisent maintenant le même fichier `.env.local` à la racine du projet pour une configuration centralisée.
+#### 💻 Pour le développement local
+
+Créez un fichier `.env.local` à la racine du projet :
+
+```env
+# Base de données PostgreSQL (requis)
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/cookai"
+
+# Même configuration que pour Docker mais avec localhost au lieu de 'db'
+# ... (reste identique)
+```
+
+**📝 Note importante :** 
+- **Docker** utilise le fichier `.env` (hostname `db` pour la base de données)
+- **Développement local** utilise `.env.local` (hostname `localhost`)
+- Tous les composants (agents, CLI, interface web) partagent cette configuration centralisée
 
 ### Migrations Prisma
 
@@ -80,30 +218,51 @@ npm run seed-users
 
 ## 🚀 Démarrage rapide
 
-### 1. Démarrer la base de données
+### 🐳 Option 1 : Avec Docker (Recommandé)
 
 ```bash
-# Démarrer PostgreSQL
+# 1. Démarrer tous les services (app + base de données)
 docker compose up -d
 
-# Appliquer les migrations
-npx prisma migrate dev
+# 2. Attendre que la base soit prête (environ 30 secondes)
+docker compose logs db
 
-# Peupler avec des données de test
-npm run seed
+# 3. Appliquer les migrations Prisma dans le conteneur
+docker compose exec typescript-app npx prisma migrate dev
 
-# Créer des utilisateurs de test pour l'authentification
-npm run seed-users
+# 4. Peupler avec des données de test
+docker compose exec typescript-app npm run seed
+
+# 5. Créer des utilisateurs de test pour l'authentification
+docker compose exec typescript-app npm run seed-users
 ```
 
-### 2. Démarrer le serveur Next.js
+**Accès aux services :**
+- 🌐 Application web : http://localhost:3000 
+- 🤖 API Agents : http://localhost:8080
+- 💻 Adminer (DB) : http://localhost:8081
+
+### 💻 Option 2 : Développement local (sans Docker)
 
 ```bash
-# Démarrer Next.js en mode développement
-npm run dev-next
+# 1. Démarrer uniquement PostgreSQL
+docker run -d --name cookai_db \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=cookai \
+  -p 5432:5432 postgres:latest
 
-# Ou en mode production
-npm run build && npm run start
+# 2. Installer les dépendances
+npm install
+
+# 3. Appliquer les migrations
+npx prisma migrate dev
+
+# 4. Peupler avec des données de test
+npm run seed && npm run seed-users
+
+# 5. Démarrer les serveurs
+npm run dev-all
 ```
 
 Le serveur sera accessible sur `http://localhost:3000`
@@ -115,10 +274,12 @@ Après avoir exécuté `npm run seed-users`, vous pouvez tester l'authentificati
 ### 🧑‍💼 **Clients avec différents abonnements**
 
 - **🆓 Client FREE :** `client@test.fr` / `TestClient123`
+
   - Accès IA Basic uniquement
   - Plan : FREE, Status : ACTIVE
 
-- **💎 Client PREMIUM :** `client-premium@test.fr` / `TestClient123`  
+- **💎 Client PREMIUM :** `client-premium@test.fr` / `TestClient123`
+
   - Accès IA Basic + Premium
   - Plan : PREMIUM, Status : ACTIVE, expire dans 30 jours
 
@@ -127,21 +288,23 @@ Après avoir exécuté `npm run seed-users`, vous pouvez tester l'authentificati
   - Plan : BUSINESS, Status : ACTIVE, expire dans 1 an
 
 ### 🏢 **Prestataire**
+
 - **Email :** `prestataire@test.fr`
-- **Mot de passe :** `TestPrestataire123`  
+- **Mot de passe :** `TestPrestataire123`
 - **Rôle :** PRESTATAIRE
 - **Nom :** Marie Martin
 - **Organisation :** Lié à une organisation existante
 
 ### ⚙️ **Admin**
+
 - **Email :** `admin@lethimcookai.fr`
 - **Mot de passe :** `AdminTest123`
-- **Rôle :** ADMIN  
+- **Rôle :** ADMIN
 - **Nom :** Admin LetHimCookAI
 
 ### 🧪 **Test de l'authentification**
 
-1. Allez sur `/auth/login` 
+1. Allez sur `/auth/login`
 2. Connectez-vous avec un des comptes ci-dessus
 3. Observez les changements dans le header (nom d'utilisateur, bouton déconnexion)
 4. Les prestataires voient en plus le bouton "Publier un service"
@@ -152,10 +315,12 @@ Après avoir exécuté `npm run seed-users`, vous pouvez tester l'authentificati
 Le système d'abonnements contrôle l'accès aux différents agents IA :
 
 1. **Connectez-vous avec un client FREE** et allez sur `/chat` :
-   - ✅ Accès à l'agent "Cuisinier Basic" 
+
+   - ✅ Accès à l'agent "Cuisinier Basic"
    - 🔒 Agents Premium et Business grisés avec message d'upgrade
 
 2. **Connectez-vous avec un client PREMIUM** :
+
    - ✅ Accès aux agents Basic et Premium
    - 🔒 Agent Business grisé
 
@@ -163,6 +328,7 @@ Le système d'abonnements contrôle l'accès aux différents agents IA :
    - ✅ Accès complet à tous les agents (Basic, Premium, Business)
 
 Les agents non accessibles affichent :
+
 - Interface grisée avec icône 🔒
 - Message d'upgrade personnalisé
 - Bouton "Upgrader maintenant" (interface préparée)
@@ -293,22 +459,48 @@ POST /{agentId}/stream
 2. **Éditez `.env.local`** avec vos vraies valeurs :
 
    ```bash
-   # 🔑 Requis pour tous les agents IA
-   OPENAI_API_KEY=sk-your-real-openai-api-key-here
+   # 🔑 AUTHENTIFICATION (OBLIGATOIRE)
+   JWT_SECRET=your-super-secret-jwt-key-change-in-production
 
-   # 🗄️ Requis pour les agents Business (recherche services)
+   # 🗄️ BASE DE DONNÉES (OBLIGATOIRE)
    DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/lethimcookai
 
-   # 🌐 Configuration serveurs (optionnel, valeurs par défaut)
-   API_URL=http://localhost:8080
+   # 🤖 INTELLIGENCE ARTIFICIELLE (OBLIGATOIRE)
+   OPENAI_API_KEY=sk-your-real-openai-api-key-here
+
+   # 💳 STRIPE PAIEMENTS (OBLIGATOIRE POUR ABONNEMENTS)
+   STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key_here
+   STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key_here
+   STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+
+   # 🌐 CONFIGURATION SERVEURS (OPTIONNEL)
+   NEXT_PUBLIC_BASE_URL=http://localhost:3000
    EXPRESS_PORT=8080
-   NEXT_PORT=3000
+   API_URL=http://localhost:8080
+   API_BEARER_TOKEN=dummy-token-for-development
    ```
 
 3. **Vérifiez votre configuration** :
    ```bash
    npm run check-env
    ```
+
+### 🎯 Configuration Stripe (Système d'abonnements)
+
+Pour activer le système de paiement et d'abonnements :
+
+1. **Créez un compte Stripe** : https://stripe.com
+2. **Récupérez vos clés de test** : https://dashboard.stripe.com/test/apikeys
+3. **Configurez un webhook** :
+
+   - URL : `https://votre-domaine.com/api/subscriptions/webhook`
+   - Événements : `checkout.session.completed`, `invoice.payment_succeeded`, `invoice.payment_failed`, `customer.subscription.deleted`
+   - Copiez le secret du webhook : `whsec_...`
+
+4. **Plans disponibles** :
+   - **FREE** : Accès à l'IA Cuisinier Basic (gratuit)
+   - **PREMIUM** : Basic + Premium (19€/mois) - Génération d'images, logos, PDFs
+   - **BUSINESS** : Premium + Business (49€/mois) - Recherche services, analyse marché
 
 > **💡 Structure des fichiers d'environnement** :
 >
@@ -426,6 +618,39 @@ Le serveur supporte les Server-Sent Events avec les types d'événements suivant
 - `error` - Erreur générale
 
 ## 🛠️ Développement
+
+### 🐳 Développement avec Docker
+
+```bash
+# Développement avec hot-reload
+docker compose up -d
+
+# Voir les logs en temps réel
+docker compose logs -f typescript-app
+
+# Accéder au shell du conteneur pour les commandes Prisma
+docker compose exec typescript-app bash
+
+# Redémarrer après changement de configuration
+docker compose restart typescript-app
+
+# Nettoyer et reconstruire
+docker compose down && docker compose build && docker compose up -d
+```
+
+### 💻 Développement local
+
+```bash
+# Installer les dépendances
+npm install
+
+# Démarrer en mode développement (hot-reload)
+npm run dev-all
+
+# Ou séparément
+npm run dev        # Express.js sur port 8080
+npm run dev-next   # Next.js sur port 3000
+```
 
 ### Structure du projet
 

@@ -185,6 +185,288 @@ interface Message {
   }>;
 }
 
+// Configuration détaillée des outils pour chaque agent
+const AGENTS_TOOLS_CONFIG = {
+  basic: {
+    id: "cuisinier",
+    name: "Chef Cuisinier IA Basic",
+    description: "Agent culinaire essentiel : recettes, nutrition, techniques",
+    totalTools: 7,
+    icon: "👨‍🍳",
+    color: "bg-blue-500",
+    tools: [
+      {
+        name: "Recherche de recettes",
+        description: "Recettes via APIs multiples (Marmiton, Spoonacular, ...)",
+        category: "Recettes",
+      },
+      {
+        name: "Calcul nutritionnel",
+        description: "Valeurs nutritionnelles complètes avec conseils santé",
+        category: "Nutrition",
+      },
+      {
+        name: "Substitution ingrédients",
+        description: "Alternatives pour allergies, régimes et disponibilité",
+        category: "Adaptations",
+      },
+      {
+        name: "Conversion unités",
+        description: "Poids, volume, température avec densités",
+        category: "Conversions",
+      },
+      {
+        name: "Planification menus",
+        description: "Menus équilibrés avec listes de courses et budgets",
+        category: "Planification",
+      },
+      {
+        name: "Accords mets-vins",
+        description: "Suggestions de bouteilles et conseils service",
+        category: "Accords",
+      },
+      {
+        name: "Techniques culinaires",
+        description: "Explications détaillées et astuces chef",
+        category: "Techniques",
+      },
+    ],
+  },
+  premium: {
+    id: "cuisinier-premium",
+    name: "Chef Cuisinier IA Premium",
+    description:
+      "Agent culinaire + création visuelle : logos, images, PDFs, templates",
+    totalTools: 13,
+    icon: "👨‍🍳",
+    color: "bg-purple-500",
+    badge: "Premium",
+    tools: [
+      // Outils Basic hérités
+      {
+        name: "Recherche de recettes",
+        description: "Recettes via APIs multiples",
+        category: "Basic - Recettes",
+        inherited: true,
+      },
+      {
+        name: "Calcul nutritionnel",
+        description: "Valeurs nutritionnelles complètes",
+        category: "Basic - Nutrition",
+        inherited: true,
+      },
+      {
+        name: "Substitution ingrédients",
+        description: "Alternatives pour allergies et régimes",
+        category: "Basic - Adaptations",
+        inherited: true,
+      },
+      {
+        name: "Conversion unités",
+        description: "Poids, volume, température",
+        category: "Basic - Conversions",
+        inherited: true,
+      },
+      {
+        name: "Planification menus",
+        description: "Menus équilibrés avec listes de courses",
+        category: "Basic - Planification",
+        inherited: true,
+      },
+      {
+        name: "Accords mets-vins",
+        description: "Suggestions de bouteilles",
+        category: "Basic - Accords",
+        inherited: true,
+      },
+      {
+        name: "Techniques culinaires",
+        description: "Explications détaillées",
+        category: "Basic - Techniques",
+        inherited: true,
+      },
+      // Outils Premium
+      {
+        name: "Génération de logos",
+        description: "Logos professionnels pour restaurants",
+        category: "Premium - Branding",
+        premium: true,
+      },
+      {
+        name: "Images culinaires",
+        description: "Images de plats HD professionnelles",
+        category: "Premium - Visuel",
+        premium: true,
+      },
+      {
+        name: "Création de PDFs",
+        description: "Documents PDF culinaires",
+        category: "Premium - Documents",
+        premium: true,
+      },
+      {
+        name: "Templates réseaux sociaux",
+        description: "Templates Instagram, Facebook",
+        category: "Premium - Marketing",
+        premium: true,
+      },
+      {
+        name: "Génération de vidéos",
+        description: "Concepts de vidéos courtes culinaires",
+        category: "Premium - Contenu",
+        premium: true,
+      },
+      {
+        name: "Étiquettes produits",
+        description: "Étiquettes pour produits alimentaires",
+        category: "Premium - Packaging",
+        premium: true,
+      },
+    ],
+  },
+  business: {
+    id: "cuisinier-business",
+    name: "Chef Cuisinier IA Business",
+    description:
+      "Agent culinaire complet + services pro : recherche orgas, business plans, analyses",
+    totalTools: 21,
+    icon: "👨‍🍳",
+    color: "bg-orange-500",
+    badge: "Business",
+    tools: [
+      // Outils Basic hérités
+      {
+        name: "Recherche de recettes",
+        description: "Recettes via APIs multiples",
+        category: "Basic - Recettes",
+        inherited: true,
+      },
+      {
+        name: "Calcul nutritionnel",
+        description: "Valeurs nutritionnelles complètes",
+        category: "Basic - Nutrition",
+        inherited: true,
+      },
+      {
+        name: "Substitution ingrédients",
+        description: "Alternatives pour allergies",
+        category: "Basic - Adaptations",
+        inherited: true,
+      },
+      {
+        name: "Conversion unités",
+        description: "Poids, volume, température",
+        category: "Basic - Conversions",
+        inherited: true,
+      },
+      {
+        name: "Planification menus",
+        description: "Menus équilibrés",
+        category: "Basic - Planification",
+        inherited: true,
+      },
+      {
+        name: "Accords mets-vins",
+        description: "Suggestions de bouteilles",
+        category: "Basic - Accords",
+        inherited: true,
+      },
+      {
+        name: "Techniques culinaires",
+        description: "Explications détaillées",
+        category: "Basic - Techniques",
+        inherited: true,
+      },
+      // Outils Premium hérités
+      {
+        name: "Génération de logos",
+        description: "Logos professionnels",
+        category: "Premium - Branding",
+        inherited: true,
+      },
+      {
+        name: "Images culinaires",
+        description: "Images de plats HD",
+        category: "Premium - Visuel",
+        inherited: true,
+      },
+      {
+        name: "Création de PDFs",
+        description: "Documents PDF",
+        category: "Premium - Documents",
+        inherited: true,
+      },
+      {
+        name: "Templates réseaux sociaux",
+        description: "Templates marketing",
+        category: "Premium - Marketing",
+        inherited: true,
+      },
+      {
+        name: "Génération de vidéos",
+        description: "Concepts de vidéos",
+        category: "Premium - Contenu",
+        inherited: true,
+      },
+      {
+        name: "Étiquettes produits",
+        description: "Étiquettes alimentaires",
+        category: "Premium - Packaging",
+        inherited: true,
+      },
+      // Outils Business exclusifs
+      {
+        name: "Génération de sites web",
+        description: "Sites web complets pour restaurants",
+        category: "Business - Web",
+        business: true,
+      },
+      {
+        name: "Recherche organisations",
+        description: "Organisations culinaires par secteur",
+        category: "Business - Recherche",
+        business: true,
+      },
+      {
+        name: "Recherche services",
+        description: "Services culinaires avec filtres avancés",
+        category: "Business - Services",
+        business: true,
+      },
+      {
+        name: "Recherche prestataires",
+        description: "Prestataires culinaires qualifiés",
+        category: "Business - Recherche",
+        business: true,
+      },
+      {
+        name: "Calculateur de coûts",
+        description: "Coûts et rentabilité restaurant",
+        category: "Business - Finance",
+        business: true,
+      },
+      {
+        name: "Business plans",
+        description: "Plans d'affaires complets",
+        category: "Business - Stratégie",
+        business: true,
+      },
+      {
+        name: "Analyse de marché",
+        description: "Analyses concurrentielles",
+        category: "Business - Analyse",
+        business: true,
+      },
+      {
+        name: "Exécution automatique",
+        description: "Exécution de services IA compatible",
+        category: "Business - Automatisation",
+        business: true,
+      },
+    ],
+  },
+};
+
 export default function ChatPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
@@ -206,27 +488,30 @@ export default function ChatPage() {
     switch (agentId) {
       case "cuisinier":
         return [
-          "Propose-moi une recette simple avec les ingrédients de mon frigo",
-          "Comment faire une pâte à crêpes parfaite ?",
-          "Donne-moi 3 idées de repas rapides pour ce soir"
+          "Trouve-moi une recette de coq au vin traditionnelle avec du vin rouge",
+          "Calcule les calories et macronutriments d'une portion de ratatouille",
+          "Par quoi remplacer les œufs dans une recette de gâteau au chocolat ?",
+          "Quel vin servir avec un magret de canard aux figues ?",
         ];
       case "cuisinier-premium":
         return [
-          "Crée-moi un logo pour mon restaurant",
-          "Génère une affiche publicitaire pour mon menu",
-          "Fait-moi un site web vitrine pour ma pizzeria"
+          "Crée un logo moderne pour ma brasserie artisanale 'Houblon d'Or'",
+          "Génère une image HD d'un burger gourmet avec des frites truffées",
+          "Template Instagram story pour promouvoir mon nouveau plat du jour",
+          "Crée une étiquette pour mes confitures artisanales aux fruits rouges",
         ];
       case "cuisinier-business":
         return [
-          "Trouve-moi des services de livraison de repas",
-          "Recherche des prestataires pour mon événement culinaire",
-          "Calcule les coûts d'ouverture d'un restaurant"
+          "Crée un site web complet pour mon restaurant pizzeria napolitaine",
+          "Trouve moi un service qui propose une formation culinaire pour mon restaurant",
+          "Calcule les coûts d'ouverture d'une boulangerie-pâtisserie de 80m²",
+          "Génère un business plan complet pour mon food truck gourmet",
         ];
       default:
         return [
           "Comment puis-je t'aider aujourd'hui ?",
           "Quelle est ta spécialité culinaire ?",
-          "Peux-tu me donner des conseils cuisine ?"
+          "Peux-tu me donner des conseils cuisine ?",
         ];
     }
   };

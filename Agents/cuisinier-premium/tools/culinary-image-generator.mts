@@ -90,25 +90,37 @@ Impossible de générer l'image pour "${dish_name}".`;
   {
     name: "culinary_image_generator",
     description:
-      "Génère des images professionnelles de plats et présentations culinaires",
+      "Génère des images professionnelles EXCLUSIVEMENT de plats et présentations culinaires pour restaurateurs",
     schema: z.object({
-      dish_name: z.string().describe("Nom du plat ou de la préparation"),
+      dish_name: z
+        .string()
+        .describe("Nom du plat culinaire ou de la préparation gastronomique"),
       style: z
         .string()
-        .describe("Style photographique (moderne, rustique, élégant, etc.)"),
+        .describe(
+          "Style photographique culinaire (moderne, rustique, élégant, gastronomique, etc.)"
+        ),
       presentation: z
         .string()
-        .describe("Type de présentation (assiette, bol, planche, etc.)"),
+        .describe(
+          "Type de présentation culinaire (assiette, bol, planche, ardoise, etc.)"
+        ),
       lighting: z
         .string()
-        .describe("Type d'éclairage (naturel, studio, dramatique, etc.)"),
+        .describe(
+          "Type d'éclairage pour food photography (naturel, studio, dramatique, etc.)"
+        ),
       background: z
         .string()
-        .describe("Arrière-plan (bois, marbre, ardoise, etc.)"),
+        .describe(
+          "Arrière-plan culinaire (bois, marbre, ardoise, nappe, etc.)"
+        ),
       additional_elements: z
         .string()
         .optional()
-        .describe("Éléments additionnels ou spécifications"),
+        .describe(
+          "Éléments culinaires additionnels (couverts, condiments, garnitures, etc.)"
+        ),
     }),
   }
 );
