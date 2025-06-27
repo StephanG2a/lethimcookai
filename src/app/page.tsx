@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { MainLayout } from "@/components/layout/main-layout";
 import { ServiceCard } from "@/components/services/service-card";
+import { PublishServiceButton } from "@/components/ui/publish-service-button";
 import {
   ArrowRight,
   CheckCircle,
@@ -155,12 +156,7 @@ export default async function HomePage() {
                     Parcourir les services
                   </Link>
                 </Button>
-                <Button variant="outline" size="lg" asChild>
-                  <Link href="/services/nouveau">
-                    Publier un service
-                    <ArrowRight className="h-5 w-5 ml-2" />
-                  </Link>
-                </Button>
+                <PublishServiceButton variant="outline" size="lg" />
               </div>
             </div>
 
@@ -413,14 +409,13 @@ export default async function HomePage() {
             <Button size="lg" variant="secondary" asChild>
               <Link href="/services">Parcourir les services</Link>
             </Button>
-            <Button
+            <PublishServiceButton
               size="lg"
               variant="outline"
               className="bg-transparent border-white text-white hover:bg-white hover:text-orange-600"
-              asChild
             >
-              <Link href="/services/nouveau">Publier un service</Link>
-            </Button>
+              Publier un service
+            </PublishServiceButton>
           </div>
         </div>
       </section>

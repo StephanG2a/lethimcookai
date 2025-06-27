@@ -482,21 +482,24 @@ export default function ChatPage() {
     switch (agentId) {
       case "cuisinier":
         return [
-          "Propose-moi une recette simple avec les ingrédients de mon frigo",
-          "Comment faire une pâte à crêpes parfaite ?",
-          "Donne-moi 3 idées de repas rapides pour ce soir",
+          "Trouve-moi une recette de coq au vin traditionnelle avec du vin rouge",
+          "Calcule les calories et macronutriments d'une portion de ratatouille",
+          "Par quoi remplacer les œufs dans une recette de gâteau au chocolat ?",
+          "Quel vin servir avec un magret de canard aux figues ?",
         ];
       case "cuisinier-premium":
         return [
-          "Crée-moi un logo pour mon restaurant",
-          "Génère une affiche publicitaire pour mon menu",
-          "Fait-moi un site web vitrine pour ma pizzeria",
+          "Crée un logo moderne pour ma brasserie artisanale 'Houblon d'Or'",
+          "Génère une image HD d'un burger gourmet avec des frites truffées",
+          "Template Instagram story pour promouvoir mon nouveau plat du jour",
+          "Crée une étiquette pour mes confitures artisanales aux fruits rouges",
         ];
       case "cuisinier-business":
         return [
-          "Trouve-moi des services de livraison de repas",
-          "Recherche des prestataires pour mon événement culinaire",
-          "Calcule les coûts d'ouverture d'un restaurant",
+          "Crée un site web complet pour mon restaurant pizzeria napolitaine",
+          "Trouve moi un service qui propose une formation culinaire pour mon restaurant",
+          "Calcule les coûts d'ouverture d'une boulangerie-pâtisserie de 80m²",
+          "Génère un business plan complet pour mon food truck gourmet",
         ];
       default:
         return [
@@ -1322,51 +1325,87 @@ export default function ChatPage() {
 
             {messages.length === 0 && !error && selectedAgent && (
               <div className="text-center py-8">
-                <div className="mb-6">
-                  <h3 className="text-xl font-semibold text-neutral-900 mb-2">
-                    👋 Bonjour ! Je suis {selectedAgent.name}
-                  </h3>
-                  <p className="text-neutral-600 mb-4">
-                    {selectedAgent.description}
-                  </p>
-                  <p className="text-sm text-neutral-500">
-                    Pour commencer, vous pouvez cliquer sur l'une de ces
-                    suggestions :
-                  </p>
-                </div>
+                {/* Vérifier si l'utilisateur a accès à l'agent */}
+                {hasAccessToAgent(user, selectedAgent.type || "basic") ? (
+                  <>
+                    <div className="mb-6">
+                      <h3 className="text-xl font-semibold text-neutral-900 mb-2">
+                        👋 Bonjour ! Je suis {selectedAgent.name}
+                      </h3>
+                      <p className="text-neutral-600 mb-4">
+                        {selectedAgent.description}
+                      </p>
+                      <p className="text-sm text-neutral-500">
+                        Pour commencer, vous pouvez cliquer sur l'une de ces
+                        suggestions :
+                      </p>
+                    </div>
 
-                <div className="grid grid-cols-1 gap-3 max-w-2xl mx-auto">
-                  {getDefaultPrompts(selectedAgent.id).map((prompt, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handlePromptClick(prompt)}
-                      disabled={isLoading}
-                      className="p-4 text-left bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-lg hover:from-orange-100 hover:to-orange-150 hover:border-orange-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
-                    >
-                      <div className="flex items-start space-x-3">
-                        <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-semibold group-hover:bg-orange-600 transition-colors">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-neutral-900 font-medium group-hover:text-orange-700 transition-colors">
-                            {prompt}
-                          </p>
-                          <p className="text-xs text-neutral-500 mt-1 group-hover:text-orange-600 transition-colors">
-                            Cliquez pour envoyer ce message
-                          </p>
-                        </div>
-                        <div className="flex-shrink-0 text-orange-500 group-hover:text-orange-600 transition-colors">
-                          →
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                    <div className="grid grid-cols-1 gap-3 max-w-2xl mx-auto">
+                      {getDefaultPrompts(selectedAgent.id).map(
+                        (prompt, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handlePromptClick(prompt)}
+                            disabled={isLoading}
+                            className="p-4 text-left bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-lg hover:from-orange-100 hover:to-orange-150 hover:border-orange-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
+                          >
+                            <div className="flex items-start space-x-3">
+                              <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-semibold group-hover:bg-orange-600 transition-colors">
+                                {index + 1}
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-neutral-900 font-medium group-hover:text-orange-700 transition-colors">
+                                  {prompt}
+                                </p>
+                                <p className="text-xs text-neutral-500 mt-1 group-hover:text-orange-600 transition-colors">
+                                  Cliquez pour envoyer ce message
+                                </p>
+                              </div>
+                              <div className="flex-shrink-0 text-orange-500 group-hover:text-orange-600 transition-colors">
+                                →
+                              </div>
+                            </div>
+                          </button>
+                        )
+                      )}
+                    </div>
 
-                <div className="mt-6 text-xs text-neutral-400">
-                  💡 Ou tapez votre propre message dans la zone de saisie
-                  ci-dessous
-                </div>
+                    <div className="mt-6 text-xs text-neutral-400">
+                      💡 Ou tapez votre propre message dans la zone de saisie
+                      ci-dessous
+                    </div>
+                  </>
+                ) : (
+                  /* Message d'accès restreint */
+                  <div className="max-w-2xl mx-auto">
+                    <div className="p-6 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg border border-purple-200">
+                      <h3 className="text-xl font-semibold text-purple-900 mb-2">
+                        🔒 Accès Restreint
+                      </h3>
+                      <p className="text-purple-700 mb-4">
+                        {selectedAgent.name} nécessite un abonnement{" "}
+                        {selectedAgent.type === "premium"
+                          ? "Premium"
+                          : "Business"}{" "}
+                        pour être utilisé.
+                      </p>
+                      <p className="text-sm text-purple-600 mb-4">
+                        {getUpgradeMessage(selectedAgent.type || "basic")}
+                      </p>
+                      <a
+                        href="/subscriptions"
+                        className="inline-block bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                      >
+                        Découvrir nos abonnements
+                      </a>
+                    </div>
+                    <div className="mt-6 text-xs text-neutral-400">
+                      💡 Sélectionnez un autre agent ou upgradez votre
+                      abonnement
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
