@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
-import { MainLayout } from "@/components/layout/main-layout";
+import { Header } from "@/components/layout/header";
 import { useAuth } from "@/lib/useAuth";
 import {
   hasAccessToAgent,
@@ -31,7 +31,13 @@ import {
   Download,
   ExternalLink,
   Copy,
-  Loader2
+  Loader2,
+  CheckCircle,
+  XCircle,
+  MapPin,
+  Phone,
+  Mail,
+  StopCircle
 } from "lucide-react";
 
 interface Agent {
@@ -189,8 +195,11 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [threadId] = useState(() => uuidv4());
   const [error, setError] = useState<string | null>(null);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamController, setStreamController] = useState<AbortController | null>(null);
   const [useStreaming, setUseStreaming] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [previewingWebsite, setPreviewingWebsite] = useState<any>(null);
 
   // Prompts par défaut pour chaque agent
   const getDefaultPrompts = (agentId: string): string[] => {
@@ -266,7 +275,11 @@ export default function ChatPage() {
   };
 
   const sendMessageWithText = async (text: string) => {
-    if (!text.trim() || !selectedAgent) return;
+    if (!text.trim() || !selectedAgent || isLoading || isStreaming) return;
+
+    // Créer un nouveau AbortController pour cette requête
+    const controller = new AbortController();
+    setStreamController(controller);
 
     const userMessage: Message = {
       id: uuidv4(),
@@ -278,7 +291,15 @@ export default function ChatPage() {
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsLoading(true);
+    setIsStreaming(true);
     setError(null);
+
+    // Timeout de sécurité (45 secondes)
+    const timeoutId = setTimeout(() => {
+      console.warn('⏰ Timeout de streaming atteint, arrêt forcé');
+      stopStreaming();
+      setError("La réponse prend trop de temps. Veuillez réessayer.");
+    }, 45000);
 
     try {
       const response = await fetch("/api/chat", {
@@ -290,6 +311,7 @@ export default function ChatPage() {
           threadId,
           useStream: useStreaming,
         }),
+        signal: controller.signal, // Ajouter le signal d'abort
       });
 
       if (!response.ok) {
@@ -309,18 +331,35 @@ export default function ChatPage() {
 
         setMessages((prev) => [...prev, agentMessage]);
 
+        let buffer = "";
+        let streamEnded = false;
+        
         try {
           while (true) {
             const { done, value } = await reader.read();
-            if (done) break;
+            if (done) {
+              console.log('✅ Stream terminé naturellement');
+              streamEnded = true;
+              break;
+            }
 
-            const chunk = decoder.decode(value);
-            const lines = chunk.split('\n');
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            
+            // Garder la dernière ligne incomplète dans le buffer
+            buffer = lines.pop() || "";
 
             for (const line of lines) {
               if (line.trim()) {
                 try {
                   const data = JSON.parse(line);
+                  
+                  // Vérifier si c'est un signal de fin
+                  if (data.done === true || data.finished === true || data.end === true) {
+                    console.log('✅ Signal de fin reçu:', data);
+                    streamEnded = true;
+                    break;
+                  }
                   
                   if (data.content) {
                     agentMessage.content += data.content;
@@ -333,29 +372,40 @@ export default function ChatPage() {
                     );
                   }
 
-                  if (data.images) {
+                  // Traiter les métadonnées une seule fois quand elles arrivent
+                  let hasMetadata = false;
+                  
+                  if (data.images && data.images.length > 0) {
                     agentMessage.images = data.images;
+                    hasMetadata = true;
                   }
-                  if (data.videos) {
+                  if (data.videos && data.videos.length > 0) {
                     agentMessage.videos = data.videos;
+                    hasMetadata = true;
                   }
-                  if (data.pdfs) {
+                  if (data.pdfs && data.pdfs.length > 0) {
                     agentMessage.pdfs = data.pdfs;
+                    hasMetadata = true;
                   }
-                  if (data.websites) {
+                  if (data.websites && data.websites.length > 0) {
                     agentMessage.websites = data.websites;
+                    hasMetadata = true;
                   }
-                  if (data.services) {
+                  if (data.services && data.services.length > 0) {
                     agentMessage.services = data.services;
+                    hasMetadata = true;
                   }
-                  if (data.organizations) {
+                  if (data.organizations && data.organizations.length > 0) {
                     agentMessage.organizations = data.organizations;
+                    hasMetadata = true;
                   }
-                  if (data.prestataires) {
+                  if (data.prestataires && data.prestataires.length > 0) {
                     agentMessage.prestataires = data.prestataires;
+                    hasMetadata = true;
                   }
 
-                  if (data.images || data.videos || data.pdfs || data.websites || data.services || data.organizations || data.prestataires) {
+                  // Mettre à jour le message avec les métadonnées
+                  if (hasMetadata) {
                     setMessages((prev) => 
                       prev.map((msg) => 
                         msg.id === agentMessage.id 
@@ -365,13 +415,33 @@ export default function ChatPage() {
                     );
                   }
                 } catch (e) {
-                  // Ignorer les erreurs de parsing JSON
+                  // Ignorer les erreurs de parsing JSON pour les lignes incomplètes
+                  console.debug("Ligne non-JSON ignorée:", line);
                 }
               }
             }
+            
+            // Sortir de la boucle externe si le stream est terminé
+            if (streamEnded) {
+              break;
+            }
           }
+          
+          console.log('🏁 Streaming terminé, nettoyage...');
         } catch (streamError) {
-          console.error("Erreur de streaming:", streamError);
+          if (streamError instanceof Error && streamError.name === 'AbortError') {
+            console.log('🛑 Streaming interrompu par l\'utilisateur');
+          } else {
+            console.error("Erreur de streaming:", streamError);
+            setError("Erreur de connexion au serveur");
+          }
+        } finally {
+          // Nettoyer le reader
+          try {
+            reader.releaseLock();
+          } catch (e) {
+            // Ignorer les erreurs de nettoyage
+          }
         }
       } else {
         const data = await response.json();
@@ -392,10 +462,22 @@ export default function ChatPage() {
         setMessages((prev) => [...prev, agentMessage]);
       }
     } catch (err) {
-      console.error("Erreur lors de l'envoi du message:", err);
-      setError("Une erreur est survenue. Veuillez réessayer.");
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.log('🛑 Requête interrompue par l\'utilisateur');
+      } else {
+        console.error("Erreur lors de l'envoi du message:", err);
+        setError("Une erreur est survenue. Veuillez réessayer.");
+      }
     } finally {
+      // Nettoyer le timeout
+      clearTimeout(timeoutId);
+      
+      // Réinitialiser les états
       setIsLoading(false);
+      setIsStreaming(false);
+      setStreamController(null);
+      
+      console.log('🧹 Nettoyage terminé');
     }
   };
 
@@ -498,6 +580,16 @@ export default function ChatPage() {
     setError(null);
   };
 
+  // Fonction pour arrêter le streaming
+  const stopStreaming = () => {
+    if (streamController) {
+      streamController.abort();
+      setStreamController(null);
+    }
+    setIsStreaming(false);
+    setIsLoading(false);
+  };
+
   // Fonction pour copier du texte
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -505,27 +597,295 @@ export default function ChatPage() {
 
   // Fonction pour télécharger un fichier
   const downloadFile = (data: string, filename: string, mimeType: string = 'text/html') => {
-    const blob = new Blob([data], { type: mimeType });
-    const url = URL.createObjectURL(blob);
+    console.log('📥 downloadFile appelée:', { filename, mimeType, dataLength: data.length });
+    
+    try {
+      let blob: Blob;
+      
+      // Si c'est un PDF (base64), le convertir correctement
+      if (mimeType === 'application/pdf' && !data.startsWith('data:')) {
+        console.log('🔄 Conversion base64 vers PDF...');
+        
+        try {
+          // Données base64 brutes
+          const binaryString = window.atob(data);
+          console.log('✅ Base64 décodé, longueur:', binaryString.length);
+          
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          
+          blob = new Blob([bytes], { type: mimeType });
+          console.log('✅ Blob PDF créé, taille:', blob.size);
+        } catch (base64Error) {
+          console.error('❌ Erreur décodage base64:', base64Error);
+          alert('Erreur: Données PDF corrompues');
+          return;
+        }
+      } else if (data.startsWith('data:')) {
+        console.log('🔄 Traitement Data URL...');
+        // Data URL
+        const response = fetch(data);
+        response.then(res => res.blob()).then(blob => {
+          console.log('✅ Blob créé depuis Data URL, taille:', blob.size);
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          console.log('✅ Téléchargement Data URL déclenché');
+        }).catch(err => {
+          console.error('❌ Erreur traitement Data URL:', err);
+          alert('Erreur lors du traitement du fichier');
+        });
+        return;
+      } else {
+        console.log('🔄 Création blob texte...');
+        // Texte normal
+        blob = new Blob([data], { type: mimeType });
+        console.log('✅ Blob texte créé, taille:', blob.size);
+      }
+      
+      console.log('🔄 Création du lien de téléchargement...');
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      
+      console.log('🔄 Ajout au DOM et clic...');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      console.log('✅ Téléchargement déclenché avec succès!');
+    } catch (error) {
+      console.error('❌ Erreur lors du téléchargement:', error);
+      alert(`Erreur lors du téléchargement: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    }
+  };
+
+  // Fonction pour télécharger une image depuis une URL
+  const downloadImageFromUrl = async (imageUrl: string, filename: string) => {
+    console.log('🖼️ Tentative de téléchargement image:', { imageUrl, filename });
+    
+    try {
+      // Méthode 1: Essayer avec fetch (CORS)
+      console.log('🔄 Méthode 1: Fetch avec CORS...');
+      const response = await fetch(imageUrl, {
+        mode: 'cors',
+        headers: {
+          'Accept': 'image/*',
+        }
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        console.log('✅ Image téléchargée avec fetch:', filename);
+        return;
+      } else {
+        console.warn('❌ Fetch échoué:', response.status, response.statusText);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+    } catch (fetchError) {
+      console.warn('❌ Erreur fetch:', fetchError);
+      
+      try {
+        // Méthode 2: Essayer avec fetch no-cors
+        console.log('🔄 Méthode 2: Fetch no-cors...');
+        const response = await fetch(imageUrl, {
+          mode: 'no-cors'
+        });
+        
+        if (response.type === 'opaque') {
+          // Pour no-cors, on ne peut pas lire la réponse, donc on utilise une approche différente
+          throw new Error('Mode no-cors ne permet pas de lire les données');
+        }
+      } catch (noCorsError) {
+        console.warn('❌ Erreur no-cors:', noCorsError);
+        
+        try {
+          // Méthode 3: Proxy avec canvas (pour certaines images)
+          console.log('🔄 Méthode 3: Canvas proxy...');
+          await downloadImageWithCanvas(imageUrl, filename);
+          return;
+        } catch (canvasError) {
+          console.warn('❌ Erreur canvas:', canvasError);
+          
+          // Méthode 4: Fallback - lien direct
+          console.log('🔄 Méthode 4: Lien direct...');
+          downloadImageWithLink(imageUrl, filename);
+        }
+      }
+    }
+  };
+
+  // Méthode alternative avec canvas
+  const downloadImageWithCanvas = (imageUrl: string, filename: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          canvas.width = img.width;
+          canvas.height = img.height;
+          
+          ctx?.drawImage(img, 0, 0);
+          
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = filename;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              window.URL.revokeObjectURL(url);
+              console.log('✅ Image téléchargée avec canvas:', filename);
+              resolve();
+            } else {
+              reject(new Error('Impossible de créer le blob'));
+            }
+          }, 'image/png');
+        } catch (error) {
+          reject(error);
+        }
+      };
+      
+      img.onerror = () => {
+        reject(new Error('Impossible de charger l\'image'));
+      };
+      
+      img.src = imageUrl;
+    });
+  };
+
+  // Méthode de fallback avec lien direct
+  const downloadImageWithLink = (imageUrl: string, filename: string) => {
+    console.log('🔗 Utilisation du lien direct...');
     const a = document.createElement('a');
-    a.href = url;
+    a.href = imageUrl;
     a.download = filename;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    console.log('✅ Lien de téléchargement déclenché:', filename);
+  };
+
+  // Fonction alternative pour télécharger un PDF via Data URL
+  const downloadPdfAlternative = (base64Data: string, filename: string) => {
+    console.log('🔄 Méthode alternative PDF...');
+    try {
+      const dataUrl = `data:application/pdf;base64,${base64Data}`;
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      console.log('✅ Téléchargement alternatif déclenché');
+    } catch (error) {
+      console.error('❌ Erreur méthode alternative:', error);
+      alert('Erreur avec la méthode alternative');
+    }
+  };
+
+  // Fonction de test pour vérifier le téléchargement PDF
+  const testPdfDownload = () => {
+    const testPdfData = "JVBERi0xLjMKJcTl8uXrp/Og0MTGCjQgMCBvYmoKPDwKL0xlbmd0aCA1IDAKL0ZpbHRlciBbL0FTQ0lJODVEZWNvZGUgL0ZsYXRlRGVjb2RlXQo+PgpzdHJlYW0K"; // Base64 PDF test
+    downloadFile(testPdfData, "test.pdf", "application/pdf");
+  };
+
+  // Fonction pour créer une prévisualisation de site web
+  const previewWebsite = (website: any) => {
+    // Créer le HTML complet avec CSS et JS intégrés
+    const fullHtml = `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${website.title || website.restaurantName}</title>
+    <style>
+        ${website.cssContent || ''}
+    </style>
+</head>
+<body>
+    ${website.htmlContent}
+    <script>
+        ${website.jsContent || ''}
+    </script>
+</body>
+</html>`;
+
+    // Créer un blob et ouvrir dans un nouvel onglet
+    const blob = new Blob([fullHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const newWindow = window.open(url, '_blank');
+    
+    // Nettoyer l'URL après un délai
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 1000);
+    
+    return newWindow;
+  };
+
+  // Fonction pour télécharger un site web complet
+  const downloadWebsite = (website: any) => {
+    const fullHtml = `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${website.title || website.restaurantName}</title>
+    <style>
+        ${website.cssContent || ''}
+    </style>
+</head>
+<body>
+    ${website.htmlContent}
+    <script>
+        ${website.jsContent || ''}
+    </script>
+</body>
+</html>`;
+
+    const filename = `${website.restaurantName?.toLowerCase().replace(/\s+/g, '-') || 'website'}.html`;
+    downloadFile(fullHtml, filename, 'text/html');
   };
 
   if (authLoading) {
     return (
-      <MainLayout>
+      <div className="min-h-screen flex flex-col">
+        <Header />
         <div className="h-[calc(100vh-64px)] flex items-center justify-center">
           <div className="flex items-center space-x-2">
             <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
             <span className="text-gray-600">Chargement...</span>
           </div>
         </div>
-      </MainLayout>
+      </div>
     );
   }
 
@@ -534,7 +894,8 @@ export default function ChatPage() {
   }
 
   return (
-    <MainLayout>
+    <div className="min-h-screen flex flex-col">
+      <Header />
       <div className="h-[calc(100vh-64px)] flex bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
         {/* Sidebar */}
         <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative z-30 w-80 h-full bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out flex flex-col`}>
@@ -703,7 +1064,7 @@ export default function ChatPage() {
                 key={message.id}
                 className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
               >
-                <div className={`flex space-x-3 max-w-4xl ${message.sender === "user" ? "flex-row-reverse space-x-reverse" : ""}`}>
+                <div className={`flex space-x-3 max-w-4xl w-full ${message.sender === "user" ? "flex-row-reverse space-x-reverse" : ""}`}>
                   {/* Avatar */}
                   <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
                     message.sender === "user" 
@@ -721,7 +1082,7 @@ export default function ChatPage() {
                   </div>
 
                   {/* Message Content */}
-                  <div className={`rounded-2xl px-4 py-3 ${
+                  <div className={`rounded-2xl px-4 py-3 flex-1 min-w-0 ${
                     message.sender === "user"
                       ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
                       : "bg-white border border-gray-200"
@@ -734,16 +1095,21 @@ export default function ChatPage() {
                     {message.images && message.images.length > 0 && (
                       <div className="mt-4 grid gap-3">
                         {message.images.map((image, index) => (
-                          <div key={index} className="bg-gray-50 rounded-lg p-3">
-                            <div className="flex items-center space-x-2 mb-2">
+                                                    <div key={index} className="bg-gray-50 rounded-lg p-3">
+                            <div className="flex items-center space-x-2 mb-3">
                               <ImageIcon className="h-4 w-4 text-gray-500" />
                               <span className="text-sm font-medium text-gray-700">{image.title || 'Image générée'}</span>
                             </div>
-                            <img
-                              src={image.url}
-                              alt={image.alt}
-                              className="w-full rounded-lg shadow-sm"
-                            />
+                            <div className="overflow-hidden rounded-lg">
+                              <img
+                                src={image.url}
+                                alt={image.alt}
+                                className="w-full h-auto max-w-full object-contain shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
+                                style={{ maxHeight: '500px' }}
+                                onClick={() => window.open(image.url, '_blank')}
+                                title="Cliquer pour ouvrir en grand"
+                              />
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -789,12 +1155,39 @@ export default function ChatPage() {
                               </div>
                               <div className="flex space-x-2">
                                 {pdf.data && (
-                                  <button
-                                    onClick={() => downloadFile(pdf.data!, pdf.filename, pdf.mimeType || 'application/pdf')}
-                                    className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                                  >
-                                    <Download className="h-4 w-4" />
-                                  </button>
+                                  <>
+                                    <button
+                                      onClick={() => {
+                                        console.log('🔍 DEBUG PDF:', {
+                                          filename: pdf.filename,
+                                          hasData: !!pdf.data,
+                                          dataLength: pdf.data?.length,
+                                          dataStart: pdf.data?.substring(0, 50),
+                                          mimeType: pdf.mimeType
+                                        });
+                                        try {
+                                          downloadFile(pdf.data!, pdf.filename, pdf.mimeType || 'application/pdf');
+                                          console.log('✅ Fonction downloadFile appelée');
+                                        } catch (error) {
+                                          console.error('❌ Erreur lors de l\'appel downloadFile:', error);
+                                        }
+                                      }}
+                                      className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                                      title="Télécharger le PDF"
+                                    >
+                                      <Download className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        console.log('🔄 Essai méthode alternative...');
+                                        downloadPdfAlternative(pdf.data!, pdf.filename);
+                                      }}
+                                      className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-xs"
+                                      title="Méthode alternative"
+                                    >
+                                      Alt
+                                    </button>
+                                  </>
                                 )}
                                 {pdf.url && (
                                   <button
@@ -853,29 +1246,69 @@ export default function ChatPage() {
                               </div>
                             </div>
 
-                            <div className="flex space-x-2">
+                            <div className="flex space-x-3">
                               <button
-                                onClick={() => window.open(website.previewUrl, '_blank')}
-                                className="flex-1 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center space-x-2"
+                                onClick={() => previewWebsite(website)}
+                                className="flex-1 p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center space-x-2"
                               >
                                 <ExternalLink className="h-4 w-4" />
-                                <span>Ouvrir</span>
+                                <span>Prévisualiser</span>
                               </button>
                               <button
-                                onClick={() => copyToClipboard(website.htmlContent)}
-                                className="flex-1 p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center justify-center space-x-2"
+                                onClick={() => setPreviewingWebsite(previewingWebsite?.title === website.title ? null : website)}
+                                className="flex-1 p-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors flex items-center justify-center space-x-2"
                               >
-                                <Copy className="h-4 w-4" />
-                                <span>Copier HTML</span>
+                                <Bot className="h-4 w-4" />
+                                <span>{previewingWebsite?.title === website.title ? 'Masquer' : 'Voir ici'}</span>
                               </button>
                               <button
-                                onClick={() => downloadFile(website.htmlContent, `${website.restaurantName.toLowerCase().replace(/\s+/g, '-')}.html`)}
-                                className="flex-1 p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center space-x-2"
+                                onClick={() => downloadWebsite(website)}
+                                className="flex-1 p-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center space-x-2"
                               >
                                 <Download className="h-4 w-4" />
                                 <span>Télécharger</span>
                               </button>
                             </div>
+                            
+                            {/* Prévisualisation intégrée */}
+                            {previewingWebsite?.title === website.title && (
+                              <div className="mt-4 border rounded-lg overflow-hidden">
+                                <div className="bg-gray-100 px-3 py-2 flex items-center justify-between">
+                                  <span className="text-sm font-medium text-gray-700">Prévisualisation</span>
+                                  <button
+                                    onClick={() => setPreviewingWebsite(null)}
+                                    className="text-gray-500 hover:text-gray-700"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </button>
+                                </div>
+                                <div className="bg-white">
+                                  <iframe
+                                    srcDoc={`
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${website.title || website.restaurantName}</title>
+    <style>
+        ${website.cssContent || ''}
+    </style>
+</head>
+<body>
+    ${website.htmlContent}
+    <script>
+        ${website.jsContent || ''}
+    </script>
+</body>
+</html>`}
+                                    className="w-full h-96 border-0"
+                                    title={`Prévisualisation de ${website.restaurantName}`}
+                                    sandbox="allow-scripts allow-same-origin"
+                                  />
+                                </div>
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -883,28 +1316,101 @@ export default function ChatPage() {
 
                     {/* Services */}
                     {message.services && message.services.length > 0 && (
-                      <div className="mt-4 grid gap-3">
-                        {message.services.map((service, index) => (
-                          <div key={index} className="bg-gray-50 rounded-lg p-4">
-                            <div className="flex items-center space-x-2 mb-3">
-                              <Building className="h-5 w-5 text-purple-500" />
-                              <div>
-                                <div className="font-medium text-gray-900">{service.title}</div>
-                                <div className="text-sm text-gray-500">{service.organizationName}</div>
+                      <div className="mt-4 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-semibold text-gray-900 flex items-center">
+                            <Building className="h-5 w-5 mr-2 text-purple-500" />
+                            Services trouvés ({message.services.length})
+                          </h4>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          {message.services.map((service, index) => (
+                            <div key={index} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all">
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex items-center space-x-3">
+                                  <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
+                                    <Building className="h-5 w-5 text-purple-600" />
+                                  </div>
+                                  <div>
+                                    <div className="font-medium text-gray-900">{service.title}</div>
+                                    <div className="text-sm text-gray-500">{service.organizationName}</div>
+                                    <div className="text-xs text-gray-400">{service.organizationSector}</div>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <div className="text-lg font-semibold text-green-600">{service.price}</div>
+                                  <div className="text-xs text-gray-500">{service.priceMode}</div>
+                                </div>
+                              </div>
+
+                              {service.summary && (
+                                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{service.summary}</p>
+                              )}
+
+                              {service.tags && service.tags.length > 0 && (
+                                <div className="mb-3">
+                                  <div className="flex flex-wrap gap-1">
+                                    {service.tags.slice(0, 4).map((tag, tagIndex) => (
+                                      <span key={tagIndex} className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                                        {tag}
+                                      </span>
+                                    ))}
+                                    {service.tags.length > 4 && (
+                                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                                        +{service.tags.length - 4}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              <div className="border-t pt-3 mt-3">
+                                <div className="grid grid-cols-2 gap-2 text-xs text-gray-500 mb-3">
+                                  <div className="flex items-center">
+                                    <span className="font-medium">Type:</span>
+                                    <span className="ml-1">{service.serviceType}</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <span className="font-medium">Plan:</span>
+                                    <span className="ml-1">{service.billingPlan}</span>
+                                  </div>
+                                  {service.organizationAddress && (
+                                    <div className="flex items-center col-span-2">
+                                      <MapPin className="h-3 w-3 mr-1" />
+                                      <span className="truncate">{service.organizationAddress}</span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="flex space-x-2">
+                                  <button
+                                    onClick={() => window.open(service.pageUrl, '_blank')}
+                                    className="flex-1 p-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors flex items-center justify-center space-x-1 text-sm"
+                                  >
+                                    <ExternalLink className="h-4 w-4" />
+                                    <span>Voir le service</span>
+                                  </button>
+                                  {service.organizationEmail && (
+                                    <button
+                                      onClick={() => window.open(`mailto:${service.organizationEmail}`, '_blank')}
+                                      className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                                    >
+                                      <Mail className="h-4 w-4" />
+                                    </button>
+                                  )}
+                                  {service.organizationWebsite && (
+                                    <button
+                                      onClick={() => window.open(service.organizationWebsite, '_blank')}
+                                      className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                                    >
+                                      <Globe className="h-4 w-4" />
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                            <p className="text-sm text-gray-600 mb-2">{service.summary}</p>
-                            <div className="flex items-center justify-between">
-                              <div className="text-lg font-semibold text-green-600">{service.price}</div>
-                              <button
-                                onClick={() => window.open(service.pageUrl, '_blank')}
-                                className="p-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
-                              >
-                                <ExternalLink className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     )}
 
@@ -943,30 +1449,153 @@ export default function ChatPage() {
 
                     {/* Prestataires */}
                     {message.prestataires && message.prestataires.length > 0 && (
-                      <div className="mt-4 grid gap-3">
-                        {message.prestataires.map((prestataire, index) => (
-                          <div key={index} className="bg-gray-50 rounded-lg p-4">
-                            <div className="flex items-center space-x-2 mb-3">
-                              <Users className="h-5 w-5 text-cyan-500" />
-                              <div>
-                                <div className="font-medium text-gray-900">{prestataire.name}</div>
-                                <div className="text-sm text-gray-500">{prestataire.email}</div>
+                      <div className="mt-4 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-semibold text-gray-900 flex items-center">
+                            <Users className="h-5 w-5 mr-2 text-cyan-500" />
+                            Prestataires trouvés ({message.prestataires.length})
+                          </h4>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          {message.prestataires.map((prestataire, index) => (
+                            <div key={index} className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all">
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex items-center space-x-3">
+                                  <div className="w-10 h-10 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-full flex items-center justify-center">
+                                    <span className="text-sm font-semibold text-cyan-700">
+                                      {prestataire.name[0].toUpperCase()}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <div className="font-medium text-gray-900">{prestataire.name}</div>
+                                    <div className="text-sm text-gray-500">{prestataire.email}</div>
+                                    <div className="flex items-center space-x-1 mt-1">
+                                      {prestataire.emailVerified ? (
+                                        <div className="flex items-center text-xs text-green-600">
+                                          <CheckCircle className="h-3 w-3 mr-1" />
+                                          Vérifié
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center text-xs text-orange-600">
+                                          <XCircle className="h-3 w-3 mr-1" />
+                                          Non vérifié
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  Depuis {new Date(prestataire.createdAt).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })}
+                                </div>
+                              </div>
+
+                              {prestataire.organization && (
+                                <div className="border-t pt-3 mt-3">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center space-x-2">
+                                      <Building2 className="h-4 w-4 text-gray-500" />
+                                      <span className="font-medium text-gray-900">{prestataire.organization.name}</span>
+                                    </div>
+                                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                                      {prestataire.organization.sector}
+                                    </span>
+                                  </div>
+                                  
+                                  {prestataire.organization.description && (
+                                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                                      {prestataire.organization.description}
+                                    </p>
+                                  )}
+
+                                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-500 mb-3">
+                                    {prestataire.organization.address && (
+                                      <div className="flex items-center">
+                                        <MapPin className="h-3 w-3 mr-1" />
+                                        <span className="truncate">{prestataire.organization.address}</span>
+                                      </div>
+                                    )}
+                                    {prestataire.organization.phone && (
+                                      <div className="flex items-center">
+                                        <Phone className="h-3 w-3 mr-1" />
+                                        <span>{prestataire.organization.phone}</span>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {prestataire.organization.services && prestataire.organization.services.length > 0 && (
+                                    <div className="mb-3">
+                                      <div className="text-xs font-medium text-gray-700 mb-2">
+                                        Services ({prestataire.organization.servicesCount})
+                                      </div>
+                                      <div className="space-y-2">
+                                        {prestataire.organization.services.slice(0, 2).map((service, serviceIndex) => (
+                                          <div key={serviceIndex} className="bg-gray-50 rounded-lg p-2">
+                                            <div className="flex justify-between items-start">
+                                              <div className="flex-1">
+                                                <div className="text-sm font-medium text-gray-900">{service.title}</div>
+                                                {service.summary && (
+                                                  <div className="text-xs text-gray-600 line-clamp-1 mt-1">{service.summary}</div>
+                                                )}
+                                                {service.tags && service.tags.length > 0 && (
+                                                  <div className="flex flex-wrap gap-1 mt-1">
+                                                    {service.tags.slice(0, 2).map((tag, tagIndex) => (
+                                                      <span key={tagIndex} className="text-xs bg-blue-100 text-blue-700 px-1 py-0.5 rounded">
+                                                        {tag}
+                                                      </span>
+                                                    ))}
+                                                  </div>
+                                                )}
+                                              </div>
+                                              <div className="text-right ml-2">
+                                                <div className="text-sm font-semibold text-gray-900">
+                                                  {service.lowerPrice === service.upperPrice
+                                                    ? `${service.lowerPrice}€`
+                                                    : `${service.lowerPrice}€ - ${service.upperPrice}€`}
+                                                </div>
+                                                <div className="text-xs text-gray-500">{service.paymentMode}</div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                        {prestataire.organization.services.length > 2 && (
+                                          <div className="text-xs text-gray-500 text-center">
+                                            +{prestataire.organization.services.length - 2} autres services
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              <div className="flex space-x-2 mt-3">
+                                <button
+                                  onClick={() => window.open(prestataire.pageUrl, '_blank')}
+                                  className="flex-1 p-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors flex items-center justify-center space-x-1 text-sm"
+                                >
+                                  <ExternalLink className="h-4 w-4" />
+                                  <span>Voir le profil</span>
+                                </button>
+                                {prestataire.organization?.email && (
+                                  <button
+                                    onClick={() => window.open(`mailto:${prestataire.organization!.email}`, '_blank')}
+                                    className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                                  >
+                                    <Mail className="h-4 w-4" />
+                                  </button>
+                                )}
+                                {prestataire.organization?.website && (
+                                  <button
+                                    onClick={() => window.open(prestataire.organization!.website!, '_blank')}
+                                    className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                                  >
+                                    <Globe className="h-4 w-4" />
+                                  </button>
+                                )}
                               </div>
                             </div>
-                            {prestataire.organization && (
-                              <div className="mb-2">
-                                <div className="text-sm font-medium text-gray-700">{prestataire.organization.name}</div>
-                                <div className="text-sm text-gray-500">{prestataire.organization.sector}</div>
-                              </div>
-                            )}
-                            <button
-                              onClick={() => window.open(prestataire.pageUrl, '_blank')}
-                              className="p-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </button>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -974,7 +1603,7 @@ export default function ChatPage() {
               </div>
             ))}
 
-            {isLoading && (
+            {(isLoading || isStreaming) && (
               <div className="flex justify-start">
                 <div className="flex space-x-3 max-w-4xl">
                   <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
@@ -988,7 +1617,17 @@ export default function ChatPage() {
                   <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3">
                     <div className="flex items-center space-x-2">
                       <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-                      <span className="text-sm text-gray-500">En train de réfléchir...</span>
+                      <span className="text-sm text-gray-500">
+                        {isStreaming ? "En train de répondre..." : "En train de réfléchir..."}
+                      </span>
+                      {isStreaming && (
+                        <button
+                          onClick={stopStreaming}
+                          className="ml-2 px-2 py-1 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+                        >
+                          Arrêter
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1015,24 +1654,54 @@ export default function ChatPage() {
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder={selectedAgent ? `Parlez avec ${selectedAgent.name}...` : "Sélectionnez un agent pour commencer..."}
-                    className="w-full p-4 pr-12 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                    className="w-full p-4 pr-24 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
                     rows={1}
                     style={{ minHeight: '56px', maxHeight: '120px' }}
                     disabled={!selectedAgent || isLoading}
                   />
-                  <button
-                    onClick={sendMessage}
-                    disabled={!inputValue.trim() || !selectedAgent || isLoading}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <Send className="h-5 w-5" />
-                  </button>
+                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex space-x-1">
+                    {selectedAgent?.id === 'cuisinier-premium' && (
+                      <label className="p-2 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 cursor-pointer transition-colors" title="Ajouter une image">
+                        <ImageIcon className="h-5 w-5" />
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              // Pour l'instant, on affiche juste un message
+                              // TODO: Implémenter l'upload d'images
+                              alert('Fonctionnalité d\'upload d\'images en cours de développement...');
+                            }
+                          }}
+                        />
+                      </label>
+                    )}
+                    {isStreaming ? (
+                      <button
+                        onClick={stopStreaming}
+                        className="p-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors"
+                        title="Arrêter la génération"
+                      >
+                        <StopCircle className="h-5 w-5" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={sendMessage}
+                        disabled={!inputValue.trim() || !selectedAgent || isLoading}
+                        className="p-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <Send className="h-5 w-5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </MainLayout>
+    </div>
   );
 }

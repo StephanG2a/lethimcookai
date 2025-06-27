@@ -74,6 +74,9 @@ export async function POST(request: NextRequest) {
               const { done, value } = await reader.read();
 
               if (done) {
+                // Envoyer un signal de fin explicite avant de fermer
+                const endSignal = JSON.stringify({ done: true, finished: true }) + "\n";
+                controller.enqueue(new TextEncoder().encode(endSignal));
                 controller.close();
                 return;
               }
@@ -117,154 +120,156 @@ export async function POST(request: NextRequest) {
                           let prestataires: any[] = [];
 
                           // Extraire les métadonnées d'images si présentes
-                          const imageMetaMatch = output.match(
-                            /\*\*MÉTADONNÉES_IMAGE:\*\* (.+?)(?=\n|$)/
-                          );
-                          if (imageMetaMatch) {
+                          if (output.includes("**MÉTADONNÉES_IMAGE:**")) {
+                            const startIndex = output.indexOf("**MÉTADONNÉES_IMAGE:**");
+                            const metaLine = output.substring(startIndex);
+                            const endIndex = metaLine.indexOf("\n");
+                            const metaText = endIndex > 0 ? metaLine.substring(0, endIndex) : metaLine;
+                            const jsonText = metaText.replace("**MÉTADONNÉES_IMAGE:**", "").trim();
+                            
                             try {
-                              const imageData = JSON.parse(imageMetaMatch[1]);
+                              const imageData = JSON.parse(jsonText);
                               images = [imageData];
                               // Retirer les métadonnées du contenu visible
-                              content = output.replace(
-                                /---\n\*\*MÉTADONNÉES_IMAGE:\*\* .+/s,
-                                "---"
-                              );
+                              const metaStartIndex = output.indexOf("---");
+                              if (metaStartIndex > 0) {
+                                content = output.substring(0, metaStartIndex).trim();
+                              }
                             } catch (e) {
-                              console.warn(
-                                "Erreur parsing métadonnées image:",
-                                e
-                              );
+                              console.warn("Erreur parsing métadonnées image:", e);
                             }
                           }
 
                           // Extraire les métadonnées de vidéos si présentes
-                          const videoMetaMatch = output.match(
-                            /\*\*MÉTADONNÉES_VIDÉO:\*\* (.+?)(?=\n|$)/
-                          );
-                          if (videoMetaMatch) {
+                          if (output.includes("**MÉTADONNÉES_VIDÉO:**")) {
+                            const startIndex = output.indexOf("**MÉTADONNÉES_VIDÉO:**");
+                            const metaLine = output.substring(startIndex);
+                            const endIndex = metaLine.indexOf("\n");
+                            const metaText = endIndex > 0 ? metaLine.substring(0, endIndex) : metaLine;
+                            const jsonText = metaText.replace("**MÉTADONNÉES_VIDÉO:**", "").trim();
+                            
                             try {
-                              const videoData = JSON.parse(videoMetaMatch[1]);
+                              const videoData = JSON.parse(jsonText);
                               videos = [videoData];
                               // Retirer les métadonnées du contenu visible
-                              content = output.replace(
-                                /---\n\*\*MÉTADONNÉES_VIDÉO:\*\* .+/s,
-                                "---"
-                              );
+                              const metaStartIndex = output.indexOf("---");
+                              if (metaStartIndex > 0) {
+                                content = output.substring(0, metaStartIndex).trim();
+                              }
                             } catch (e) {
-                              console.warn(
-                                "Erreur parsing métadonnées vidéo:",
-                                e
-                              );
+                              console.warn("Erreur parsing métadonnées vidéo:", e);
                             }
                           }
 
                           // Extraire les métadonnées de PDFs si présentes
-                          const pdfMetaMatch = output.match(
-                            /\*\*MÉTADONNÉES_PDF:\*\* (.+?)(?=\n|$)/
-                          );
-                          if (pdfMetaMatch) {
+                          if (output.includes("**MÉTADONNÉES_PDF:**")) {
+                            const startIndex = output.indexOf("**MÉTADONNÉES_PDF:**");
+                            const metaLine = output.substring(startIndex);
+                            const endIndex = metaLine.indexOf("\n");
+                            const metaText = endIndex > 0 ? metaLine.substring(0, endIndex) : metaLine;
+                            const jsonText = metaText.replace("**MÉTADONNÉES_PDF:**", "").trim();
+                            
+                            console.log("📄 Parsing PDF metadata:", jsonText.substring(0, 200) + "...");
+                            
                             try {
-                              const pdfData = JSON.parse(pdfMetaMatch[1]);
+                              const pdfData = JSON.parse(jsonText);
                               pdfs = [pdfData];
+                              console.log("✅ PDF metadata parsed successfully:", {
+                                filename: pdfData.filename,
+                                hasData: !!pdfData.data,
+                                dataLength: pdfData.data?.length || 0
+                              });
                               // Retirer les métadonnées du contenu visible
-                              content = output.replace(
-                                /---\n\*\*MÉTADONNÉES_PDF:\*\* .+/s,
-                                "---"
-                              );
+                              const metaStartIndex = output.indexOf("---");
+                              if (metaStartIndex > 0) {
+                                content = output.substring(0, metaStartIndex).trim();
+                              }
                             } catch (e) {
-                              console.warn(
-                                "Erreur parsing métadonnées PDF:",
-                                e
-                              );
+                              console.warn("Erreur parsing métadonnées PDF:", e, "JSON:", jsonText.substring(0, 100));
                             }
                           }
 
                           // Extraire les métadonnées de services si présentes
-                          const serviceMetaMatch = output.match(
-                            /\*\*MÉTADONNÉES_SERVICES:\*\* (.+?)(?=\n|$)/
-                          );
-                          if (serviceMetaMatch) {
+                          if (output.includes("**MÉTADONNÉES_SERVICES:**")) {
+                            const startIndex = output.indexOf("**MÉTADONNÉES_SERVICES:**");
+                            const metaLine = output.substring(startIndex);
+                            const endIndex = metaLine.indexOf("\n");
+                            const metaText = endIndex > 0 ? metaLine.substring(0, endIndex) : metaLine;
+                            const jsonText = metaText.replace("**MÉTADONNÉES_SERVICES:**", "").trim();
+                            
                             try {
-                              const servicesData = JSON.parse(
-                                serviceMetaMatch[1]
-                              );
+                              const servicesData = JSON.parse(jsonText);
                               services = servicesData.services || [];
                               // Retirer les métadonnées du contenu visible
-                              content = output.replace(
-                                /---\n\*\*MÉTADONNÉES_SERVICES:\*\* .+/s,
-                                "---"
-                              );
+                              const metaStartIndex = output.indexOf("---");
+                              if (metaStartIndex > 0) {
+                                content = output.substring(0, metaStartIndex).trim();
+                              }
                             } catch (e) {
-                              console.warn(
-                                "Erreur parsing métadonnées services:",
-                                e
-                              );
+                              console.warn("Erreur parsing métadonnées services:", e);
                             }
                           }
 
                           // Extraire les métadonnées de sites web si présentes
-                          const websiteMetaMatch = output.match(
-                            /\*\*MÉTADONNÉES_WEBSITE:\*\* (.+?)(?=\n|$)/
-                          );
-                          if (websiteMetaMatch) {
+                          if (output.includes("**MÉTADONNÉES_WEBSITE:**")) {
+                            const startIndex = output.indexOf("**MÉTADONNÉES_WEBSITE:**");
+                            const metaLine = output.substring(startIndex);
+                            const endIndex = metaLine.indexOf("\n");
+                            const metaText = endIndex > 0 ? metaLine.substring(0, endIndex) : metaLine;
+                            const jsonText = metaText.replace("**MÉTADONNÉES_WEBSITE:**", "").trim();
+                            
                             try {
-                              const websiteData = JSON.parse(websiteMetaMatch[1]);
+                              const websiteData = JSON.parse(jsonText);
                               websites = [websiteData];
                               // Retirer les métadonnées du contenu visible
-                              content = output.replace(
-                                /---\n\*\*MÉTADONNÉES_WEBSITE:\*\* .+/s,
-                                "---"
-                              );
+                              const metaStartIndex = output.indexOf("---");
+                              if (metaStartIndex > 0) {
+                                content = output.substring(0, metaStartIndex).trim();
+                              }
                             } catch (e) {
-                              console.warn(
-                                "Erreur parsing métadonnées website:",
-                                e
-                              );
+                              console.warn("Erreur parsing métadonnées website:", e);
                             }
                           }
 
                           // Extraire les métadonnées d'organisations si présentes
-                          const orgMetaMatch = output.match(
-                            /\*\*MÉTADONNÉES_ORGANISATIONS:\*\* (.+?)(?=\n|$)/
-                          );
-                          if (orgMetaMatch) {
+                          if (output.includes("**MÉTADONNÉES_ORGANISATIONS:**")) {
+                            const startIndex = output.indexOf("**MÉTADONNÉES_ORGANISATIONS:**");
+                            const metaLine = output.substring(startIndex);
+                            const endIndex = metaLine.indexOf("\n");
+                            const metaText = endIndex > 0 ? metaLine.substring(0, endIndex) : metaLine;
+                            const jsonText = metaText.replace("**MÉTADONNÉES_ORGANISATIONS:**", "").trim();
+                            
                             try {
-                              const orgsData = JSON.parse(orgMetaMatch[1]);
+                              const orgsData = JSON.parse(jsonText);
                               organizations = orgsData.organizations || [];
                               // Retirer les métadonnées du contenu visible
-                              content = output.replace(
-                                /---\n\*\*MÉTADONNÉES_ORGANISATIONS:\*\* .+/s,
-                                "---"
-                              );
+                              const metaStartIndex = output.indexOf("---");
+                              if (metaStartIndex > 0) {
+                                content = output.substring(0, metaStartIndex).trim();
+                              }
                             } catch (e) {
-                              console.warn(
-                                "Erreur parsing métadonnées organisations:",
-                                e
-                              );
+                              console.warn("Erreur parsing métadonnées organisations:", e);
                             }
                           }
 
                           // Extraire les métadonnées de prestataires si présentes
-                          const prestataireMetaMatch = output.match(
-                            /\*\*MÉTADONNÉES_PRESTATAIRES:\*\* (.+?)(?=\n|$)/
-                          );
-                          if (prestataireMetaMatch) {
+                          if (output.includes("**MÉTADONNÉES_PRESTATAIRES:**")) {
+                            const startIndex = output.indexOf("**MÉTADONNÉES_PRESTATAIRES:**");
+                            const metaLine = output.substring(startIndex);
+                            const endIndex = metaLine.indexOf("\n");
+                            const metaText = endIndex > 0 ? metaLine.substring(0, endIndex) : metaLine;
+                            const jsonText = metaText.replace("**MÉTADONNÉES_PRESTATAIRES:**", "").trim();
+                            
                             try {
-                              const prestatairesData = JSON.parse(
-                                prestataireMetaMatch[1]
-                              );
-                              prestataires =
-                                prestatairesData.prestataires || [];
+                              const prestatairesData = JSON.parse(jsonText);
+                              prestataires = prestatairesData.prestataires || [];
                               // Retirer les métadonnées du contenu visible
-                              content = output.replace(
-                                /---\n\*\*MÉTADONNÉES_PRESTATAIRES:\*\* .+/s,
-                                "---"
-                              );
+                              const metaStartIndex = output.indexOf("---");
+                              if (metaStartIndex > 0) {
+                                content = output.substring(0, metaStartIndex).trim();
+                              }
                             } catch (e) {
-                              console.warn(
-                                "Erreur parsing métadonnées prestataires:",
-                                e
-                              );
+                              console.warn("Erreur parsing métadonnées prestataires:", e);
                             }
                           }
 
